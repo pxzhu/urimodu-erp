@@ -364,3 +364,58 @@ Deliver a working vertical slice for attendance ingestion and normalization, lea
 - `pnpm -r typecheck` passed
 - `pnpm -r test` passed
 - `pnpm -r build` passed
+
+---
+
+# PROMPT06 Execution Plan (Expenses / Finance / Import-Export)
+
+Date: 2026-03-14  
+Scope source: `PROMPT01.md` + `korean-self-hosted-erp-starter-structure-and-schema.md` + `PROMPT06.md`
+
+## Objective
+
+Deliver a working vertical slice for expense claims, starter accounting (COA + journal entry), and import/export job flows with audit logs and Swagger coverage.
+
+## Ordered Steps
+
+1. Re-validate current repository baseline:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+2. Implement API scope for `expenses`, `finance`, `import-export`:
+   - expense claim create/list/detail (+ `ExpenseItem`, `FileObject` receipt linking)
+   - chart of accounts list
+   - journal entry create/list/detail (`JournalEntry`, `JournalEntryLine`)
+   - import job create/list/detail with CSV/XLSX starter parser for at least one entity type
+   - import row-level validation/error reporting (`ImportJobRow`)
+   - export job create/list/detail with CSV/JSON starter output for at least one list view
+3. Ensure mutation audit logs for finance + import/export actions.
+4. Update seeds/docs:
+   - confirm starter COA seed and add PROMPT06 endpoint docs
+5. Add/extend tests for core service behaviors in this slice.
+6. Implement web UI screens:
+   - expense claim create/list/detail
+   - chart of accounts list
+   - journal entry create/list/detail
+   - import jobs
+   - export jobs
+7. Re-run final validations and require all green:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+
+## Constraints
+
+- Keep API as modular monolith.
+- Reuse existing file/document infrastructure where practical.
+- Keep finance scope minimal but extensible.
+- Do not start PROMPT07 or later in this run.
+
+## Validation Snapshot (Pre-Implementation)
+
+- `pnpm -r lint` passed
+- `pnpm -r typecheck` passed
+- `pnpm -r test` passed
+- `pnpm -r build` passed

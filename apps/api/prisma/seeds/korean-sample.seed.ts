@@ -333,7 +333,70 @@ async function main() {
     });
   }
 
-  console.log("Seeded Korean sample templates/policies/attendance mappings/accounts.");
+  await prisma.vendor.upsert({
+    where: {
+      companyId_code: {
+        companyId: company.id,
+        code: "VEND-SEOUL-TAXI"
+      }
+    },
+    update: {
+      name: "서울택시협동조합",
+      registrationNumber: "123-45-67890",
+      isActive: true
+    },
+    create: {
+      companyId: company.id,
+      code: "VEND-SEOUL-TAXI",
+      name: "서울택시협동조합",
+      registrationNumber: "123-45-67890",
+      isActive: true
+    }
+  });
+
+  await prisma.costCenter.upsert({
+    where: {
+      companyId_code: {
+        companyId: company.id,
+        code: "CC-HR"
+      }
+    },
+    update: {
+      name: "인사비용센터",
+      isActive: true
+    },
+    create: {
+      companyId: company.id,
+      code: "CC-HR",
+      name: "인사비용센터",
+      isActive: true
+    }
+  });
+
+  await prisma.project.upsert({
+    where: {
+      companyId_code: {
+        companyId: company.id,
+        code: "PRJ-ERP-2026"
+      }
+    },
+    update: {
+      name: "ERP 고도화 2026",
+      status: "ACTIVE",
+      startDate: new Date("2026-01-01"),
+      endDate: new Date("2026-12-31")
+    },
+    create: {
+      companyId: company.id,
+      code: "PRJ-ERP-2026",
+      name: "ERP 고도화 2026",
+      status: "ACTIVE",
+      startDate: new Date("2026-01-01"),
+      endDate: new Date("2026-12-31")
+    }
+  });
+
+  console.log("Seeded Korean sample templates/policies/attendance mappings/accounts/finance masters.");
 }
 
 main()

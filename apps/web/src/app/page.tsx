@@ -22,7 +22,8 @@ export default function HomePage() {
       </p>
       <p>
         After login: <Link href="/files">Files</Link> · <Link href="/documents">Documents</Link> ·{" "}
-        <Link href="/approvals">Approvals</Link>
+        <Link href="/approvals">Approvals</Link> · <Link href="/expenses">Expenses</Link> ·{" "}
+        <Link href="/accounting/journal-entries">Journal Entries</Link>
       </p>
     </main>
   );
