@@ -1,0 +1,1119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  INVITED
+  DISABLED
+}
+
+enum MembershipRole {
+  SUPER_ADMIN
+  ORG_ADMIN
+  HR_MANAGER
+  APPROVER
+  EMPLOYEE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  CONTRACT
+  PART_TIME
+  INTERN
+  FREELANCER
+}
+
+enum EmploymentStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+enum FileStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+enum DocumentStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  CANCELED
+  ARCHIVED
+}
+
+enum ApprovalLineStatus {
+  DRAFT
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  CANCELED
+}
+
+enum ApprovalStepType {
+  APPROVE
+  CONSULT
+  AGREE
+  CC
+  RECEIVE
+}
+
+enum ApprovalStepStatus {
+  PENDING
+  WAITING
+  APPROVED
+  REJECTED
+  SKIPPED
+  CANCELED
+}
+
+enum ApprovalActionType {
+  SUBMIT
+  APPROVE
+  REJECT
+  CANCEL
+  RESUBMIT
+  COMMENT
+}
+
+enum SignatureAssetType {
+  SIGNATURE
+  SEAL
+}
+
+enum AttendanceIngestionSource {
+  API
+  CSV
+  AGENT_CSV
+  AGENT_DB
+  MANUAL
+}
+
+enum AttendanceEventType {
+  IN
+  OUT
+  BREAK_OUT
+  BREAK_IN
+  ACCESS_GRANTED
+  ACCESS_DENIED
+  UNKNOWN
+}
+
+enum AttendanceLedgerStatus {
+  NORMAL
+  LATE
+  EARLY_LEAVE
+  ABSENT
+  ON_LEAVE
+  HOLIDAY
+  WEEKEND
+  NEEDS_REVIEW
+}
+
+enum LeaveUnit {
+  DAY
+  HALF_DAY_AM
+  HALF_DAY_PM
+  HOUR
+}
+
+enum LeaveRequestStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  CANCELED
+}
+
+enum CorrectionStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  CANCELED
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  POSTED
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum JournalEntryStatus {
+  DRAFT
+  POSTED
+  REVERSED
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELED
+}
+
+enum IntegrationType {
+  NAVER_WORKS
+  JANDI
+  HIWORKS
+  ADT
+  S1
+  GENERIC
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  DISABLED
+  ERROR
+}
+
+enum IntegrationDirection {
+  INBOUND
+  OUTBOUND
+}
+
+model Company {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  name          String
+  defaultLocale String   @default("ko-KR")
+  timezone      String   @default("Asia/Seoul")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  memberships           CompanyMembership[]
+  legalEntities         LegalEntity[]
+  businessSites         BusinessSite[]
+  departments           Department[]
+  positions             Position[]
+  jobTitles             JobTitle[]
+  employees             Employee[]
+  fileObjects           FileObject[]
+  documentTemplates     DocumentTemplate[]
+  documents             Document[]
+  signatureAssets       SignatureAsset[]
+  shiftPolicies         ShiftPolicy[]
+  leavePolicies         LeavePolicy[]
+  leaveRequests         LeaveRequest[]
+  attendanceCorrections AttendanceCorrection[]
+  attendanceRawEvents   AttendanceRawEvent[]
+  attendanceLedgers     AttendanceLedger[]
+  vendors               Vendor[]
+  costCenters           CostCenter[]
+  projects              Project[]
+  accounts              Account[]
+  journalEntries        JournalEntry[]
+  expenseClaims         ExpenseClaim[]
+  importJobs            ImportJob[]
+  exportJobs            ExportJob[]
+  integrations          IntegrationConnection[]
+  integrationEvents     IntegrationEvent[]
+  auditLogs             AuditLog[]
+}
+
+model User {
+  id          String     @id @default(cuid())
+  email       String     @unique
+  name        String
+  locale      String     @default("ko-KR")
+  status      UserStatus @default(ACTIVE)
+  lastLoginAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  credentials              PasswordCredential?
+  identities               AuthIdentity[]
+  sessions                 UserSession[]
+  memberships              CompanyMembership[]
+  employees                Employee[]          @relation("EmployeeUser")
+  uploadedFiles            FileObject[]
+  signatureAssets          SignatureAsset[]
+  documentVersionsAuthored DocumentVersion[]   @relation("DocumentVersionAuthor")
+  approvalActions          ApprovalAction[]    @relation("ApprovalActionActor")
+  submittedExpenseClaims   ExpenseClaim[]      @relation("ExpenseClaimSubmitter")
+  importJobsRequested      ImportJob[]         @relation("ImportJobRequester")
+  exportJobsRequested      ExportJob[]         @relation("ExportJobRequester")
+  createdJournalEntries    JournalEntry[]      @relation("JournalEntryCreator")
+  postedJournalEntries     JournalEntry[]      @relation("JournalEntryPoster")
+  auditLogs                AuditLog[]          @relation("AuditActor")
+}
+
+model PasswordCredential {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuthIdentity {
+  id             String   @id @default(cuid())
+  userId         String
+  provider       String
+  providerUserId String
+  email          String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CompanyMembership {
+  id        String         @id @default(cuid())
+  companyId String
+  userId    String
+  role      MembershipRole
+  active    Boolean        @default(true)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, userId])
+}
+
+model LegalEntity {
+  id                 String   @id @default(cuid())
+  companyId          String
+  code               String
+  name               String
+  registrationNumber String?
+  representativeName String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  company        Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  businessSites  BusinessSite[]
+  employees      Employee[]
+  vendors        Vendor[]
+  costCenters    CostCenter[]
+  projects       Project[]
+  accounts       Account[]
+  journalEntries JournalEntry[]
+  expenseClaims  ExpenseClaim[]
+
+  @@unique([companyId, code])
+}
+
+model BusinessSite {
+  id            String   @id @default(cuid())
+  companyId     String
+  legalEntityId String?
+  code          String
+  name          String
+  address       String?
+  timezone      String   @default("Asia/Seoul")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company             Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  legalEntity         LegalEntity?         @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  departments         Department[]
+  employees           Employee[]
+  shiftPolicies       ShiftPolicy[]
+  attendanceRawEvents AttendanceRawEvent[]
+  attendanceLedgers   AttendanceLedger[]
+
+  @@unique([companyId, code])
+}
+
+model Department {
+  id                String   @id @default(cuid())
+  companyId         String
+  businessSiteId    String?
+  code              String
+  name              String
+  parentId          String?
+  managerEmployeeId String?
+  sortOrder         Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  businessSite BusinessSite? @relation(fields: [businessSiteId], references: [id], onDelete: SetNull)
+  parent       Department?   @relation("DepartmentHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Department[]  @relation("DepartmentHierarchy")
+  manager      Employee?     @relation("DepartmentManager", fields: [managerEmployeeId], references: [id], onDelete: SetNull)
+  employees    Employee[]
+
+  @@unique([companyId, code])
+}
+
+model Position {
+  id        String   @id @default(cuid())
+  companyId String
+  code      String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employees Employee[] @relation("EmployeePosition")
+
+  @@unique([companyId, code])
+}
+
+model JobTitle {
+  id        String   @id @default(cuid())
+  companyId String
+  code      String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employees Employee[] @relation("EmployeeJobTitle")
+
+  @@unique([companyId, code])
+}
+
+model Employee {
+  id             String  @id @default(cuid())
+  companyId      String
+  legalEntityId  String?
+  businessSiteId String?
+  departmentId   String?
+  userId         String?
+  positionId     String?
+  jobTitleId     String?
+  managerId      String?
+
+  employeeNumber   String
+  nameKr           String
+  nameEn           String?
+  workEmail        String?
+  mobilePhone      String?
+  nationalIdMasked String?
+  hireDate         DateTime         @db.Date
+  terminationDate  DateTime?        @db.Date
+  employmentType   EmploymentType
+  employmentStatus EmploymentStatus @default(ACTIVE)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  company                Company                         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  legalEntity            LegalEntity?                    @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  businessSite           BusinessSite?                   @relation(fields: [businessSiteId], references: [id], onDelete: SetNull)
+  department             Department?                     @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  user                   User?                           @relation("EmployeeUser", fields: [userId], references: [id], onDelete: SetNull)
+  position               Position?                       @relation("EmployeePosition", fields: [positionId], references: [id], onDelete: SetNull)
+  jobTitle               JobTitle?                       @relation("EmployeeJobTitle", fields: [jobTitleId], references: [id], onDelete: SetNull)
+  manager                Employee?                       @relation("EmployeeManager", fields: [managerId], references: [id], onDelete: SetNull)
+  subordinates           Employee[]                      @relation("EmployeeManager")
+  managedDepartments     Department[]                    @relation("DepartmentManager")
+  contracts              EmploymentContract[]
+  externalIdentities     EmployeeExternalIdentity[]
+  ownedDocuments         Document[]                      @relation("DocumentOwnerEmployee")
+  submittedApprovalLines ApprovalLine[]                  @relation("ApprovalLineSubmitterEmployee")
+  approvalSteps          ApprovalStep[]                  @relation("ApprovalStepApproverEmployee")
+  attendanceRawEvents    AttendanceRawEvent[]
+  attendanceLedgers      AttendanceLedger[]
+  leaveRequests          LeaveRequest[]
+  attendanceCorrections  AttendanceCorrection[]
+  expenseClaims          ExpenseClaim[]                  @relation("ExpenseClaimEmployee")
+  shiftPolicyAssignments EmployeeShiftPolicyAssignment[]
+
+  @@unique([companyId, employeeNumber])
+  @@index([companyId, departmentId])
+}
+
+model EmploymentContract {
+  id           String    @id @default(cuid())
+  employeeId   String
+  fileId       String?
+  contractType String
+  startDate    DateTime  @db.Date
+  endDate      DateTime? @db.Date
+  isCurrent    Boolean   @default(true)
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  employee Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  file     FileObject? @relation(fields: [fileId], references: [id], onDelete: SetNull)
+}
+
+model EmployeeExternalIdentity {
+  id             String          @id @default(cuid())
+  employeeId     String
+  provider       IntegrationType
+  externalUserId String
+  externalName   String?
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, externalUserId])
+  @@index([employeeId, provider])
+}
+
+model FileObject {
+  id             String     @id @default(cuid())
+  companyId      String
+  uploadedById   String
+  bucket         String
+  storageKey     String     @unique
+  originalName   String
+  mimeType       String
+  extension      String?
+  sizeBytes      BigInt
+  checksumSha256 String
+  status         FileStatus @default(ACTIVE)
+  metadata       Json?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  company                    Company                     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  uploadedBy                 User                        @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+  documentVersionAttachments DocumentVersionAttachment[]
+  receiptItems               ExpenseItem[]               @relation("ExpenseReceipt")
+  importSourceOf             ImportJob[]                 @relation("ImportSourceFile")
+  exportResultOf             ExportJob[]                 @relation("ExportResultFile")
+  signatureAssets            SignatureAsset[]
+  contractFiles              EmploymentContract[]
+  generatedFromVersions      DocumentVersion[]           @relation("DocumentVersionPdfFile")
+}
+
+model DocumentTemplate {
+  id           String   @id @default(cuid())
+  companyId    String?
+  key          String
+  name         String
+  category     String
+  version      Int      @default(1)
+  schemaJson   Json
+  htmlTemplate String
+  isSystem     Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  company   Company?   @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  documents Document[]
+
+  @@unique([companyId, key, version])
+}
+
+model Document {
+  id               String         @id @default(cuid())
+  companyId        String
+  ownerEmployeeId  String?
+  templateId       String?
+  title            String
+  category         String?
+  status           DocumentStatus @default(DRAFT)
+  currentVersionNo Int            @default(1)
+  submittedAt      DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  company               Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  ownerEmployee         Employee?              @relation("DocumentOwnerEmployee", fields: [ownerEmployeeId], references: [id], onDelete: SetNull)
+  template              DocumentTemplate?      @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  versions              DocumentVersion[]
+  approvalLine          ApprovalLine?
+  leaveRequests         LeaveRequest[]
+  attendanceCorrections AttendanceCorrection[]
+  expenseClaims         ExpenseClaim[]
+
+  @@index([companyId, status])
+}
+
+model DocumentVersion {
+  id           String   @id @default(cuid())
+  documentId   String
+  versionNo    Int
+  authoredById String
+  contentJson  Json
+  htmlSnapshot String
+  pdfFileId    String?
+  createdAt    DateTime @default(now())
+
+  document    Document                    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  authoredBy  User                        @relation("DocumentVersionAuthor", fields: [authoredById], references: [id], onDelete: Restrict)
+  pdfFile     FileObject?                 @relation("DocumentVersionPdfFile", fields: [pdfFileId], references: [id], onDelete: SetNull)
+  attachments DocumentVersionAttachment[]
+
+  @@unique([documentId, versionNo])
+}
+
+model DocumentVersionAttachment {
+  id                String   @id @default(cuid())
+  documentVersionId String
+  fileId            String
+  label             String?
+  createdAt         DateTime @default(now())
+
+  documentVersion DocumentVersion @relation(fields: [documentVersionId], references: [id], onDelete: Cascade)
+  file            FileObject      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@unique([documentVersionId, fileId])
+}
+
+model ApprovalLine {
+  id                    String             @id @default(cuid())
+  documentId            String             @unique
+  submittedByEmployeeId String?
+  status                ApprovalLineStatus @default(DRAFT)
+  currentOrder          Int?
+  submittedAt           DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  document            Document         @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  submittedByEmployee Employee?        @relation("ApprovalLineSubmitterEmployee", fields: [submittedByEmployeeId], references: [id], onDelete: SetNull)
+  steps               ApprovalStep[]
+  actions             ApprovalAction[]
+}
+
+model ApprovalStep {
+  id                 String             @id @default(cuid())
+  lineId             String
+  orderNo            Int
+  type               ApprovalStepType
+  approverEmployeeId String
+  status             ApprovalStepStatus @default(PENDING)
+  actedAt            DateTime?
+  comment            String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  line             ApprovalLine     @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  approverEmployee Employee         @relation("ApprovalStepApproverEmployee", fields: [approverEmployeeId], references: [id], onDelete: Restrict)
+  actions          ApprovalAction[]
+
+  @@unique([lineId, orderNo])
+}
+
+model ApprovalAction {
+  id         String             @id @default(cuid())
+  lineId     String
+  stepId     String?
+  actorId    String
+  actionType ApprovalActionType
+  comment    String?
+  payload    Json?
+  createdAt  DateTime           @default(now())
+
+  line  ApprovalLine  @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  step  ApprovalStep? @relation(fields: [stepId], references: [id], onDelete: SetNull)
+  actor User          @relation("ApprovalActionActor", fields: [actorId], references: [id], onDelete: Restrict)
+}
+
+model SignatureAsset {
+  id          String             @id @default(cuid())
+  companyId   String
+  ownerUserId String
+  fileId      String
+  type        SignatureAssetType
+  label       String
+  isDefault   Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  ownerUser User       @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  file      FileObject @relation(fields: [fileId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, ownerUserId])
+}
+
+model ShiftPolicy {
+  id               String   @id @default(cuid())
+  companyId        String
+  businessSiteId   String?
+  code             String
+  name             String
+  version          Int      @default(1)
+  timezone         String   @default("Asia/Seoul")
+  workStartMinutes Int
+  workEndMinutes   Int
+  breakMinutes     Int      @default(60)
+  graceMinutes     Int      @default(0)
+  rulesJson        Json?
+  isDefault        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  company             Company                         @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  businessSite        BusinessSite?                   @relation(fields: [businessSiteId], references: [id], onDelete: SetNull)
+  employeeAssignments EmployeeShiftPolicyAssignment[]
+  attendanceLedgers   AttendanceLedger[]
+
+  @@unique([companyId, code, version])
+}
+
+model EmployeeShiftPolicyAssignment {
+  id            String    @id @default(cuid())
+  employeeId    String
+  shiftPolicyId String
+  effectiveFrom DateTime  @db.Date
+  effectiveTo   DateTime? @db.Date
+  createdAt     DateTime  @default(now())
+
+  employee    Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shiftPolicy ShiftPolicy @relation(fields: [shiftPolicyId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId, effectiveFrom])
+}
+
+model AttendanceRawEvent {
+  id             String                    @id @default(cuid())
+  companyId      String
+  businessSiteId String?
+  employeeId     String?
+  provider       IntegrationType
+  source         AttendanceIngestionSource
+  externalUserId String
+  eventType      AttendanceEventType
+  eventTimestamp DateTime
+  deviceId       String?
+  siteCode       String?
+  dedupeHash     String
+  rawPayload     Json
+  receivedAt     DateTime                  @default(now())
+  normalized     Boolean                   @default(false)
+  createdAt      DateTime                  @default(now())
+
+  company       Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  businessSite  BusinessSite?            @relation(fields: [businessSiteId], references: [id], onDelete: SetNull)
+  employee      Employee?                @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  ledgerSources AttendanceLedgerSource[]
+
+  @@unique([companyId, dedupeHash])
+  @@index([companyId, eventTimestamp])
+}
+
+model AttendanceLedger {
+  id              String                 @id @default(cuid())
+  companyId       String
+  businessSiteId  String?
+  employeeId      String
+  workDate        DateTime               @db.Date
+  shiftPolicyId   String?
+  status          AttendanceLedgerStatus @default(NEEDS_REVIEW)
+  checkInAt       DateTime?
+  checkOutAt      DateTime?
+  breakMinutes    Int                    @default(0)
+  workedMinutes   Int                    @default(0)
+  overtimeMinutes Int                    @default(0)
+  nightMinutes    Int                    @default(0)
+  holidayMinutes  Int                    @default(0)
+  policyVersion   Int?
+  needsReview     Boolean                @default(true)
+  notes           String?
+  generatedAt     DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  company      Company                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  businessSite BusinessSite?            @relation(fields: [businessSiteId], references: [id], onDelete: SetNull)
+  employee     Employee                 @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  shiftPolicy  ShiftPolicy?             @relation(fields: [shiftPolicyId], references: [id], onDelete: SetNull)
+  sourceEvents AttendanceLedgerSource[]
+  corrections  AttendanceCorrection[]
+
+  @@unique([companyId, employeeId, workDate])
+  @@index([companyId, workDate])
+}
+
+model AttendanceLedgerSource {
+  id                 String @id @default(cuid())
+  attendanceLedgerId String
+  rawEventId         String
+
+  attendanceLedger AttendanceLedger   @relation(fields: [attendanceLedgerId], references: [id], onDelete: Cascade)
+  rawEvent         AttendanceRawEvent @relation(fields: [rawEventId], references: [id], onDelete: Cascade)
+
+  @@unique([attendanceLedgerId, rawEventId])
+}
+
+model LeavePolicy {
+  id                   String    @id @default(cuid())
+  companyId            String
+  code                 String
+  name                 String
+  unit                 LeaveUnit @default(DAY)
+  annualAllocationDays Decimal?  @db.Decimal(10, 2)
+  maxCarryoverDays     Decimal?  @db.Decimal(10, 2)
+  isPaid               Boolean   @default(true)
+  rulesJson            Json?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  company       Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  leaveRequests LeaveRequest[]
+
+  @@unique([companyId, code])
+}
+
+model LeaveRequest {
+  id            String             @id @default(cuid())
+  companyId     String
+  employeeId    String
+  leavePolicyId String
+  documentId    String?
+  status        LeaveRequestStatus @default(REQUESTED)
+  startDate     DateTime           @db.Date
+  endDate       DateTime           @db.Date
+  unit          LeaveUnit
+  quantity      Decimal            @db.Decimal(10, 2)
+  reason        String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee    Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  leavePolicy LeavePolicy @relation(fields: [leavePolicyId], references: [id], onDelete: Restrict)
+  document    Document?   @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, employeeId, status])
+}
+
+model AttendanceCorrection {
+  id                  String           @id @default(cuid())
+  companyId           String
+  employeeId          String
+  attendanceLedgerId  String?
+  documentId          String?
+  status              CorrectionStatus @default(REQUESTED)
+  workDate            DateTime         @db.Date
+  requestedCheckInAt  DateTime?
+  requestedCheckOutAt DateTime?
+  reason              String
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employee         Employee          @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  attendanceLedger AttendanceLedger? @relation(fields: [attendanceLedgerId], references: [id], onDelete: SetNull)
+  document         Document?         @relation(fields: [documentId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, employeeId, workDate])
+}
+
+model Vendor {
+  id                 String   @id @default(cuid())
+  companyId          String
+  legalEntityId      String?
+  code               String
+  name               String
+  registrationNumber String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  legalEntity       LegalEntity?       @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  expenseItems      ExpenseItem[]
+  journalEntryLines JournalEntryLine[]
+
+  @@unique([companyId, code])
+}
+
+model CostCenter {
+  id            String   @id @default(cuid())
+  companyId     String
+  legalEntityId String?
+  code          String
+  name          String
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  legalEntity       LegalEntity?       @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  expenseClaims     ExpenseClaim[]
+  journalEntryLines JournalEntryLine[]
+
+  @@unique([companyId, code])
+}
+
+model Project {
+  id            String    @id @default(cuid())
+  companyId     String
+  legalEntityId String?
+  code          String
+  name          String
+  status        String?
+  startDate     DateTime? @db.Date
+  endDate       DateTime? @db.Date
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  legalEntity       LegalEntity?       @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  expenseClaims     ExpenseClaim[]
+  journalEntryLines JournalEntryLine[]
+
+  @@unique([companyId, code])
+}
+
+model ExpenseClaim {
+  id            String        @id @default(cuid())
+  companyId     String
+  legalEntityId String?
+  employeeId    String
+  submittedById String
+  documentId    String?
+  costCenterId  String?
+  projectId     String?
+  title         String
+  status        ExpenseStatus @default(DRAFT)
+  currency      String        @default("KRW")
+  totalAmount   Decimal       @default(0) @db.Decimal(18, 2)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  company        Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  legalEntity    LegalEntity?   @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  employee       Employee       @relation("ExpenseClaimEmployee", fields: [employeeId], references: [id], onDelete: Restrict)
+  submittedBy    User           @relation("ExpenseClaimSubmitter", fields: [submittedById], references: [id], onDelete: Restrict)
+  document       Document?      @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  costCenter     CostCenter?    @relation(fields: [costCenterId], references: [id], onDelete: SetNull)
+  project        Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  items          ExpenseItem[]
+  journalEntries JournalEntry[]
+
+  @@index([companyId, employeeId, status])
+}
+
+model ExpenseItem {
+  id            String   @id @default(cuid())
+  claimId       String
+  incurredOn    DateTime @db.Date
+  category      String
+  description   String?
+  vendorId      String?
+  amount        Decimal  @db.Decimal(18, 2)
+  vatAmount     Decimal? @db.Decimal(18, 2)
+  receiptFileId String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  claim       ExpenseClaim @relation(fields: [claimId], references: [id], onDelete: Cascade)
+  vendor      Vendor?      @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  receiptFile FileObject?  @relation("ExpenseReceipt", fields: [receiptFileId], references: [id], onDelete: SetNull)
+}
+
+model Account {
+  id            String      @id @default(cuid())
+  companyId     String
+  legalEntityId String?
+  parentId      String?
+  code          String
+  name          String
+  type          AccountType
+  isPosting     Boolean     @default(true)
+  isActive      Boolean     @default(true)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  company           Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  legalEntity       LegalEntity?       @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  parent            Account?           @relation("AccountHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children          Account[]          @relation("AccountHierarchy")
+  journalEntryLines JournalEntryLine[]
+
+  @@unique([companyId, code])
+}
+
+model JournalEntry {
+  id             String             @id @default(cuid())
+  companyId      String
+  legalEntityId  String?
+  expenseClaimId String?
+  number         String
+  entryDate      DateTime           @db.Date
+  description    String?
+  status         JournalEntryStatus @default(DRAFT)
+  totalDebit     Decimal            @default(0) @db.Decimal(18, 2)
+  totalCredit    Decimal            @default(0) @db.Decimal(18, 2)
+  createdById    String
+  postedById     String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  company      Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  legalEntity  LegalEntity?       @relation(fields: [legalEntityId], references: [id], onDelete: SetNull)
+  expenseClaim ExpenseClaim?      @relation(fields: [expenseClaimId], references: [id], onDelete: SetNull)
+  createdBy    User               @relation("JournalEntryCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  postedBy     User?              @relation("JournalEntryPoster", fields: [postedById], references: [id], onDelete: SetNull)
+  lines        JournalEntryLine[]
+
+  @@unique([companyId, number])
+  @@index([companyId, entryDate])
+}
+
+model JournalEntryLine {
+  id             String   @id @default(cuid())
+  journalEntryId String
+  lineNo         Int
+  accountId      String
+  vendorId       String?
+  costCenterId   String?
+  projectId      String?
+  description    String?
+  debit          Decimal  @default(0) @db.Decimal(18, 2)
+  credit         Decimal  @default(0) @db.Decimal(18, 2)
+  createdAt      DateTime @default(now())
+
+  journalEntry JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  account      Account      @relation(fields: [accountId], references: [id], onDelete: Restrict)
+  vendor       Vendor?      @relation(fields: [vendorId], references: [id], onDelete: SetNull)
+  costCenter   CostCenter?  @relation(fields: [costCenterId], references: [id], onDelete: SetNull)
+  project      Project?     @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@unique([journalEntryId, lineNo])
+}
+
+model ImportJob {
+  id            String    @id @default(cuid())
+  companyId     String
+  requestedById String
+  type          String
+  status        JobStatus @default(PENDING)
+  sourceFileId  String?
+  mappingJson   Json?
+  summaryJson   Json?
+  errorMessage  String?
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  requestedBy User           @relation("ImportJobRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  sourceFile  FileObject?    @relation("ImportSourceFile", fields: [sourceFileId], references: [id], onDelete: SetNull)
+  rows        ImportJobRow[]
+}
+
+model ImportJobRow {
+  id           String    @id @default(cuid())
+  importJobId  String
+  rowNo        Int
+  status       JobStatus @default(PENDING)
+  rawData      Json
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  importJob ImportJob @relation(fields: [importJobId], references: [id], onDelete: Cascade)
+
+  @@unique([importJobId, rowNo])
+}
+
+model ExportJob {
+  id            String    @id @default(cuid())
+  companyId     String
+  requestedById String
+  type          String
+  status        JobStatus @default(PENDING)
+  resultFileId  String?
+  filterJson    Json?
+  summaryJson   Json?
+  errorMessage  String?
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  company     Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  requestedBy User        @relation("ExportJobRequester", fields: [requestedById], references: [id], onDelete: Restrict)
+  resultFile  FileObject? @relation("ExportResultFile", fields: [resultFileId], references: [id], onDelete: SetNull)
+}
+
+model IntegrationConnection {
+  id         String            @id @default(cuid())
+  companyId  String
+  type       IntegrationType
+  name       String
+  status     IntegrationStatus @default(ACTIVE)
+  configJson Json
+  lastSyncAt DateTime?
+  lastError  String?
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+
+  company Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  events  IntegrationEvent[]
+
+  @@index([companyId, type, status])
+}
+
+model IntegrationEvent {
+  id           String               @id @default(cuid())
+  companyId    String
+  connectionId String?
+  direction    IntegrationDirection
+  eventType    String
+  status       JobStatus            @default(PENDING)
+  payload      Json
+  receivedAt   DateTime             @default(now())
+  processedAt  DateTime?
+  errorMessage String?
+
+  company    Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  connection IntegrationConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, receivedAt])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  companyId    String?
+  actorId      String?
+  entityType   String
+  entityId     String
+  action       String
+  beforeJson   Json?
+  afterJson    Json?
+  metadataJson Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  actor   User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, entityType, entityId])
+  @@index([createdAt])
+}

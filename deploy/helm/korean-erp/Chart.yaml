@@ -1,0 +1,6 @@
+apiVersion: v2
+name: korean-erp
+description: Self-hosted Korean ERP/work platform foundation chart
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

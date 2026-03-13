@@ -1,0 +1,13 @@
+import { Module } from "@nestjs/common";
+
+import { AuditModule } from "../audit/audit.module";
+import { OrgController } from "./controllers/org.controller";
+import { OrgService } from "./services/org.service";
+
+@Module({
+  imports: [AuditModule],
+  controllers: [OrgController],
+  providers: [OrgService],
+  exports: [OrgService]
+})
+export class OrgModule {}
