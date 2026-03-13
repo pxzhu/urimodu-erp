@@ -231,6 +231,75 @@ async function main() {
     }
   });
 
+  const shiftPolicy = await prisma.shiftPolicy.findUnique({
+    where: {
+      companyId_code_version: {
+        companyId: company.id,
+        code: "DEFAULT_9_TO_6",
+        version: 1
+      }
+    }
+  });
+
+  const employees = await prisma.employee.findMany({
+    where: {
+      companyId: company.id,
+      employeeNumber: {
+        in: ["10000001", "10000002", "10000003", "10000004"]
+      }
+    },
+    select: {
+      id: true,
+      employeeNumber: true,
+      nameKr: true
+    }
+  });
+
+  if (shiftPolicy) {
+    const assignmentEffectiveFrom = new Date("2026-01-01");
+    for (const employee of employees) {
+      await prisma.employeeShiftPolicyAssignment.deleteMany({
+        where: {
+          employeeId: employee.id,
+          effectiveFrom: assignmentEffectiveFrom
+        }
+      });
+
+      await prisma.employeeShiftPolicyAssignment.create({
+        data: {
+          employeeId: employee.id,
+          shiftPolicyId: shiftPolicy.id,
+          effectiveFrom: assignmentEffectiveFrom
+        }
+      });
+    }
+  }
+
+  for (const employee of employees) {
+    await prisma.employeeExternalIdentity.upsert({
+      where: {
+        provider_externalUserId: {
+          provider: "GENERIC",
+          externalUserId: `ADT-EMP-${employee.employeeNumber}`
+        }
+      },
+      update: {
+        employeeId: employee.id,
+        externalName: `${employee.nameKr}-출입단말`
+      },
+      create: {
+        employeeId: employee.id,
+        provider: "GENERIC",
+        externalUserId: `ADT-EMP-${employee.employeeNumber}`,
+        externalName: `${employee.nameKr}-출입단말`,
+        metadata: {
+          source: "seed",
+          note: "Generic ADT/S1-like external identity mapping"
+        }
+      }
+    });
+  }
+
   const accounts = [
     ["1100", "현금및현금성자산", AccountType.ASSET],
     ["1200", "매출채권", AccountType.ASSET],
@@ -264,7 +333,7 @@ async function main() {
     });
   }
 
-  console.log("Seeded Korean sample templates/policies/accounts.");
+  console.log("Seeded Korean sample templates/policies/attendance mappings/accounts.");
 }
 
 main()

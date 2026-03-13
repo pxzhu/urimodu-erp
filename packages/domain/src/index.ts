@@ -5,3 +5,5 @@ export enum AttendanceEventType {
   BREAK_IN = "BREAK_IN",
   UNKNOWN = "UNKNOWN"
 }
+
+export * from "./attendance-normalization";

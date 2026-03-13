@@ -1,27 +1,27 @@
-[English](./README.en.md)
+[한국어](./README.ko.md)
 
 # Korean Self-Hosted ERP
 
-사용자 설치형(Self-hosted) 한국형 ERP/업무 플랫폼을 위한 공개 오픈소스 기반 레포입니다.
+Public open-source foundation for a self-hosted Korean ERP/work platform.
 
-## 비전
+## Vision
 
-프로젝트 방향을 먼저 이해하려면 [VISION.md](./VISION.md)를 먼저 읽는 것을 권장합니다.  
+Before diving into setup and code, we recommend reading [VISION.md](./VISION.md) first.  
 English version: [VISION.en.md](./VISION.en.md)
 
-## 상태
+## Status
 
-현재 레포에는 다음이 포함되어 있습니다.
+This repository currently contains:
 
-- 모노레포 스캐폴드 (`pnpm` + `turbo`)
-- Next.js 웹 앱 기반 + auth/org/employee/document/approval 화면 시작 구현 (`apps/web`)
-- NestJS 모듈형 모놀리스 API 기반 모듈 + PROMPT04 문서/결재 흐름 구현 (`apps/api`)
-- worker/docs-service/connector-gateway 스캐폴드
-- Go edge-agent 스캐폴드
-- Docker Compose + Helm 시작 구성
-- Prisma 스키마 베이스라인, 마이그레이션, 한국 샘플 시드
+- Monorepo scaffold (`pnpm` + `turbo`)
+- Next.js web app foundation + auth/org/employee/document/approval + attendance/leave UI screens (`apps/web`)
+- NestJS modular-monolith API with foundational modules and PROMPT05 attendance/leave/integration workflow (`apps/api`)
+- Worker/docs-service/connector-gateway runnable services with attendance normalization/ingress forwarding
+- Go edge-agent scaffold with CSV directory polling, external ID mapping, and failed-send buffering
+- Docker Compose + Helm starter
+- Prisma schema baseline, migrations, and Korean sample seeds
 
-## 모노레포 구조
+## Monorepo Structure
 
 ```text
 apps/
@@ -49,16 +49,16 @@ docs/
   ops/
 ```
 
-## 로컬 설정
+## Local Setup
 
-### 사전 요구사항
+### Prerequisites
 
 - Node.js 20+
 - pnpm 10+
-- Docker / Docker Compose (권장)
-- Go 1.19+ (edge-agent 실행 시)
+- Docker / Docker Compose (optional but recommended)
+- Go 1.19+ (for edge-agent local run)
 
-### 설치 및 실행
+### Install and Run
 
 ```bash
 make bootstrap
@@ -66,7 +66,7 @@ cp .env.example .env
 pnpm dev
 ```
 
-### 로컬 엔드포인트
+### Service Endpoints (local dev)
 
 - Web: `http://localhost:3000`
 - Web health: `http://localhost:3000/health`
@@ -77,78 +77,87 @@ pnpm dev
 - Connector gateway health: `http://localhost:4200/health`
 - Docs service health: `http://localhost:4300/health`
 
-### 시드 로그인 (로컬 인증)
+### Seeded Login (Local Auth)
 
 - Email: `admin@acme.local`
 - Password: `ChangeMe123!`
-- 시드 명령: `pnpm --filter @korean-erp/api prisma:seed`
+- Seed command: `pnpm --filter @korean-erp/api prisma:seed`
 
-추가 시드 사용자: `hr@acme.local`, `manager@acme.local`, `employee@acme.local`
+Additional seeded users: `hr@acme.local`, `manager@acme.local`, `employee@acme.local`.
 
 ## Docker Compose
 
-전체 로컬 스택(PostgreSQL, Redis, MinIO, API, Web, Worker, gateway, docs-service) 실행:
+Run full local stack (PostgreSQL, Redis, MinIO, API, Web, Worker, gateway, docs-service):
 
 ```bash
 cp deploy/compose/.env.example deploy/compose/.env
 make compose-up
 ```
 
-중지:
+Stop stack:
 
 ```bash
 make compose-down
 ```
 
-## Helm 차트
+## Helm Chart
 
-시작용 차트 경로:
+Starter chart is located at:
 
 - `deploy/helm/korean-erp`
 
-설치 예시:
+Example install:
 
 ```bash
 helm install korean-erp deploy/helm/korean-erp
 ```
 
-차트는 이미지 태그, 환경변수, ingress, persistence, secret 참조를 설정할 수 있습니다.
+The chart supports configurable image tags, env vars, ingress settings, persistence, and secret references.
 
-## 아키텍처 기준
+## Architecture Baseline
 
-- 코어 API는 **모듈형 모놀리스**를 유지합니다.
-- 근태 연동은 **edge-agent + generic adapter**를 기본으로 합니다.
-- 문서 전략은 **HWPX 우선**, legacy HWP는 fallback adapter만 유지합니다.
-- 감사 로그 중심의 데이터 모델 베이스라인을 Prisma 스키마에 포함했습니다.
-- API 인증은 bearer 세션 + 회사 컨텍스트(`x-company-id`)를 사용합니다.
+- Core API is a **modular monolith** (no premature microservice split)
+- Attendance integrations are **edge-agent + generic adapters** first
+- **HWPX-first** document strategy; legacy HWP is fallback adapter only
+- Audit-first data model baseline is included in Prisma schema
+- API auth uses bearer sessions with company context (`x-company-id`) for membership-scoped access
 
-## 기반 모듈 구현 (PROMPT03-04)
+## Foundational Modules (PROMPT03-04)
 
-- `auth`: local login/logout/me, 세션 토큰, OIDC 확장용 provider 추상화
-- `org`: company/legal-entity/business-site/department CRUD + 부서 트리
-- `employee`: employee number 기반 직원 CRUD, position/title 분리
-- `audit`: 생성/수정/삭제 및 인증 민감 동작 감사로그 저장/조회
-- `files`: MinIO 기반 파일 업로드/다운로드 + 메타데이터/체크섬 + 감사로그
-- `documents`: 템플릿 기반 문서 생성/버전/첨부 + PDF 렌더 트리거
-- `approvals`: 결재선 구성/상신/승인/반려/취소/재상신 + 결재함
-- `signatures`: 업로드 파일 기반 서명/도장 에셋 등록
-- Swagger 문서: `/swagger`
+- `auth`: local login/logout/me, session token, OIDC-ready provider abstraction
+- `org`: company/legal-entity/business-site/department CRUD + department tree
+- `employee`: employee CRUD with employee number, position/title separation
+- `audit`: mutation/auth action logs and query endpoint
+- `files`: MinIO-backed file upload/download + metadata/checksum + audit logging
+- `documents`: template-based document create/version + attachment linking + PDF render trigger
+- `approvals`: approval line configure/submit/approve/reject/cancel/resubmit + inbox
+- `signatures`: signature/seal asset registration from uploaded files
+- Swagger docs available at `/swagger` for these endpoints
 
-## PROMPT04 웹 화면
+## PROMPT04 Web Screens
 
-- `GET /files` 화면: 파일 업로드, 메타데이터 조회, 다운로드
-- `GET /documents` 화면: 템플릿 문서 생성, 버전 추가, 결재선 구성/상신, PDF 다운로드
-- `GET /approvals` 화면: 결재함 승인/반려 + 코멘트
+- `GET /files` UI: upload, metadata list, download
+- `GET /documents` UI: template-based document create, version add, approval routing, submit, PDF download
+- `GET /approvals` UI: approval inbox with approve/reject and comment
 
-## 문서
+## Attendance and Leave Vertical Slice (PROMPT05)
 
-- 실행 계획: `docs/PLAN.md`
-- ADR: `docs/adr/`
-- API 노트: `docs/api/README.md`
-- 운영 노트: `docs/ops/README.md`
-- 기여 가이드: `CONTRIBUTING.md`
-- 보안 정책: `SECURITY.md`
+- Raw attendance ingestion endpoints (`/integrations/attendance/raw`, `/integrations/attendance/raw/batch`, `/integrations/attendance/raw/csv`)
+- Attendance query endpoints (`/attendance/raw-events`, `/attendance/ledgers`)
+- Shift policy starter endpoints (`/attendance/shift-policies`, create/update version)
+- Leave and correction endpoints (`/leave/policies`, `/leave/requests`, `/attendance-corrections`)
+- Worker normalization job from immutable `AttendanceRawEvent` -> `AttendanceLedger` with policy version capture
+- Edge-agent CSV directory watch + local buffer retry + external ID map config
 
-## 라이선스
+## Documentation
 
-Apache-2.0 (`LICENSE` 참고)
+- Plan: `docs/PLAN.md`
+- ADRs: `docs/adr/`
+- API notes: `docs/api/README.md`
+- Ops notes: `docs/ops/README.md`
+- Contribution: `CONTRIBUTING.md`
+- Security policy: `SECURITY.md`
+
+## License
+
+Apache-2.0. See `LICENSE`.

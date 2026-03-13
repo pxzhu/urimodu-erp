@@ -24,7 +24,7 @@ pnpm dev
 - Use `pnpm` and `turbo` commands.
 - Keep the API as a modular monolith unless a separation is justified.
 - Preserve HWPX-first strategy; keep legacy HWP support as fallback adapter only.
-- Keep docs and setup aligned across `README.md` and `README.en.md`.
+- Keep docs and setup aligned across `README.md` and `README.ko.md`.
 - Never commit secrets or customer/vendor-private assets.
 
 ## Pull Request Checklist

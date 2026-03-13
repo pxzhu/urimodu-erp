@@ -73,6 +73,7 @@ services:
       MINIO_BUCKET: ${MINIO_BUCKET:-erp-files}
       MINIO_USE_SSL: "false"
       DOCS_SERVICE_BASE_URL: http://docs-service:4300
+      INTEGRATION_INGEST_API_KEY: ${INTEGRATION_INGEST_API_KEY:-dev-integration-key}
     ports:
       - "${API_PORT:-4000}:4000"
     depends_on:
@@ -117,6 +118,7 @@ services:
       WORKER_PORT: ${WORKER_PORT:-4100}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-erp}
       REDIS_URL: redis://redis:6379
+      ATTENDANCE_NORMALIZE_BATCH_SIZE: 500
     ports:
       - "${WORKER_PORT:-4100}:4100"
     depends_on:
@@ -137,6 +139,10 @@ services:
     container_name: erp-connector-gateway
     environment:
       CONNECTOR_GATEWAY_PORT: ${CONNECTOR_GATEWAY_PORT:-4200}
+      EDGE_AGENT_SHARED_KEY: ${EDGE_AGENT_SHARED_KEY:-dev-edge-agent-key}
+      INTEGRATION_INGEST_URL: http://api:4000/integrations/attendance/raw
+      INTEGRATION_INGEST_API_KEY: ${INTEGRATION_INGEST_API_KEY:-dev-integration-key}
+      DEFAULT_COMPANY_CODE: ${DEFAULT_COMPANY_CODE:-ACME_KR}
     ports:
       - "${CONNECTOR_GATEWAY_PORT:-4200}:4200"
     healthcheck:

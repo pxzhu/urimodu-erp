@@ -77,6 +77,30 @@
 - `GET /signatures/mine`
 - `POST /signatures`
 
+## PROMPT05 Endpoints (Attendance / Leave / Integrations / Edge-Agent Slice)
+
+### Integrations
+
+- `POST /integrations/attendance/raw`
+- `POST /integrations/attendance/raw/batch`
+- `POST /integrations/attendance/raw/csv` (multipart CSV import)
+
+### Attendance
+
+- `GET /attendance/raw-events`
+- `GET /attendance/ledgers`
+- `GET /attendance/shift-policies`
+- `POST /attendance/shift-policies`
+- `PATCH /attendance/shift-policies/:id`
+
+### Leave + Corrections
+
+- `GET /leave/policies`
+- `GET /leave/requests`
+- `POST /leave/requests`
+- `GET /attendance-corrections`
+- `POST /attendance-corrections`
+
 ## Auth and RBAC Notes
 
 - Use bearer token from `/auth/login` response: `Authorization: Bearer <token>`
