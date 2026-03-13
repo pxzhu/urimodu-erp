@@ -160,3 +160,70 @@ Date: 2026-03-13
 ## Next Recommended Prompt
 
 - `PROMPT04.md`
+
+---
+
+# PROMPT04 Execution Plan (Document / File / Approval Vertical Slice)
+
+Date: 2026-03-13
+Scope source: `PROMPT01.md` + `korean-self-hosted-erp-starter-structure-and-schema.md` + `PROMPT04.md`
+
+## Objective
+
+Implement a working end-to-end slice for files, documents, approvals, and signatures with JSON+HTML+PDF canonical document flow.
+
+## In Scope (This Run)
+
+- API modules: `files`, `documents`, `approvals`, `signatures`
+- MinIO-backed file upload/download + metadata persistence (`FileObject`)
+- Document creation from template + versioning + attachment linking
+- Approval line/step/action workflow: submit, approve, reject, cancel, resubmit
+- Signature asset registration from uploaded files
+- HTML template rendering + PDF generation pipeline
+- Sample document templates:
+  - leave request
+  - expense approval
+  - attendance correction
+  - employment certificate
+  - overtime request
+- Web UI for upload, document create/submit, approval action, PDF download
+- Swagger docs for new endpoints
+- Seed updates for templates/sample approvals
+- Tests for core service/flow behavior
+- HWPX-first adapter scaffolding note + legacy HWP fallback TODO boundary
+
+## Out of Scope (This Run)
+
+- PROMPT05+ domains (attendance normalization deepening, finance expansion, etc.)
+- Full OCR/editor workflows
+- Large workflow engine generalization beyond required approval actions
+
+## Execution Steps
+
+1. Implement storage abstraction and MinIO adapter in API (`common/storage`) and wire env config.
+2. Build `files` module endpoints for upload/download/metadata and audit logging.
+3. Build `documents` module endpoints for template listing, document draft creation, versioning, attachments, PDF rendering.
+4. Build `approvals` module endpoints for line setup + submit/approve/reject/cancel/resubmit with status transitions and audit logs.
+5. Build `signatures` module endpoints for signature/seal asset registration and listing.
+6. Extend `docs-service` with HTML-to-PDF generation endpoint and template artifacts.
+7. Add web screens/routes for file upload, document create, approval routing/action, PDF download.
+8. Update seeds (templates + sample records), API docs references, and README sections if setup/architecture changes.
+9. Add/extend tests for service flows and run full workspace validation.
+
+## Validation Targets
+
+- `pnpm -r lint`
+- `pnpm -r typecheck`
+- `pnpm -r test`
+- `pnpm -r build`
+
+## Acceptance Checklist
+
+- [ ] File upload/download works against local MinIO stack
+- [ ] Document can be created from template and stored with version
+- [ ] Document version attachments can be added/listed
+- [ ] Approval submit/approve/reject flow works with status updates
+- [ ] Rendered PDF is generated and downloadable
+- [ ] Audit logs are written for key mutations in this slice
+- [ ] Swagger includes file/document/approval/signature endpoints
+- [ ] Web screens exist for the required user flow

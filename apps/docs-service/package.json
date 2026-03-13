@@ -11,7 +11,11 @@
     "test": "node -e \"console.log('No tests yet for docs-service')\"",
     "clean": "rm -rf dist"
   },
+  "dependencies": {
+    "pdfkit": "^0.17.1"
+  },
   "devDependencies": {
+    "@types/pdfkit": "^0.17.3",
     "@types/node": "^22.13.10",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"

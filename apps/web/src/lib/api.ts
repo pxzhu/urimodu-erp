@@ -16,12 +16,11 @@ interface ApiRequestOptions {
   body?: unknown;
   token?: string;
   companyId?: string;
+  responseType?: "json" | "blob" | "text";
 }
 
 export async function apiRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json"
-  };
+  const headers: Record<string, string> = {};
 
   if (options.token) {
     headers.Authorization = `Bearer ${options.token}`;
@@ -31,10 +30,19 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     headers["x-company-id"] = options.companyId;
   }
 
+  const bodyIsFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
+  if (!bodyIsFormData) {
+    headers["Content-Type"] = "application/json";
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: options.method ?? "GET",
     headers,
-    body: options.body ? JSON.stringify(options.body) : undefined
+    body: options.body
+      ? bodyIsFormData
+        ? (options.body as FormData)
+        : JSON.stringify(options.body)
+      : undefined
   });
 
   if (!response.ok) {
@@ -51,6 +59,18 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
     }
 
     throw new ApiError(response.status, message);
+  }
+
+  if ((options.responseType ?? "json") === "blob") {
+    return (await response.blob()) as T;
+  }
+
+  if ((options.responseType ?? "json") === "text") {
+    return (await response.text()) as T;
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return (await response.json()) as T;

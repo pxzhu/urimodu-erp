@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 import { CommonAuthModule } from "./common/auth/auth.module";
 import { PrismaModule } from "./common/prisma/prisma.module";
+import { StorageModule } from "./common/storage/storage.module";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { ApprovalsModule } from "./modules/approvals/approvals.module";
@@ -23,6 +24,7 @@ import { SignaturesModule } from "./modules/signatures/signatures.module";
 @Module({
   imports: [
     PrismaModule,
+    StorageModule,
     CommonAuthModule,
     AuthModule,
     OrgModule,

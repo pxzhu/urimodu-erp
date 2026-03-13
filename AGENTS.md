@@ -11,7 +11,15 @@
 
 - Package manager: `pnpm`
 - Task orchestration: `turbo`
-- Git workflow is mandatory: create a task-specific branch first, then commit and push, then merge into `main`
+- Git workflow is mandatory for every task
+- Git workflow checklist:
+  1. Create a task-specific branch from `main` (use `codex/<task-name>`)
+  2. Implement the task on that branch
+  3. Commit changes with clear messages
+  4. Push branch to `origin`
+  5. Agent must create PR targeting `main` directly via CLI (`gh pr create`)
+  6. Merge via PR after required checks pass (prefer squash merge)
+- If PR creation fails due token scope, refresh GitHub auth/token first and retry PR creation before asking for manual action
 - Use branch prefix `codex/` for agent-created branches
 - Repository default branch is `main`; CI/Dependabot targets must stay aligned to `main`
 - Dependabot baseline policy: patch/minor automation by default, major upgrades are reviewed manually
