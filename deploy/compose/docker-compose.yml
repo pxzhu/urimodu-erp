@@ -72,6 +72,7 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minio123}
       MINIO_BUCKET: ${MINIO_BUCKET:-erp-files}
       MINIO_USE_SSL: "false"
+      DOCS_SERVICE_BASE_URL: http://docs-service:4300
     ports:
       - "${API_PORT:-4000}:4000"
     depends_on:
