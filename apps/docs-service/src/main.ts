@@ -1,28 +1,49 @@
 import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
+import { readdir, stat } from "node:fs/promises";
+import { join, resolve, sep } from "node:path";
+import { convert as htmlToText } from "html-to-text";
 import PDFDocument from "pdfkit";
 
 const port = Number(process.env.DOCS_SERVICE_PORT ?? 4300);
-const templatesDir = join(process.cwd(), "apps/docs-service/src/templates");
+const templatesDir = resolve(join(process.cwd(), "apps/docs-service/src/templates"));
 
 interface RenderPdfRequest {
   title?: string;
   html: string;
 }
 
-function stripHtmlTags(html: string): string {
-  return html
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
-    .replace(/<[^>]+>/g, "\n")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+function htmlToPlainText(html: string): string {
+  return htmlToText(html, {
+    selectors: [
+      { selector: "script", format: "skip" },
+      { selector: "style", format: "skip" }
+    ],
+    wordwrap: false,
+    preserveNewlines: true
+  }).trim();
+}
+
+function resolveTemplatePathFromRequestPath(requestPath: string): string | null {
+  const relativePath = requestPath.replace("/templates/", "");
+  if (!relativePath || !relativePath.endsWith(".html") || relativePath.includes("\u0000")) {
+    return null;
+  }
+
+  let decodedPath = "";
+  try {
+    decodedPath = decodeURIComponent(relativePath);
+  } catch {
+    return null;
+  }
+
+  const resolvedPath = resolve(templatesDir, decodedPath);
+  const allowedPrefix = `${templatesDir}${sep}`;
+  if (!resolvedPath.startsWith(allowedPrefix)) {
+    return null;
+  }
+
+  return resolvedPath;
 }
 
 function renderPdfBuffer(input: RenderPdfRequest): Promise<Buffer> {
@@ -38,7 +59,7 @@ function renderPdfBuffer(input: RenderPdfRequest): Promise<Buffer> {
     doc.on("end", () => resolve(Buffer.concat(chunks)));
 
     const title = input.title?.trim() || "Generated Document";
-    const plainText = stripHtmlTags(input.html);
+    const plainText = htmlToPlainText(input.html);
 
     doc.fontSize(18).text(title);
     doc.moveDown(1);
@@ -115,15 +136,39 @@ const server = createServer((req, res) => {
   }
 
   if (req.method === "GET" && req.url?.startsWith("/templates/")) {
-    const requestedFile = decodeURIComponent(req.url.replace("/templates/", ""));
-    const filePath = join(templatesDir, requestedFile);
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    createReadStream(filePath)
-      .on("error", () => {
+    void (async () => {
+      const requestUrl = req.url;
+      if (!requestUrl) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Invalid template path" }));
+        return;
+      }
+
+      const pathname = new URL(requestUrl, "http://localhost").pathname;
+      const filePath = resolveTemplatePathFromRequestPath(pathname);
+      if (!filePath) {
+        res.writeHead(400, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ message: "Invalid template path" }));
+        return;
+      }
+
+      const fileInfo = await stat(filePath).catch(() => null);
+      if (!fileInfo || !fileInfo.isFile()) {
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ message: "Template not found" }));
-      })
-      .pipe(res);
+        return;
+      }
+
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      createReadStream(filePath)
+        .on("error", () => {
+          if (!res.headersSent) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+          }
+          res.end(JSON.stringify({ message: "Failed to read template file" }));
+        })
+        .pipe(res);
+    })();
     return;
   }
 
