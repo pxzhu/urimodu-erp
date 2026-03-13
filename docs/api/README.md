@@ -101,6 +101,36 @@
 - `GET /attendance-corrections`
 - `POST /attendance-corrections`
 
+## PROMPT06 Endpoints (Expenses / Finance / Import-Export Slice)
+
+### Expenses
+
+- `GET /expenses/claims`
+- `GET /expenses/claims/:id`
+- `POST /expenses/claims`
+
+### Finance
+
+- `GET /finance/accounts`
+- `GET /finance/vendors`
+- `POST /finance/vendors`
+- `GET /finance/cost-centers`
+- `POST /finance/cost-centers`
+- `GET /finance/projects`
+- `POST /finance/projects`
+- `GET /finance/journal-entries`
+- `GET /finance/journal-entries/:id`
+- `POST /finance/journal-entries`
+
+### Import / Export
+
+- `GET /import-export/import-jobs`
+- `GET /import-export/import-jobs/:id`
+- `POST /import-export/import-jobs/vendors` (source `FileObject` CSV/XLSX)
+- `GET /import-export/export-jobs`
+- `GET /import-export/export-jobs/:id`
+- `POST /import-export/export-jobs/expense-claims` (CSV/JSON)
+
 ## Auth and RBAC Notes
 
 - Use bearer token from `/auth/login` response: `Authorization: Bearer <token>`
