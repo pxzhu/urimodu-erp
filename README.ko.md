@@ -9,8 +9,8 @@
 현재 레포에는 다음이 포함되어 있습니다.
 
 - 모노레포 스캐폴드 (`pnpm` + `turbo`)
-- Next.js 웹 앱 기반 + auth/org/employee 화면 시작 구현 (`apps/web`)
-- NestJS 모듈형 모놀리스 API 기반 모듈 구현 (`apps/api`)
+- Next.js 웹 앱 기반 + auth/org/employee/document/approval 화면 시작 구현 (`apps/web`)
+- NestJS 모듈형 모놀리스 API 기반 모듈 + PROMPT04 문서/결재 흐름 구현 (`apps/api`)
 - worker/docs-service/connector-gateway 스캐폴드
 - Go edge-agent 스캐폴드
 - Docker Compose + Helm 시작 구성
@@ -117,13 +117,23 @@ helm install korean-erp deploy/helm/korean-erp
 - 감사 로그 중심의 데이터 모델 베이스라인을 Prisma 스키마에 포함했습니다.
 - API 인증은 bearer 세션 + 회사 컨텍스트(`x-company-id`)를 사용합니다.
 
-## 기반 모듈 구현 (PROMPT03)
+## 기반 모듈 구현 (PROMPT03-04)
 
 - `auth`: local login/logout/me, 세션 토큰, OIDC 확장용 provider 추상화
 - `org`: company/legal-entity/business-site/department CRUD + 부서 트리
 - `employee`: employee number 기반 직원 CRUD, position/title 분리
 - `audit`: 생성/수정/삭제 및 인증 민감 동작 감사로그 저장/조회
+- `files`: MinIO 기반 파일 업로드/다운로드 + 메타데이터/체크섬 + 감사로그
+- `documents`: 템플릿 기반 문서 생성/버전/첨부 + PDF 렌더 트리거
+- `approvals`: 결재선 구성/상신/승인/반려/취소/재상신 + 결재함
+- `signatures`: 업로드 파일 기반 서명/도장 에셋 등록
 - Swagger 문서: `/swagger`
+
+## PROMPT04 웹 화면
+
+- `GET /files` 화면: 파일 업로드, 메타데이터 조회, 다운로드
+- `GET /documents` 화면: 템플릿 문서 생성, 버전 추가, 결재선 구성/상신, PDF 다운로드
+- `GET /approvals` 화면: 결재함 승인/반려 + 코멘트
 
 ## 문서
 

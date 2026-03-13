@@ -33,6 +33,9 @@ export function DashboardNav() {
         <Link href="/companies">Companies</Link>
         <Link href="/departments">Departments</Link>
         <Link href="/employees">Employees</Link>
+        <Link href="/files">Files</Link>
+        <Link href="/documents">Documents</Link>
+        <Link href="/approvals">Approvals</Link>
       </div>
       <div className="top-nav__right">
         <span>{session?.user.name ?? "Guest"}</span>

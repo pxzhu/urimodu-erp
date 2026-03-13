@@ -8,76 +8,118 @@ async function main() {
     throw new Error("ACME_KR company is required. Run core seed first.");
   }
 
-  await prisma.documentTemplate.upsert({
-    where: {
-      companyId_key_version: {
-        companyId: company.id,
-        key: "leave-request",
-        version: 1
-      }
-    },
-    update: {
-      name: "휴가신청서"
-    },
-    create: {
-      companyId: company.id,
-      key: "leave-request",
-      name: "휴가신청서",
-      category: "hr",
-      version: 1,
-      schemaJson: {
-        fields: ["employeeNumber", "startDate", "endDate", "reason"]
+  async function upsertTemplate(input: {
+    key: string;
+    name: string;
+    category: string;
+    fields: string[];
+    htmlTemplate: string;
+  }) {
+    await prisma.documentTemplate.upsert({
+      where: {
+        companyId_key_version: {
+          companyId: company.id,
+          key: input.key,
+          version: 1
+        }
       },
-      htmlTemplate: "<h1>휴가신청서</h1><p>사유: {{reason}}</p>"
-    }
+      update: {
+        name: input.name,
+        category: input.category,
+        schemaJson: { fields: input.fields },
+        htmlTemplate: input.htmlTemplate,
+        isActive: true
+      },
+      create: {
+        companyId: company.id,
+        key: input.key,
+        name: input.name,
+        category: input.category,
+        version: 1,
+        schemaJson: { fields: input.fields },
+        htmlTemplate: input.htmlTemplate,
+        isSystem: false,
+        isActive: true
+      }
+    });
+  }
+
+  await upsertTemplate({
+    key: "leave-request",
+    name: "휴가 신청서",
+    category: "hr",
+    fields: ["employeeNumber", "employeeName", "leaveType", "startDate", "endDate", "reason"],
+    htmlTemplate: [
+      "<h1>휴가 신청서</h1>",
+      "<p>사번: {{employeeNumber}}</p>",
+      "<p>성명: {{employeeName}}</p>",
+      "<p>휴가 구분: {{leaveType}}</p>",
+      "<p>기간: {{startDate}} ~ {{endDate}}</p>",
+      "<p>사유: {{reason}}</p>"
+    ].join("")
   });
 
-  await prisma.documentTemplate.upsert({
-    where: {
-      companyId_key_version: {
-        companyId: company.id,
-        key: "attendance-correction",
-        version: 1
-      }
-    },
-    update: {
-      name: "근태정정요청서"
-    },
-    create: {
-      companyId: company.id,
-      key: "attendance-correction",
-      name: "근태정정요청서",
-      category: "attendance",
-      version: 1,
-      schemaJson: {
-        fields: ["employeeNumber", "workDate", "requestedCheckInAt", "requestedCheckOutAt", "reason"]
-      },
-      htmlTemplate: "<h1>근태정정요청서</h1><p>정정 사유: {{reason}}</p>"
-    }
+  await upsertTemplate({
+    key: "expense-approval",
+    name: "경비 승인 요청서",
+    category: "expense",
+    fields: ["employeeNumber", "employeeName", "expenseDate", "amount", "vendorName", "description"],
+    htmlTemplate: [
+      "<h1>경비 승인 요청서</h1>",
+      "<p>사번: {{employeeNumber}}</p>",
+      "<p>성명: {{employeeName}}</p>",
+      "<p>사용일자: {{expenseDate}}</p>",
+      "<p>금액: {{amount}}</p>",
+      "<p>사용처: {{vendorName}}</p>",
+      "<p>사유: {{description}}</p>"
+    ].join("")
   });
 
-  await prisma.documentTemplate.upsert({
-    where: {
-      companyId_key_version: {
-        companyId: company.id,
-        key: "expense-claim",
-        version: 1
-      }
-    },
-    update: {
-      name: "경비청구서"
-    },
-    create: {
-      companyId: company.id,
-      key: "expense-claim",
-      name: "경비청구서",
-      category: "expense",
-      version: 1,
-      schemaJson: {
-        fields: ["employeeNumber", "expenseDate", "amount", "description"]
-      },
-      htmlTemplate: "<h1>경비청구서</h1><p>금액: {{amount}}</p>"
-    }
+  await upsertTemplate({
+    key: "attendance-correction",
+    name: "근태 정정 요청서",
+    category: "attendance",
+    fields: ["employeeNumber", "workDate", "requestedCheckInAt", "requestedCheckOutAt", "reason"],
+    htmlTemplate: [
+      "<h1>근태 정정 요청서</h1>",
+      "<p>사번: {{employeeNumber}}</p>",
+      "<p>근무일: {{workDate}}</p>",
+      "<p>출근 정정: {{requestedCheckInAt}}</p>",
+      "<p>퇴근 정정: {{requestedCheckOutAt}}</p>",
+      "<p>정정 사유: {{reason}}</p>"
+    ].join("")
+  });
+
+  await upsertTemplate({
+    key: "employment-certificate",
+    name: "재직증명서",
+    category: "hr",
+    fields: ["employeeName", "employeeNumber", "departmentName", "positionName", "jobTitleName", "hireDate", "purpose"],
+    htmlTemplate: [
+      "<h1>재직증명서</h1>",
+      "<p>성명: {{employeeName}}</p>",
+      "<p>사번: {{employeeNumber}}</p>",
+      "<p>부서: {{departmentName}}</p>",
+      "<p>직위/직책: {{positionName}} / {{jobTitleName}}</p>",
+      "<p>입사일: {{hireDate}}</p>",
+      "<p>용도: {{purpose}}</p>"
+    ].join("")
+  });
+
+  await upsertTemplate({
+    key: "overtime-request",
+    name: "연장근무 신청서",
+    category: "attendance",
+    fields: ["employeeNumber", "employeeName", "workDate", "overtimeStartAt", "overtimeEndAt", "workSummary", "reason"],
+    htmlTemplate: [
+      "<h1>연장근무 신청서</h1>",
+      "<p>사번: {{employeeNumber}}</p>",
+      "<p>성명: {{employeeName}}</p>",
+      "<p>근무일: {{workDate}}</p>",
+      "<p>연장 시간: {{overtimeStartAt}} ~ {{overtimeEndAt}}</p>",
+      "<p>업무 내용: {{workSummary}}</p>",
+      "<p>신청 사유: {{reason}}</p>"
+    ].join("")
   });
 
   await prisma.shiftPolicy.upsert({

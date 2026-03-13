@@ -67,17 +67,34 @@ code {
 }
 
 input,
+textarea,
 select,
 button {
   font: inherit;
 }
 
 input,
+textarea,
 select {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.5rem 0.65rem;
   background: #fff;
+}
+
+textarea {
+  resize: vertical;
+}
+
+fieldset {
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+legend {
+  padding: 0 0.35rem;
+  font-weight: 600;
 }
 
 button {
@@ -99,6 +116,11 @@ button:disabled {
   font-weight: 600;
 }
 
+.success-text {
+  color: #047857;
+  font-weight: 600;
+}
+
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -114,4 +136,27 @@ button:disabled {
 
 .data-table th {
   background: #eff6ff;
+}
+
+.checkbox-grid {
+  display: grid;
+  gap: 0.45rem;
+  max-height: 10rem;
+  overflow: auto;
+}
+
+.inline-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.step-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 0.65rem;
 }

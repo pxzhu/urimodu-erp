@@ -227,3 +227,52 @@ Implement a working end-to-end slice for files, documents, approvals, and signat
 - [ ] Audit logs are written for key mutations in this slice
 - [ ] Swagger includes file/document/approval/signature endpoints
 - [ ] Web screens exist for the required user flow
+
+---
+
+# PROMPT04 Completion Plan (Validation-Green Then Scope Completion)
+
+Date: 2026-03-13
+Scope source: `PROMPT01.md` + `korean-self-hosted-erp-starter-structure-and-schema.md` + `PROMPT04.md`
+
+## Objective
+
+Complete remaining PROMPT04 vertical-slice deliverables on top of current baseline without expanding into PROMPT05+.
+
+## Ordered Steps
+
+1. Re-validate current repository state with:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+2. If any command fails, apply minimal scope fixes only until all four are green.
+3. Complete PROMPT04 only:
+   - finish document/approval web UI flow (upload, create, route, submit, approve/reject, PDF download)
+   - ensure templates/seeds/migrations/tests and Swagger docs are aligned
+   - keep modular-monolith boundary and audit-first mutations
+   - keep HWPX-first adapter boundary with legacy HWP fallback scaffold only
+4. Re-run the same four validation commands and require green before finish.
+
+## Out of Scope
+
+- Any PROMPT05+ domain work
+- Premature module/service splitting beyond modular monolith
+
+## Completion Notes
+
+- Re-validation before implementation:
+  - `pnpm -r lint` passed
+  - `pnpm -r typecheck` passed
+  - `pnpm -r test` passed
+  - `pnpm -r build` passed
+- PROMPT04 completion in this run:
+  - web UI routes implemented: `/files`, `/documents`, `/approvals`
+  - Korean sample seeds expanded to 5 required document templates
+  - PROMPT04-focused API tests added
+  - docs/api endpoint reference updated
+- Final validation after implementation:
+  - `pnpm -r lint` passed
+  - `pnpm -r typecheck` passed
+  - `pnpm -r test` passed
+  - `pnpm -r build` passed

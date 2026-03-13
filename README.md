@@ -9,8 +9,8 @@ Public open-source foundation for a self-hosted Korean ERP/work platform.
 This repository currently contains:
 
 - Monorepo scaffold (`pnpm` + `turbo`)
-- Next.js web app foundation + auth/org/employee UI starter screens (`apps/web`)
-- NestJS modular-monolith API with foundational modules (`apps/api`)
+- Next.js web app foundation + auth/org/employee/document/approval UI starter screens (`apps/web`)
+- NestJS modular-monolith API with foundational modules and PROMPT04 document workflow (`apps/api`)
 - Worker/docs-service/connector-gateway scaffolds
 - Go edge-agent scaffold
 - Docker Compose + Helm starter
@@ -117,13 +117,23 @@ The chart supports configurable image tags, env vars, ingress settings, persiste
 - Audit-first data model baseline is included in Prisma schema
 - API auth uses bearer sessions with company context (`x-company-id`) for membership-scoped access
 
-## Foundational Modules (PROMPT03)
+## Foundational Modules (PROMPT03-04)
 
 - `auth`: local login/logout/me, session token, OIDC-ready provider abstraction
 - `org`: company/legal-entity/business-site/department CRUD + department tree
 - `employee`: employee CRUD with employee number, position/title separation
 - `audit`: mutation/auth action logs and query endpoint
+- `files`: MinIO-backed file upload/download + metadata/checksum + audit logging
+- `documents`: template-based document create/version + attachment linking + PDF render trigger
+- `approvals`: approval line configure/submit/approve/reject/cancel/resubmit + inbox
+- `signatures`: signature/seal asset registration from uploaded files
 - Swagger docs available at `/swagger` for these endpoints
+
+## PROMPT04 Web Screens
+
+- `GET /files` UI: upload, metadata list, download
+- `GET /documents` UI: template-based document create, version add, approval routing, submit, PDF download
+- `GET /approvals` UI: approval inbox with approve/reject and comment
 
 ## Documentation
 
