@@ -20,6 +20,10 @@ export default function HomePage() {
       <p>
         <Link href="/login">Open login page</Link>
       </p>
+      <p>
+        After login: <Link href="/files">Files</Link> · <Link href="/documents">Documents</Link> ·{" "}
+        <Link href="/approvals">Approvals</Link>
+      </p>
     </main>
   );
 }

@@ -43,6 +43,40 @@
 
 - `GET /audit-logs`
 
+## PROMPT04 Endpoints (Document / Approval Vertical Slice)
+
+### Files
+
+- `POST /files/upload`
+- `GET /files`
+- `GET /files/:id`
+- `GET /files/:id/download`
+
+### Documents
+
+- `GET /document-templates`
+- `GET /documents`
+- `GET /documents/:id`
+- `POST /documents`
+- `POST /documents/:id/versions`
+- `POST /documents/:id/render-pdf`
+
+### Approvals
+
+- `POST /approvals/lines`
+- `GET /approvals/lines/:id`
+- `POST /approvals/lines/:id/submit`
+- `POST /approvals/lines/:id/approve`
+- `POST /approvals/lines/:id/reject`
+- `POST /approvals/lines/:id/cancel`
+- `POST /approvals/lines/:id/resubmit`
+- `GET /approvals/inbox`
+
+### Signatures
+
+- `GET /signatures/mine`
+- `POST /signatures`
+
 ## Auth and RBAC Notes
 
 - Use bearer token from `/auth/login` response: `Authorization: Bearer <token>`
