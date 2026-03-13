@@ -396,7 +396,7 @@ async function main() {
   });
 
   console.log("Seeded core auth/org/employee entities.");
-  console.log(`Default login password: ${DEFAULT_PASSWORD}`);
+  console.log("Default login password is configured via SEED_DEFAULT_PASSWORD.");
   console.log(`Departments: ${[hr.name, fin.name, eng.name, ops.name, sales.name].join(", ")}`);
 }
 
