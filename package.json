@@ -1,0 +1,21 @@
+{
+  "name": "korean-self-hosted-erp",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.6.2",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsup": "^8.4.0",
+    "turbo": "^2.4.4",
+    "typescript": "^5.7.3",
+    "tsx": "^4.19.2"
+  }
+}

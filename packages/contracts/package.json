@@ -1,0 +1,16 @@
+{
+  "name": "@korean-erp/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts",
+    "dev": "tsup src/index.ts --format cjs --dts --watch",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "node -e \"console.log('No tests yet for @korean-erp/contracts')\"",
+    "clean": "rm -rf dist"
+  }
+}

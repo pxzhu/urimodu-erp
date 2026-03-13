@@ -1,0 +1,16 @@
+{
+  "name": "@korean-erp/config",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "tsconfig"
+  ],
+  "scripts": {
+    "build": "node -e \"console.log('No build step for config package')\"",
+    "dev": "node -e \"console.log('No dev step for config package')\"",
+    "lint": "node -e \"console.log('Config lint placeholder')\"",
+    "typecheck": "node -e \"console.log('Config typecheck placeholder')\"",
+    "test": "node -e \"console.log('No tests for config package')\"",
+    "clean": "node -e \"console.log('Nothing to clean for config package')\""
+  }
+}
