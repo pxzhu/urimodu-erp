@@ -43,7 +43,7 @@ Create a clean, public OSS-ready repository foundation for a self-hosted Korean 
    - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
    - `.editorconfig`, `.gitignore`, GitHub issue templates, PR template
 7. Add docs and conventions:
-   - `README.md` (EN), `README.ko.md` (KO), `docs/adr/*`, concise root `AGENTS.md`
+   - `README.md` (KO), `README.en.md` (EN), `docs/adr/*`, concise root `AGENTS.md`
 8. Run scaffold checks and record results.
 
 ## Acceptance Checklist
