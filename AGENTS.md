@@ -13,6 +13,8 @@
 - Task orchestration: `turbo`
 - Git workflow is mandatory: create a task-specific branch first, then commit and push, then merge into `main`
 - Use branch prefix `codex/` for agent-created branches
+- Repository default branch is `main`; CI/Dependabot targets must stay aligned to `main`
+- Dependabot baseline policy: patch/minor automation by default, major upgrades are reviewed manually
 - Core API architecture: modular monolith (NestJS)
 - API auth convention: `Authorization: Bearer <session-token>` + `x-company-id` header
 - Secured API controllers should expose `x-company-id` in Swagger via shared decorator
