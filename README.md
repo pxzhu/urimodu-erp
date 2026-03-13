@@ -1,22 +1,27 @@
-[한국어](./README.ko.md)
+[English](./README.en.md)
 
 # Korean Self-Hosted ERP
 
-Public open-source foundation for a self-hosted Korean ERP/work platform.
+사용자 설치형(Self-hosted) 한국형 ERP/업무 플랫폼을 위한 공개 오픈소스 기반 레포입니다.
 
-## Status
+## 비전
 
-This repository currently contains:
+프로젝트 방향을 먼저 이해하려면 [VISION.md](./VISION.md)를 먼저 읽는 것을 권장합니다.  
+English version: [VISION.en.md](./VISION.en.md)
 
-- Monorepo scaffold (`pnpm` + `turbo`)
-- Next.js web app foundation + auth/org/employee/document/approval UI starter screens (`apps/web`)
-- NestJS modular-monolith API with foundational modules and PROMPT04 document workflow (`apps/api`)
-- Worker/docs-service/connector-gateway scaffolds
-- Go edge-agent scaffold
-- Docker Compose + Helm starter
-- Prisma schema baseline, migrations, and Korean sample seeds
+## 상태
 
-## Monorepo Structure
+현재 레포에는 다음이 포함되어 있습니다.
+
+- 모노레포 스캐폴드 (`pnpm` + `turbo`)
+- Next.js 웹 앱 기반 + auth/org/employee/document/approval 화면 시작 구현 (`apps/web`)
+- NestJS 모듈형 모놀리스 API 기반 모듈 + PROMPT04 문서/결재 흐름 구현 (`apps/api`)
+- worker/docs-service/connector-gateway 스캐폴드
+- Go edge-agent 스캐폴드
+- Docker Compose + Helm 시작 구성
+- Prisma 스키마 베이스라인, 마이그레이션, 한국 샘플 시드
+
+## 모노레포 구조
 
 ```text
 apps/
@@ -44,16 +49,16 @@ docs/
   ops/
 ```
 
-## Local Setup
+## 로컬 설정
 
-### Prerequisites
+### 사전 요구사항
 
 - Node.js 20+
 - pnpm 10+
-- Docker / Docker Compose (optional but recommended)
-- Go 1.19+ (for edge-agent local run)
+- Docker / Docker Compose (권장)
+- Go 1.19+ (edge-agent 실행 시)
 
-### Install and Run
+### 설치 및 실행
 
 ```bash
 make bootstrap
@@ -61,7 +66,7 @@ cp .env.example .env
 pnpm dev
 ```
 
-### Service Endpoints (local dev)
+### 로컬 엔드포인트
 
 - Web: `http://localhost:3000`
 - Web health: `http://localhost:3000/health`
@@ -72,78 +77,78 @@ pnpm dev
 - Connector gateway health: `http://localhost:4200/health`
 - Docs service health: `http://localhost:4300/health`
 
-### Seeded Login (Local Auth)
+### 시드 로그인 (로컬 인증)
 
 - Email: `admin@acme.local`
 - Password: `ChangeMe123!`
-- Seed command: `pnpm --filter @korean-erp/api prisma:seed`
+- 시드 명령: `pnpm --filter @korean-erp/api prisma:seed`
 
-Additional seeded users: `hr@acme.local`, `manager@acme.local`, `employee@acme.local`.
+추가 시드 사용자: `hr@acme.local`, `manager@acme.local`, `employee@acme.local`
 
 ## Docker Compose
 
-Run full local stack (PostgreSQL, Redis, MinIO, API, Web, Worker, gateway, docs-service):
+전체 로컬 스택(PostgreSQL, Redis, MinIO, API, Web, Worker, gateway, docs-service) 실행:
 
 ```bash
 cp deploy/compose/.env.example deploy/compose/.env
 make compose-up
 ```
 
-Stop stack:
+중지:
 
 ```bash
 make compose-down
 ```
 
-## Helm Chart
+## Helm 차트
 
-Starter chart is located at:
+시작용 차트 경로:
 
 - `deploy/helm/korean-erp`
 
-Example install:
+설치 예시:
 
 ```bash
 helm install korean-erp deploy/helm/korean-erp
 ```
 
-The chart supports configurable image tags, env vars, ingress settings, persistence, and secret references.
+차트는 이미지 태그, 환경변수, ingress, persistence, secret 참조를 설정할 수 있습니다.
 
-## Architecture Baseline
+## 아키텍처 기준
 
-- Core API is a **modular monolith** (no premature microservice split)
-- Attendance integrations are **edge-agent + generic adapters** first
-- **HWPX-first** document strategy; legacy HWP is fallback adapter only
-- Audit-first data model baseline is included in Prisma schema
-- API auth uses bearer sessions with company context (`x-company-id`) for membership-scoped access
+- 코어 API는 **모듈형 모놀리스**를 유지합니다.
+- 근태 연동은 **edge-agent + generic adapter**를 기본으로 합니다.
+- 문서 전략은 **HWPX 우선**, legacy HWP는 fallback adapter만 유지합니다.
+- 감사 로그 중심의 데이터 모델 베이스라인을 Prisma 스키마에 포함했습니다.
+- API 인증은 bearer 세션 + 회사 컨텍스트(`x-company-id`)를 사용합니다.
 
-## Foundational Modules (PROMPT03-04)
+## 기반 모듈 구현 (PROMPT03-04)
 
-- `auth`: local login/logout/me, session token, OIDC-ready provider abstraction
-- `org`: company/legal-entity/business-site/department CRUD + department tree
-- `employee`: employee CRUD with employee number, position/title separation
-- `audit`: mutation/auth action logs and query endpoint
-- `files`: MinIO-backed file upload/download + metadata/checksum + audit logging
-- `documents`: template-based document create/version + attachment linking + PDF render trigger
-- `approvals`: approval line configure/submit/approve/reject/cancel/resubmit + inbox
-- `signatures`: signature/seal asset registration from uploaded files
-- Swagger docs available at `/swagger` for these endpoints
+- `auth`: local login/logout/me, 세션 토큰, OIDC 확장용 provider 추상화
+- `org`: company/legal-entity/business-site/department CRUD + 부서 트리
+- `employee`: employee number 기반 직원 CRUD, position/title 분리
+- `audit`: 생성/수정/삭제 및 인증 민감 동작 감사로그 저장/조회
+- `files`: MinIO 기반 파일 업로드/다운로드 + 메타데이터/체크섬 + 감사로그
+- `documents`: 템플릿 기반 문서 생성/버전/첨부 + PDF 렌더 트리거
+- `approvals`: 결재선 구성/상신/승인/반려/취소/재상신 + 결재함
+- `signatures`: 업로드 파일 기반 서명/도장 에셋 등록
+- Swagger 문서: `/swagger`
 
-## PROMPT04 Web Screens
+## PROMPT04 웹 화면
 
-- `GET /files` UI: upload, metadata list, download
-- `GET /documents` UI: template-based document create, version add, approval routing, submit, PDF download
-- `GET /approvals` UI: approval inbox with approve/reject and comment
+- `GET /files` 화면: 파일 업로드, 메타데이터 조회, 다운로드
+- `GET /documents` 화면: 템플릿 문서 생성, 버전 추가, 결재선 구성/상신, PDF 다운로드
+- `GET /approvals` 화면: 결재함 승인/반려 + 코멘트
 
-## Documentation
+## 문서
 
-- Plan: `docs/PLAN.md`
-- ADRs: `docs/adr/`
-- API notes: `docs/api/README.md`
-- Ops notes: `docs/ops/README.md`
-- Contribution: `CONTRIBUTING.md`
-- Security policy: `SECURITY.md`
+- 실행 계획: `docs/PLAN.md`
+- ADR: `docs/adr/`
+- API 노트: `docs/api/README.md`
+- 운영 노트: `docs/ops/README.md`
+- 기여 가이드: `CONTRIBUTING.md`
+- 보안 정책: `SECURITY.md`
 
-## License
+## 라이선스
 
-Apache-2.0. See `LICENSE`.
+Apache-2.0 (`LICENSE` 참고)
