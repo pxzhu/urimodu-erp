@@ -17,8 +17,9 @@
   2. Implement the task on that branch
   3. Commit changes with clear messages
   4. Push branch to `origin`
-  5. Agent must create PR targeting `main` directly via CLI (`gh pr create`)
-  6. Merge via PR after required checks pass (prefer squash merge)
+  5. Verify final PR diff before merge (especially README language/file-name conventions and accidental file renames/deletes)
+  6. Agent must create PR targeting `main` directly via CLI (`gh pr create`)
+  7. Merge via PR after required checks pass (prefer squash merge)
 - If PR creation fails due token scope, refresh GitHub auth/token first and retry PR creation before asking for manual action
 - Use branch prefix `codex/` for agent-created branches
 - Repository default branch is `main`; CI/Dependabot targets must stay aligned to `main`
@@ -33,7 +34,7 @@
 - Guard tests should use lightweight `ExecutionContext` stubs to keep auth/RBAC checks fast
 - Keep vendor attendance integrations generic via adapters/stubs
 - HWPX is first-class; legacy HWP is fallback only
-- Keep `README.md` (EN) and `README.ko.md` (KO) aligned for setup and architecture
+- Keep `README.md` (KO) and `README.en.md` (EN) aligned for setup and architecture
 - Public OSS hygiene required: no secrets, no proprietary credentials, no vendor-private SDK assets
 
 ## Structure Baseline
