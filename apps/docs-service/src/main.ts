@@ -14,14 +14,14 @@ interface RenderPdfRequest {
 
 function stripHtmlTags(html: string): string {
   return html
-    .replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, "")
-    .replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, "")
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<[^>]+>/g, "\n")
     .replace(/&nbsp;/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
-    .replace(/\\n{3,}/g, "\n\n")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
@@ -33,7 +33,7 @@ function renderPdfBuffer(input: RenderPdfRequest): Promise<Buffer> {
       margin: 50
     });
 
-    doc.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+    doc.on("data", (chunk: Buffer | Uint8Array) => chunks.push(Buffer.from(chunk)));
     doc.on("error", reject);
     doc.on("end", () => resolve(Buffer.concat(chunks)));
 

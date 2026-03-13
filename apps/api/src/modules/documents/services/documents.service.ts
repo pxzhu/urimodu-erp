@@ -22,11 +22,7 @@ interface RequestMeta {
   userAgent?: string;
 }
 
-function toInputJson(value: unknown): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
+function toInputJson(value: unknown): Prisma.InputJsonValue {
   return value as Prisma.InputJsonValue;
 }
 
@@ -227,7 +223,7 @@ export class DocumentsService {
           documentId: document.id,
           versionNo: 1,
           authoredById: auth.userId,
-          contentJson: toInputJson(dto.contentJson) ?? Prisma.JsonNull,
+          contentJson: toInputJson(dto.contentJson),
           htmlSnapshot: renderedHtml
         }
       });
@@ -290,7 +286,7 @@ export class DocumentsService {
           documentId,
           versionNo: nextVersionNo,
           authoredById: auth.userId,
-          contentJson: toInputJson(dto.contentJson) ?? Prisma.JsonNull,
+          contentJson: toInputJson(dto.contentJson),
           htmlSnapshot: renderedHtml
         }
       });

@@ -1,6 +1,7 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from "@nestjs/swagger";
+import type { Prisma } from "@prisma/client";
 import type { Response } from "express";
 
 import type { AuthContext, RequestWithAuth } from "../../../common/auth/request-context";
@@ -56,10 +57,10 @@ export class FilesController {
       throw new BadRequestException("file is required");
     }
 
-    let metadata: Record<string, unknown> | undefined;
+    let metadata: Prisma.InputJsonValue | undefined;
     if (dto.metadataJson) {
       try {
-        metadata = JSON.parse(dto.metadataJson) as Record<string, unknown>;
+        metadata = JSON.parse(dto.metadataJson) as Prisma.InputJsonValue;
       } catch {
         throw new BadRequestException("metadataJson must be valid JSON string");
       }

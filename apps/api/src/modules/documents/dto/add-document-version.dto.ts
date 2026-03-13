@@ -2,7 +2,11 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsArray, IsObject, IsOptional, IsString } from "class-validator";
 
 export class AddDocumentVersionDto {
-  @ApiProperty({ description: "Canonical JSON payload for new version", type: "object" })
+  @ApiProperty({
+    description: "Canonical JSON payload for new version",
+    type: "object",
+    additionalProperties: true
+  })
   @IsObject()
   contentJson!: Record<string, unknown>;
 

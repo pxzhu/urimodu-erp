@@ -505,7 +505,12 @@ export class ApprovalsService {
   async cancel(auth: AuthContext, lineId: string, dto: ApprovalActionCommentDto, requestMeta: RequestMeta) {
     const line = await this.getLineForCompany(auth, lineId);
 
-    if (![ApprovalLineStatus.DRAFT, ApprovalLineStatus.IN_REVIEW, ApprovalLineStatus.REJECTED].includes(line.status)) {
+    const cancellableStatuses: ApprovalLineStatus[] = [
+      ApprovalLineStatus.DRAFT,
+      ApprovalLineStatus.IN_REVIEW,
+      ApprovalLineStatus.REJECTED
+    ];
+    if (!cancellableStatuses.includes(line.status)) {
       throw new BadRequestException("Cannot cancel this approval line state");
     }
 
@@ -579,7 +584,8 @@ export class ApprovalsService {
   async resubmit(auth: AuthContext, lineId: string, dto: ApprovalActionCommentDto, requestMeta: RequestMeta) {
     const line = await this.getLineForCompany(auth, lineId);
 
-    if (![ApprovalLineStatus.REJECTED, ApprovalLineStatus.CANCELED].includes(line.status)) {
+    const resubmittableStatuses: ApprovalLineStatus[] = [ApprovalLineStatus.REJECTED, ApprovalLineStatus.CANCELED];
+    if (!resubmittableStatuses.includes(line.status)) {
       throw new BadRequestException("Only rejected or canceled lines can be resubmitted");
     }
 

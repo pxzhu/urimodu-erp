@@ -16,7 +16,11 @@ export class CreateDocumentDto {
   @IsString()
   category?: string;
 
-  @ApiProperty({ description: "Canonical JSON payload for template rendering", type: "object" })
+  @ApiProperty({
+    description: "Canonical JSON payload for template rendering",
+    type: "object",
+    additionalProperties: true
+  })
   @IsObject()
   contentJson!: Record<string, unknown>;
 
