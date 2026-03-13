@@ -12,6 +12,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@prisma/client": "^6.4.1",
     "@korean-erp/shared": "workspace:*"
   },
   "devDependencies": {

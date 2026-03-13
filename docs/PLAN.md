@@ -43,7 +43,7 @@ Create a clean, public OSS-ready repository foundation for a self-hosted Korean 
    - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
    - `.editorconfig`, `.gitignore`, GitHub issue templates, PR template
 7. Add docs and conventions:
-   - `README.md` (KO), `README.en.md` (EN), `docs/adr/*`, concise root `AGENTS.md`
+   - `README.md` (EN), `README.ko.md` (KO), `docs/adr/*`, concise root `AGENTS.md`
 8. Run scaffold checks and record results.
 
 ## Acceptance Checklist
@@ -276,3 +276,91 @@ Complete remaining PROMPT04 vertical-slice deliverables on top of current baseli
   - `pnpm -r typecheck` passed
   - `pnpm -r test` passed
   - `pnpm -r build` passed
+
+---
+
+# PROMPT05 Execution Plan (Attendance / Leave / Integrations / Edge-Agent)
+
+Date: 2026-03-14  
+Scope source: `PROMPT01.md` + `korean-self-hosted-erp-starter-structure-and-schema.md` + `PROMPT05.md`
+
+## Objective
+
+Deliver a working vertical slice for attendance ingestion and normalization, leave/correction requests, generic attendance integration contracts, and a practical Go edge-agent CSV flow.
+
+## Ordered Steps
+
+1. Re-validate workspace before implementation:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+2. Implement API attendance and leave domain endpoints:
+   - raw attendance ingestion (single + CSV import)
+   - raw event list / normalized ledger list
+   - shift policy list/create/update
+   - leave request create/list
+   - attendance correction create/list
+3. Implement normalization worker flow:
+   - immutable raw event preservation
+   - dedupe-safe normalization to ledger
+   - policy version capture in ledger rows
+4. Integrations boundary:
+   - add generic ADT/S1-like ingestion contract types + service adapter entrypoint
+   - keep vendor-specific logic in clearly marked stubs only
+5. Edge-agent scaffold hardening (Go):
+   - watch local CSV directory
+   - map external IDs via config mapping file
+   - send events to integration ingress
+   - persist failed sends in local buffer and retry
+6. Web UI additions:
+   - raw attendance events page
+   - attendance ledger page
+   - leave request page
+   - attendance correction page
+   - basic shift policy page
+7. Update Swagger docs, seeds, and tests for the new slice.
+8. Re-run validations and keep all green:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+
+## Constraints
+
+- Keep API as modular monolith.
+- Reuse existing document/approval flow where practical for leave/correction workflows.
+- Write audit logs for important mutations.
+- Preserve HWPX-first posture and HWP fallback boundary.
+- Do not start PROMPT06 or later in this run.
+
+## Completion Snapshot
+
+- Implemented API endpoints:
+  - `/integrations/attendance/raw`, `/integrations/attendance/raw/batch`, `/integrations/attendance/raw/csv`
+  - `/attendance/raw-events`, `/attendance/ledgers`, `/attendance/shift-policies` (list/create/version update)
+  - `/leave/policies`, `/leave/requests` (create/list), `/attendance-corrections` (create/list)
+- Added worker attendance normalization job:
+  - converts immutable raw events into ledger rows
+  - records policy version used for normalization
+  - links source raw events and writes audit logs
+- Added integration/edge flow:
+  - generic ADT/S1-like adapter contract and normalization
+  - connector-gateway forwarding to API ingress with shared key
+  - edge-agent CSV directory watch, external ID mapping, and local failed-send buffer retry
+- Added web screens:
+  - `/attendance/raw`
+  - `/attendance/ledger`
+  - `/leave`
+  - `/attendance/corrections`
+  - `/attendance/shift-policies`
+- Added/updated seed and tests:
+  - employee external identity + shift assignment seed data
+  - API tests for attendance service, integrations service, leave service
+
+## Final Validation
+
+- `pnpm -r lint` passed
+- `pnpm -r typecheck` passed
+- `pnpm -r test` passed
+- `pnpm -r build` passed

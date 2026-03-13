@@ -1,6 +1,7 @@
 package models
 
 type AttendanceEvent struct {
+	CompanyCode   string `json:"companyCode"`
 	Provider      string `json:"provider"`
 	Source        string `json:"source"`
 	ExternalUser  string `json:"externalUserId"`

@@ -36,6 +36,11 @@ export function DashboardNav() {
         <Link href="/files">Files</Link>
         <Link href="/documents">Documents</Link>
         <Link href="/approvals">Approvals</Link>
+        <Link href="/attendance/raw">Attendance Raw</Link>
+        <Link href="/attendance/ledger">Attendance Ledger</Link>
+        <Link href="/leave">Leave</Link>
+        <Link href="/attendance/corrections">Corrections</Link>
+        <Link href="/attendance/shift-policies">Shift Policies</Link>
       </div>
       <div className="top-nav__right">
         <span>{session?.user.name ?? "Guest"}</span>
