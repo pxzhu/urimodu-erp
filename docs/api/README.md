@@ -1,7 +1,15 @@
 # API Docs
 
 - Swagger UI: `/swagger` on the API service
+- OpenAPI JSON: `/swagger-json`
 - Health endpoint: `/health`
+
+## Quick Availability Check
+
+```bash
+curl -fsS http://localhost:4000/health
+curl -fsS http://localhost:4000/swagger-json
+```
 
 ## Implemented Foundational Endpoints
 

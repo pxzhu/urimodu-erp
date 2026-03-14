@@ -14,6 +14,7 @@ Generic edge agent scaffold for attendance ingestion.
 
 ```bash
 cd agents/edge-agent
+cp .env.example .env
 go run ./cmd/agent
 ```
 

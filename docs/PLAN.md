@@ -43,7 +43,7 @@ Create a clean, public OSS-ready repository foundation for a self-hosted Korean 
    - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
    - `.editorconfig`, `.gitignore`, GitHub issue templates, PR template
 7. Add docs and conventions:
-   - `README.md` (KO), `README.en.md` (EN), `docs/adr/*`, concise root `AGENTS.md`
+   - `README.md` (EN), `README.ko.md` (KO), `README.en.md` (EN mirror), `docs/adr/*`, concise root `AGENTS.md`
 8. Run scaffold checks and record results.
 
 ## Acceptance Checklist
@@ -419,3 +419,63 @@ Deliver a working vertical slice for expense claims, starter accounting (COA + j
 - `pnpm -r typecheck` passed
 - `pnpm -r test` passed
 - `pnpm -r build` passed
+
+---
+
+# PROMPT07 Execution Plan (Finalization / Docs / Operability)
+
+Date: 2026-03-14  
+Scope source: `PROMPT01.md` + `korean-self-hosted-erp-starter-structure-and-schema.md` + `PROMPT07.md`
+
+## Objective
+
+Finalize the repository so another engineer can clone, run, seed, and explore the system confidently, with clear architecture/ops/security documentation and minimal smoke coverage.
+
+## Ordered Steps
+
+1. Re-validate current repository baseline:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+2. Refresh docs and runbook quality for public OSS usability:
+   - improve README language split and setup/architecture alignment
+   - add architecture diagrams and clear phase roadmap
+   - extend ADR and operations docs (seed, backup/restore, production env, security checklist, compose/helm notes)
+3. Add minimal smoke/e2e-style tests for boot-time confidence:
+   - API `/health` and Swagger/OpenAPI availability checks
+   - docs-service `/health` and `/render` contract smoke checks
+4. Ensure sample environment files and template/seed guidance are explicit and reproducible.
+5. Re-run validations and keep all green:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+
+## Constraints
+
+- Implement only PROMPT07 scope.
+- Keep API as modular monolith.
+- Keep README setup and architecture sections aligned between English and Korean.
+- Preserve HWPX-first posture and OSS hygiene.
+
+## Completion Snapshot
+
+- Added PROMPT07 finalization documentation:
+  - architecture diagrams
+  - deployment/runbook docs (compose + helm values)
+  - seeding, backup/restore, production notes, security checklist
+  - roadmap and smoke-test runbook
+- Added smoke/e2e baseline:
+  - docs-service runtime smoke tests (`apps/docs-service/test/server.smoke.test.ts`)
+  - stack smoke script (`scripts/smoke-stack.sh`, `make smoke`)
+- README structure normalized:
+  - `README.md` (English canonical)
+  - `README.ko.md` (Korean)
+  - `README.en.md` (English mirror)
+- Validation:
+  - `pnpm -r lint` passed
+  - `pnpm -r typecheck` passed
+  - `pnpm -r test` passed
+  - `pnpm -r build` passed
+  - `docker compose -f deploy/compose/docker-compose.yml config` passed

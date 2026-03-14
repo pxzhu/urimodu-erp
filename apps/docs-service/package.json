@@ -8,7 +8,7 @@
     "start": "node dist/main.js",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "node -e \"console.log('No tests yet for docs-service')\"",
+    "test": "tsx --test test/*.test.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

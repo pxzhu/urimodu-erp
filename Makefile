@@ -1,4 +1,4 @@
-.PHONY: bootstrap dev build lint typecheck test compose-up compose-down seed reset
+.PHONY: bootstrap dev build lint typecheck test smoke compose-up compose-down seed reset
 
 bootstrap:
 	corepack enable
@@ -18,6 +18,9 @@ typecheck:
 
 test:
 	pnpm test
+
+smoke:
+	./scripts/smoke-stack.sh
 
 compose-up:
 	docker compose -f deploy/compose/docker-compose.yml up -d --build

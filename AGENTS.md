@@ -34,7 +34,8 @@
 - Guard tests should use lightweight `ExecutionContext` stubs to keep auth/RBAC checks fast
 - Keep vendor attendance integrations generic via adapters/stubs
 - HWPX is first-class; legacy HWP is fallback only
-- Keep `README.md` (KO) and `README.en.md` (EN) aligned for setup and architecture
+- Keep `README.md` in English and `README.ko.md` in Korean, with setup/architecture sections aligned
+- Keep `README.en.md` as an English mirror of `README.md`; when a PROMPT run is completed, reflect the update in both files
 - Public OSS hygiene required: no secrets, no proprietary credentials, no vendor-private SDK assets
 
 ## Structure Baseline
