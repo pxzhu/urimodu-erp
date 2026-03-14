@@ -1,27 +1,46 @@
-[English](./README.en.md)
+[한국어](./README.ko.md) | [English Mirror](./README.en.md)
 
-# Korean Self-Hosted ERP
+# Urimodu ERP (Korean Self-Hosted ERP)
 
-사용자 설치형(Self-hosted) 한국형 ERP/업무 플랫폼을 위한 공개 오픈소스 기반 레포입니다.
+Open-source, Apache-2.0 licensed, self-hosted ERP/work platform focused on Korean business workflows.
 
-## 비전
+## Vision
 
-프로젝트 방향을 먼저 이해하려면 [VISION.md](./VISION.md)를 먼저 읽는 것을 권장합니다.  
-English version: [VISION.en.md](./VISION.en.md)
+Read [VISION.md](./VISION.md) first for project direction and principles.  
+English vision: [VISION.en.md](./VISION.en.md)
 
-## 상태
+## Current Status
 
-현재 레포에는 다음이 포함되어 있습니다.
+The repository currently provides a runnable PROMPT02-PROMPT07 baseline:
 
-- 모노레포 스캐폴드 (`pnpm` + `turbo`)
-- Next.js 웹 앱 기반 + auth/org/employee/document/approval + attendance/leave 화면 구현 (`apps/web`)
-- NestJS 모듈형 모놀리스 API 기반 모듈 + PROMPT05 근태/휴가/연동 흐름 구현 (`apps/api`)
-- worker/docs-service/connector-gateway 실행 가능 서비스(근태 정규화/연동 수집 포워딩 포함)
-- Go edge-agent 스캐폴드(로컬 CSV 디렉터리 감시, 외부 ID 매핑, 실패 버퍼링 포함)
-- Docker Compose + Helm 시작 구성
-- Prisma 스키마 베이스라인, 마이그레이션, 한국 샘플 시드
+- `pnpm` + `turbo` monorepo
+- Next.js web app (`apps/web`)
+- NestJS modular-monolith API (`apps/api`)
+- Worker (`apps/worker`), docs-service (`apps/docs-service`), connector gateway (`apps/connector-gateway`)
+- Go edge-agent scaffold (`agents/edge-agent`)
+- Docker Compose stack + Helm chart starter
+- Prisma schema, migrations, Korean sample seed data
 
-## 모노레포 구조
+## Prompt Progress
+
+- PROMPT02: OSS bootstrap, monorepo foundation, CI and deploy skeleton
+- PROMPT03: auth/org/employee/audit modules
+- PROMPT04: files/documents/approvals/signatures/PDF vertical slice
+- PROMPT05: attendance/leave/integrations/edge-agent vertical slice
+- PROMPT06: expenses/finance/import-export vertical slice
+- PROMPT07: finalization docs, ADR hardening, runbooks, smoke tests, roadmap
+
+## Architecture Baseline
+
+- Core API remains a modular monolith.
+- Document strategy is HWPX-first, with legacy HWP fallback-only adapters.
+- Attendance keeps immutable raw events and normalized ledgers.
+- Important mutations write audit logs.
+- Edge integrations use generic contracts and edge-agent/gateway boundaries.
+
+Architecture diagrams: [docs/architecture/README.md](./docs/architecture/README.md)
+
+## Monorepo Structure
 
 ```text
 apps/
@@ -43,22 +62,24 @@ deploy/
   compose/
   helm/
 docs/
-  PLAN.md
+  architecture/
   adr/
   api/
+  deploy/
   ops/
+  testing/
 ```
 
-## 로컬 설정
+## Local Setup
 
-### 사전 요구사항
+### Prerequisites
 
 - Node.js 20+
 - pnpm 10+
-- Docker / Docker Compose (권장)
-- Go 1.19+ (edge-agent 실행 시)
+- Docker / Docker Compose (recommended)
+- Go 1.19+ (if running edge-agent)
 
-### 설치 및 실행
+### Install and Run
 
 ```bash
 make bootstrap
@@ -66,98 +87,83 @@ cp .env.example .env
 pnpm dev
 ```
 
-### 로컬 엔드포인트
+### Service Endpoints
 
 - Web: `http://localhost:3000`
-- Web health: `http://localhost:3000/health`
 - API: `http://localhost:4000`
-- API health: `http://localhost:4000/health`
-- Swagger: `http://localhost:4000/swagger`
+- Swagger UI: `http://localhost:4000/swagger`
+- OpenAPI JSON: `http://localhost:4000/swagger-json`
 - Worker health: `http://localhost:4100/health`
 - Connector gateway health: `http://localhost:4200/health`
 - Docs service health: `http://localhost:4300/health`
 
-### 시드 로그인 (로컬 인증)
-
-- Email: `admin@acme.local`
-- Password: `ChangeMe123!`
-- 시드 명령: `pnpm --filter @korean-erp/api prisma:seed`
-
-추가 시드 사용자: `hr@acme.local`, `manager@acme.local`, `employee@acme.local`
-
 ## Docker Compose
-
-전체 로컬 스택(PostgreSQL, Redis, MinIO, API, Web, Worker, gateway, docs-service) 실행:
 
 ```bash
 cp deploy/compose/.env.example deploy/compose/.env
 make compose-up
 ```
 
-중지:
+Stop:
 
 ```bash
 make compose-down
 ```
 
-## Helm 차트
+Guide: [docs/deploy/docker-compose.md](./docs/deploy/docker-compose.md)
 
-시작용 차트 경로:
+## Seed Data
 
-- `deploy/helm/korean-erp`
+```bash
+pnpm --filter @korean-erp/api prisma:seed
+```
 
-설치 예시:
+Seed users:
+
+- `admin@acme.local`
+- `hr@acme.local`
+- `manager@acme.local`
+- `employee@acme.local`
+
+Default password: `ChangeMe123!` (override via `SEED_DEFAULT_PASSWORD`)
+
+Seed + template details: [docs/ops/seeding.md](./docs/ops/seeding.md)
+
+## Operations and Security
+
+- Ops index: [docs/ops/README.md](./docs/ops/README.md)
+- Backup/restore: [docs/ops/backup-restore.md](./docs/ops/backup-restore.md)
+- Production notes: [docs/ops/production.md](./docs/ops/production.md)
+- Security checklist: [docs/ops/security-checklist.md](./docs/ops/security-checklist.md)
+- Smoke tests: [docs/testing/smoke-tests.md](./docs/testing/smoke-tests.md)
+
+Run smoke checks after boot:
+
+```bash
+make smoke
+```
+
+## Helm
+
+Chart path: `deploy/helm/korean-erp`
 
 ```bash
 helm install korean-erp deploy/helm/korean-erp
 ```
 
-차트는 이미지 태그, 환경변수, ingress, persistence, secret 참조를 설정할 수 있습니다.
+Values guide: [docs/deploy/helm-values.md](./docs/deploy/helm-values.md)
 
-## 아키텍처 기준
+## Roadmap
 
-- 코어 API는 **모듈형 모놀리스**를 유지합니다.
-- 근태 연동은 **edge-agent + generic adapter**를 기본으로 합니다.
-- 문서 전략은 **HWPX 우선**, legacy HWP는 fallback adapter만 유지합니다.
-- 감사 로그 중심의 데이터 모델 베이스라인을 Prisma 스키마에 포함했습니다.
-- API 인증은 bearer 세션 + 회사 컨텍스트(`x-company-id`)를 사용합니다.
+Next roadmap priorities are tracked in [docs/roadmap.md](./docs/roadmap.md):
 
-## 기반 모듈 구현 (PROMPT03-04)
+- payroll
+- advanced accounting
+- deeper ADT/S1 adapters
+- HWPX export hardening
+- mobile app
+- notification integrations
 
-- `auth`: local login/logout/me, 세션 토큰, OIDC 확장용 provider 추상화
-- `org`: company/legal-entity/business-site/department CRUD + 부서 트리
-- `employee`: employee number 기반 직원 CRUD, position/title 분리
-- `audit`: 생성/수정/삭제 및 인증 민감 동작 감사로그 저장/조회
-- `files`: MinIO 기반 파일 업로드/다운로드 + 메타데이터/체크섬 + 감사로그
-- `documents`: 템플릿 기반 문서 생성/버전/첨부 + PDF 렌더 트리거
-- `approvals`: 결재선 구성/상신/승인/반려/취소/재상신 + 결재함
-- `signatures`: 업로드 파일 기반 서명/도장 에셋 등록
-- Swagger 문서: `/swagger`
+## License
 
-## PROMPT04 웹 화면
-
-- `GET /files` 화면: 파일 업로드, 메타데이터 조회, 다운로드
-- `GET /documents` 화면: 템플릿 문서 생성, 버전 추가, 결재선 구성/상신, PDF 다운로드
-- `GET /approvals` 화면: 결재함 승인/반려 + 코멘트
-
-## 근태/휴가 수직 슬라이스 (PROMPT05)
-
-- Raw 근태 수집 엔드포인트 (`/integrations/attendance/raw`, `/integrations/attendance/raw/batch`, `/integrations/attendance/raw/csv`)
-- 근태 조회 엔드포인트 (`/attendance/raw-events`, `/attendance/ledgers`)
-- Shift 정책 시작 엔드포인트 (`/attendance/shift-policies`, 생성/버전 업데이트)
-- 휴가/정정 엔드포인트 (`/leave/policies`, `/leave/requests`, `/attendance-corrections`)
-- Worker 정규화 잡: immutable `AttendanceRawEvent` -> `AttendanceLedger` + 정책 버전 저장
-- Edge-agent: CSV 디렉터리 감시 + 실패 재전송 버퍼 + external ID 매핑
-
-## 문서
-
-- 실행 계획: `docs/PLAN.md`
-- ADR: `docs/adr/`
-- API 노트: `docs/api/README.md`
-- 운영 노트: `docs/ops/README.md`
-- 기여 가이드: `CONTRIBUTING.md`
-- 보안 정책: `SECURITY.md`
-
-## 라이선스
-
-Apache-2.0 (`LICENSE` 참고)
+Apache-2.0 ([LICENSE](./LICENSE))

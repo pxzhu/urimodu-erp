@@ -1,14 +1,29 @@
 # Operations Notes
 
-## Local stack
+This section is the practical runbook for local development and self-hosted operations.
 
-- `deploy/compose/docker-compose.yml`
+## Runbook Index
 
-## Kubernetes starter
+- Seeding and sample accounts: `docs/ops/seeding.md`
+- Backup and restore: `docs/ops/backup-restore.md`
+- Production environment notes: `docs/ops/production.md`
+- Security checklist: `docs/ops/security-checklist.md`
+- Smoke tests: `docs/testing/smoke-tests.md`
 
-- `deploy/helm/korean-erp`
+## Deployment Docs
 
-## Security baseline
+- Docker Compose guide: `docs/deploy/docker-compose.md`
+- Helm values guide: `docs/deploy/helm-values.md`
 
-- No secrets in repo
-- Use environment variables and Kubernetes secret references
+## Service Health Endpoints
+
+- Web: `GET /health`
+- API: `GET /health`
+- Connector gateway: `GET /health`
+- Worker: `GET /health`
+- Docs service: `GET /health`
+
+## API Discovery
+
+- Swagger UI: `http://localhost:4000/swagger`
+- OpenAPI JSON: `http://localhost:4000/swagger-json`
