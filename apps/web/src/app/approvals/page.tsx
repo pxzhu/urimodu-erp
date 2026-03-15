@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../components/dashboard-nav";
+import { useLocaleText, useUiShell } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
 
@@ -36,6 +37,8 @@ interface ApprovalInboxLine {
 
 export default function ApprovalsPage() {
   const router = useRouter();
+  const t = useLocaleText();
+  const { isAdminView } = useUiShell();
   const [session, setSession] = useState<LoginSession | null>(null);
   const [inbox, setInbox] = useState<ApprovalInboxLine[]>([]);
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -88,7 +91,7 @@ export default function ApprovalsPage() {
       if (actionError instanceof ApiError) {
         setError(actionError.message);
       } else {
-        setError("Failed to process approval action");
+        setError(t("결재 처리에 실패했습니다.", "Failed to process approval action."));
       }
     } finally {
       setWorkingLineId(null);
@@ -96,25 +99,35 @@ export default function ApprovalsPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
-      <h1>Approvals Inbox</h1>
-      <p>Approve or reject pending steps assigned to your employee identity.</p>
+      <section className="app-shell-content">
+      <h1>{t("결재함", "Approvals Inbox")}</h1>
       <p>
-        Need to create or submit a document? Go to <Link href="/documents">Documents</Link>.
+        {t(
+          "대기 중인 결재 단계를 승인/반려할 수 있습니다.",
+          "Approve or reject pending steps assigned to your employee identity."
+        )}
       </p>
+      <p>
+        {t("문서 작성/상신은", "Need to create or submit a document? Go to")} <Link href="/documents">{t("문서함", "Documents")}</Link>.
+      </p>
+
+      {!isAdminView ? (
+        <p className="role-note">{t("사용자 모드에서는 개인 결재 대상만 표시됩니다.", "User mode shows only personal approval targets.")}</p>
+      ) : null}
 
       {error ? <p className="error-text">{error}</p> : null}
 
       <table className="data-table">
         <thead>
           <tr>
-            <th>Document</th>
-            <th>Line Status</th>
-            <th>Current Step</th>
-            <th>Approver</th>
-            <th>Comment</th>
-            <th>Actions</th>
+            <th>{t("문서", "Document")}</th>
+            <th>{t("결재선 상태", "Line Status")}</th>
+            <th>{t("현재 단계", "Current Step")}</th>
+            <th>{t("결재자", "Approver")}</th>
+            <th>{t("코멘트", "Comment")}</th>
+            <th>{t("동작", "Actions")}</th>
           </tr>
         </thead>
         <tbody>
@@ -153,7 +166,7 @@ export default function ApprovalsPage() {
                         [line.id]: event.target.value
                       }))
                     }
-                    placeholder="comment (optional)"
+                    placeholder={t("코멘트(선택)", "Comment (optional)")}
                   />
                 </td>
                 <td>
@@ -163,14 +176,14 @@ export default function ApprovalsPage() {
                       disabled={workingLineId === line.id}
                       onClick={() => void handleAction(line.id, "approve")}
                     >
-                      Approve
+                      {t("승인", "Approve")}
                     </button>
                     <button
                       type="button"
                       disabled={workingLineId === line.id}
                       onClick={() => void handleAction(line.id, "reject")}
                     >
-                      Reject
+                      {t("반려", "Reject")}
                     </button>
                   </div>
                 </td>
@@ -179,11 +192,12 @@ export default function ApprovalsPage() {
           })}
           {inbox.length === 0 ? (
             <tr>
-              <td colSpan={6}>No pending approvals in your inbox.</td>
+              <td colSpan={6}>{t("결재 대기 항목이 없습니다.", "No pending approvals in your inbox.")}</td>
             </tr>
           ) : null}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }

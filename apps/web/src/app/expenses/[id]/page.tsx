@@ -113,8 +113,9 @@ export default function ExpenseClaimDetailPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Expense Claim Detail</h1>
 
       {error ? <p className="error-text">{error}</p> : null}
@@ -196,6 +197,7 @@ export default function ExpenseClaimDetailPage() {
       ) : (
         <p>Loading...</p>
       )}
+      </section>
     </main>
   );
 }

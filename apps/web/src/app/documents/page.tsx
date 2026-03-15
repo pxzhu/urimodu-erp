@@ -5,6 +5,9 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../components/dashboard-nav";
+import { KeyValueTableEditor, type KeyValueRow } from "../../components/key-value-table-editor";
+import { SearchableEmployeeSelector } from "../../components/searchable-employee-selector";
+import { useLocaleText, useUiShell } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
 
@@ -125,32 +128,51 @@ interface DocumentDetail {
   } | null;
 }
 
-interface ApprovalStepDraft {
-  rowId: string;
-  orderNo: number;
-  type: ApprovalStepType;
-  approverEmployeeId: string;
-}
-
-function createStepRow(orderNo: number, approverEmployeeId: string): ApprovalStepDraft {
-  return {
-    rowId: `${Date.now()}-${Math.random()}`,
-    orderNo,
-    type: "APPROVE",
-    approverEmployeeId
-  };
-}
-
-function prettyJson(input: unknown): string {
-  try {
-    return JSON.stringify(input, null, 2);
-  } catch {
-    return "{}";
+function toggleSelection(current: string[], fileId: string): string[] {
+  if (current.includes(fileId)) {
+    return current.filter((id) => id !== fileId);
   }
+  return [...current, fileId];
+}
+
+function rowsToContent(rows: KeyValueRow[]): Record<string, string> {
+  return rows.reduce<Record<string, string>>((accumulator, row) => {
+    const key = row.key.trim();
+    if (!key) {
+      return accumulator;
+    }
+
+    accumulator[key] = row.value.trim();
+    return accumulator;
+  }, {});
+}
+
+function readTemplateFields(template: DocumentTemplateItem | undefined): string[] {
+  if (!template || typeof template.schemaJson !== "object" || !template.schemaJson) {
+    return ["employeeNumber", "employeeName", "reason"];
+  }
+
+  const maybeFields = (template.schemaJson as { fields?: unknown }).fields;
+  if (!Array.isArray(maybeFields)) {
+    return ["employeeNumber", "employeeName", "reason"];
+  }
+
+  const normalized = maybeFields.filter((field): field is string => typeof field === "string" && field.length > 0);
+  return normalized.length > 0 ? normalized : ["employeeNumber", "employeeName", "reason"];
+}
+
+function createRowsFromFields(fields: string[], previousRows: KeyValueRow[] = []): KeyValueRow[] {
+  return fields.map((field) => ({
+    key: field,
+    value: previousRows.find((row) => row.key === field)?.value ?? ""
+  }));
 }
 
 export default function DocumentsPage() {
   const router = useRouter();
+  const t = useLocaleText();
+  const { isAdminView } = useUiShell();
+
   const [session, setSession] = useState<LoginSession | null>(null);
   const [templates, setTemplates] = useState<DocumentTemplateItem[]>([]);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
@@ -162,26 +184,31 @@ export default function DocumentsPage() {
   const [templateId, setTemplateId] = useState("");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [contentJsonText, setContentJsonText] = useState(
-    prettyJson({
-      employeeNumber: "10000003",
-      employeeName: "일반직원",
-      reason: "사유를 입력하세요"
-    })
-  );
+  const [contentRows, setContentRows] = useState<KeyValueRow[]>([]);
   const [selectedAttachmentIds, setSelectedAttachmentIds] = useState<string[]>([]);
 
   const [versionTitle, setVersionTitle] = useState("");
-  const [versionContentJsonText, setVersionContentJsonText] = useState(prettyJson({ reason: "수정 사유" }));
+  const [versionRows, setVersionRows] = useState<KeyValueRow[]>([]);
   const [versionAttachmentIds, setVersionAttachmentIds] = useState<string[]>([]);
+  const [approverEmployeeIds, setApproverEmployeeIds] = useState<string[]>([]);
 
-  const [steps, setSteps] = useState<ApprovalStepDraft[]>([]);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const [savingInProgress, setSavingInProgress] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const companyId = useMemo(() => (session ? requireCompanyId(session) : ""), [session]);
+
+  const selectedTemplate = useMemo(
+    () => templates.find((template) => template.id === templateId),
+    [templates, templateId]
+  );
+
+  useEffect(() => {
+    const fields = readTemplateFields(selectedTemplate);
+    setContentRows((current) => createRowsFromFields(fields, current));
+    setVersionRows((current) => createRowsFromFields(fields, current));
+  }, [selectedTemplate]);
 
   async function refreshReferences(activeSession: LoginSession) {
     const activeCompanyId = requireCompanyId(activeSession);
@@ -215,9 +242,6 @@ export default function DocumentsPage() {
     if (!selectedDocumentId && nextDocuments[0]?.id) {
       setSelectedDocumentId(nextDocuments[0].id);
     }
-    if (steps.length === 0) {
-      setSteps([createStepRow(1, nextEmployees[0]?.id ?? "")]);
-    }
   }
 
   async function loadDocumentDetail(activeSession: LoginSession, documentId: string) {
@@ -226,6 +250,10 @@ export default function DocumentsPage() {
       companyId: requireCompanyId(activeSession)
     });
     setSelectedDocument(detail);
+
+    if (detail.approvalLine?.steps.length) {
+      setApproverEmployeeIds(detail.approvalLine.steps.map((step) => step.approverEmployeeId));
+    }
   }
 
   useEffect(() => {
@@ -264,14 +292,7 @@ export default function DocumentsPage() {
       setError(actionError.message);
       return;
     }
-    setError("Unexpected request error");
-  }
-
-  function toggleSelection(current: string[], fileId: string): string[] {
-    if (current.includes(fileId)) {
-      return current.filter((id) => id !== fileId);
-    }
-    return [...current, fileId];
+    setError(t("요청 처리 중 오류가 발생했습니다.", "Unexpected request error."));
   }
 
   async function handleCreateDocument(event: FormEvent<HTMLFormElement>) {
@@ -285,7 +306,6 @@ export default function DocumentsPage() {
     setSuccess(null);
 
     try {
-      const contentJson = JSON.parse(contentJsonText) as Record<string, unknown>;
       const created = await apiRequest<DocumentDetail>("/documents", {
         method: "POST",
         token: session.token,
@@ -294,7 +314,7 @@ export default function DocumentsPage() {
           templateId,
           title: title.trim() || undefined,
           category: category.trim() || undefined,
-          contentJson,
+          contentJson: rowsToContent(contentRows),
           attachmentFileIds: selectedAttachmentIds
         }
       });
@@ -305,7 +325,7 @@ export default function DocumentsPage() {
       setCategory("");
       await refreshReferences(session);
       await loadDocumentDetail(session, created.id);
-      setSuccess("Document created from template.");
+      setSuccess(t("템플릿 기반 문서를 생성했습니다.", "Document created from template."));
     } catch (actionError) {
       setFriendlyError(actionError);
     } finally {
@@ -324,14 +344,13 @@ export default function DocumentsPage() {
     setSuccess(null);
 
     try {
-      const contentJson = JSON.parse(versionContentJsonText) as Record<string, unknown>;
       const updated = await apiRequest<DocumentDetail>(`/documents/${selectedDocumentId}/versions`, {
         method: "POST",
         token: session.token,
         companyId,
         body: {
           title: versionTitle.trim() || undefined,
-          contentJson,
+          contentJson: rowsToContent(versionRows),
           attachmentFileIds: versionAttachmentIds
         }
       });
@@ -340,7 +359,7 @@ export default function DocumentsPage() {
       setVersionAttachmentIds([]);
       setVersionTitle("");
       await refreshReferences(session);
-      setSuccess("New document version added.");
+      setSuccess(t("문서 버전을 추가했습니다.", "New document version added."));
     } catch (actionError) {
       setFriendlyError(actionError);
     } finally {
@@ -359,16 +378,8 @@ export default function DocumentsPage() {
     setSuccess(null);
 
     try {
-      const normalizedSteps = [...steps]
-        .map((step) => ({
-          orderNo: Number(step.orderNo),
-          type: step.type,
-          approverEmployeeId: step.approverEmployeeId
-        }))
-        .sort((left, right) => left.orderNo - right.orderNo);
-
-      if (normalizedSteps.some((step) => !step.approverEmployeeId)) {
-        throw new Error("Every step requires an approver.");
+      if (approverEmployeeIds.length === 0) {
+        throw new Error(t("결재자를 최소 1명 선택해주세요.", "Select at least one approver."));
       }
 
       await apiRequest(`/approvals/lines`, {
@@ -377,12 +388,16 @@ export default function DocumentsPage() {
         companyId,
         body: {
           documentId: selectedDocumentId,
-          steps: normalizedSteps
+          steps: approverEmployeeIds.map((approverEmployeeId, index) => ({
+            orderNo: index + 1,
+            type: "APPROVE",
+            approverEmployeeId
+          }))
         }
       });
 
       await loadDocumentDetail(session, selectedDocumentId);
-      setSuccess("Approval line configured.");
+      setSuccess(t("결재선을 저장했습니다.", "Approval line configured."));
     } catch (actionError) {
       setFriendlyError(actionError);
     } finally {
@@ -406,7 +421,7 @@ export default function DocumentsPage() {
       });
       await loadDocumentDetail(session, selectedDocument.id);
       await refreshReferences(session);
-      setSuccess("Approval line submitted.");
+      setSuccess(t("결재 요청을 상신했습니다.", "Approval line submitted."));
     } catch (actionError) {
       setFriendlyError(actionError);
     } finally {
@@ -443,9 +458,7 @@ export default function DocumentsPage() {
     setError(null);
     setSuccess(null);
     try {
-      const rendered = await apiRequest<{
-        pdfFileId: string;
-      }>(`/documents/${selectedDocumentId}/render-pdf`, {
+      const rendered = await apiRequest<{ pdfFileId: string }>(`/documents/${selectedDocumentId}/render-pdf`, {
         method: "POST",
         token: session.token,
         companyId,
@@ -456,7 +469,7 @@ export default function DocumentsPage() {
       await loadDocumentDetail(session, selectedDocumentId);
       await refreshReferences(session);
       await downloadFile(rendered.pdfFileId, `${selectedDocument?.title ?? "document"}.pdf`);
-      setSuccess("PDF rendered and downloaded.");
+      setSuccess(t("PDF를 생성하고 다운로드했습니다.", "PDF rendered and downloaded."));
     } catch (actionError) {
       setFriendlyError(actionError);
     } finally {
@@ -465,19 +478,29 @@ export default function DocumentsPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
-      <h1>Documents</h1>
+      <section className="app-shell-content">
+      <h1>{t("문서/결재", "Documents")}</h1>
       <p>
-        Template-based document flow with JSON + HTML + PDF canonical model. For raw file uploads, use{" "}
-        <Link href="/files">Files</Link>.
+        {t(
+          "JSON 직접 입력 대신 템플릿 필드 표 입력으로 문서를 작성하고 결재선을 설정하세요.",
+          "Create documents using template field tables (without direct JSON editing) and configure approval lines."
+        )}{" "}
+        <Link href="/files">{t("첨부 파일은 파일함에서 먼저 업로드", "Upload attachments in Files first")}</Link>
       </p>
+
+      {!isAdminView ? (
+        <p className="role-note">
+          {t("사용자 권한에서도 문서 작성/상신은 가능하지만 템플릿 운영 권한은 제한될 수 있습니다.", "User role can draft/submit documents, but template administration may be restricted.")}
+        </p>
+      ) : null}
 
       <section className="section-grid">
         <form className="form-grid" onSubmit={handleCreateDocument}>
-          <h2>Create Document</h2>
+          <h2>{t("문서 작성", "Create Document")}</h2>
 
-          <label htmlFor="template-id">Template</label>
+          <label htmlFor="template-id">{t("템플릿", "Template")}</label>
           <select id="template-id" value={templateId} onChange={(event) => setTemplateId(event.target.value)}>
             {templates.map((template) => (
               <option key={template.id} value={template.id}>
@@ -486,52 +509,47 @@ export default function DocumentsPage() {
             ))}
           </select>
 
-          <label htmlFor="document-title">Title (optional)</label>
+          <label htmlFor="document-title">{t("제목 (선택)", "Title (optional)")}</label>
           <input id="document-title" value={title} onChange={(event) => setTitle(event.target.value)} />
 
-          <label htmlFor="document-category">Category override (optional)</label>
+          <label htmlFor="document-category">{t("카테고리 재정의 (선택)", "Category override (optional)")}</label>
           <input id="document-category" value={category} onChange={(event) => setCategory(event.target.value)} />
 
-          <label htmlFor="document-content-json">Content JSON</label>
-          <textarea
-            id="document-content-json"
-            rows={8}
-            value={contentJsonText}
-            onChange={(event) => setContentJsonText(event.target.value)}
-          />
+          <fieldset>
+            <legend>{t("문서 입력 항목", "Document input fields")}</legend>
+            <KeyValueTableEditor rows={contentRows} onChange={setContentRows} keyReadOnly hideRemove />
+          </fieldset>
 
           <fieldset>
-            <legend>Initial Attachments</legend>
+            <legend>{t("초기 첨부파일", "Initial Attachments")}</legend>
             <div className="checkbox-grid">
               {files.map((file) => (
                 <label key={file.id}>
                   <input
                     type="checkbox"
                     checked={selectedAttachmentIds.includes(file.id)}
-                    onChange={() =>
-                      setSelectedAttachmentIds((current) => toggleSelection(current, file.id))
-                    }
+                    onChange={() => setSelectedAttachmentIds((current) => toggleSelection(current, file.id))}
                   />
                   {file.originalName}
                 </label>
               ))}
-              {files.length === 0 ? <span>No uploaded files yet.</span> : null}
+              {files.length === 0 ? <span>{t("업로드된 파일이 없습니다.", "No uploaded files yet.")}</span> : null}
             </div>
           </fieldset>
 
           <button type="submit" disabled={savingInProgress}>
-            {savingInProgress ? "Saving..." : "Create Document"}
+            {savingInProgress ? t("저장 중...", "Saving...") : t("문서 생성", "Create Document")}
           </button>
         </form>
 
         <div className="form-grid">
-          <h2>Document List</h2>
+          <h2>{t("문서 목록", "Document List")}</h2>
           <select
             value={selectedDocumentId}
             onChange={(event) => setSelectedDocumentId(event.target.value)}
             aria-label="Select document"
           >
-            <option value="">Select a document</option>
+            <option value="">{t("문서를 선택하세요", "Select a document")}</option>
             {documents.map((document) => (
               <option key={document.id} value={document.id}>
                 {document.title} ({document.status})
@@ -542,11 +560,11 @@ export default function DocumentsPage() {
           <table className="data-table">
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Version</th>
-                <th>Template</th>
-                <th>Approval</th>
+                <th>{t("제목", "Title")}</th>
+                <th>{t("상태", "Status")}</th>
+                <th>{t("버전", "Version")}</th>
+                <th>{t("템플릿", "Template")}</th>
+                <th>{t("결재", "Approval")}</th>
               </tr>
             </thead>
             <tbody>
@@ -561,7 +579,7 @@ export default function DocumentsPage() {
               ))}
               {documents.length === 0 ? (
                 <tr>
-                  <td colSpan={5}>No documents yet.</td>
+                  <td colSpan={5}>{t("문서가 없습니다.", "No documents yet.")}</td>
                 </tr>
               ) : null}
             </tbody>
@@ -576,172 +594,82 @@ export default function DocumentsPage() {
         <>
           <section className="section-grid">
             <form className="form-grid" onSubmit={handleAddVersion}>
-              <h2>Add Version</h2>
+              <h2>{t("버전 추가", "Add Version")}</h2>
               <p>
-                Current status: <strong>{selectedDocument.status}</strong>, version:{" "}
-                <strong>v{selectedDocument.currentVersionNo}</strong>
+                {t("현재 상태", "Current status")}: <strong>{selectedDocument.status}</strong>, {t("버전", "version")}: <strong>v{selectedDocument.currentVersionNo}</strong>
               </p>
 
-              <label htmlFor="version-title">Title update (optional)</label>
-              <input
-                id="version-title"
-                value={versionTitle}
-                onChange={(event) => setVersionTitle(event.target.value)}
-              />
-
-              <label htmlFor="version-content-json">Version Content JSON</label>
-              <textarea
-                id="version-content-json"
-                rows={8}
-                value={versionContentJsonText}
-                onChange={(event) => setVersionContentJsonText(event.target.value)}
-              />
+              <label htmlFor="version-title">{t("제목 수정 (선택)", "Title update (optional)")}</label>
+              <input id="version-title" value={versionTitle} onChange={(event) => setVersionTitle(event.target.value)} />
 
               <fieldset>
-                <legend>Version Attachments</legend>
+                <legend>{t("버전 입력 항목", "Version input fields")}</legend>
+                <KeyValueTableEditor rows={versionRows} onChange={setVersionRows} keyReadOnly hideRemove />
+              </fieldset>
+
+              <fieldset>
+                <legend>{t("버전 첨부파일", "Version Attachments")}</legend>
                 <div className="checkbox-grid">
                   {files.map((file) => (
                     <label key={file.id}>
                       <input
                         type="checkbox"
                         checked={versionAttachmentIds.includes(file.id)}
-                        onChange={() =>
-                          setVersionAttachmentIds((current) => toggleSelection(current, file.id))
-                        }
+                        onChange={() => setVersionAttachmentIds((current) => toggleSelection(current, file.id))}
                       />
                       {file.originalName}
                     </label>
                   ))}
-                  {files.length === 0 ? <span>No uploaded files yet.</span> : null}
+                  {files.length === 0 ? <span>{t("업로드된 파일이 없습니다.", "No uploaded files yet.")}</span> : null}
                 </div>
               </fieldset>
 
               <button type="submit" disabled={savingInProgress}>
-                {savingInProgress ? "Saving..." : "Add Version"}
+                {savingInProgress ? t("저장 중...", "Saving...") : t("버전 추가", "Add Version")}
               </button>
             </form>
 
             <form className="form-grid" onSubmit={handleConfigureApprovalLine}>
-              <h2>Configure Approval Line</h2>
-              {steps.map((step, index) => (
-                <div key={step.rowId} className="step-row">
-                  <label>
-                    Order
-                    <input
-                      type="number"
-                      min={1}
-                      value={step.orderNo}
-                      onChange={(event) => {
-                        const nextOrderNo = Number(event.target.value || 1);
-                        setSteps((current) =>
-                          current.map((currentStep) =>
-                            currentStep.rowId === step.rowId
-                              ? { ...currentStep, orderNo: nextOrderNo }
-                              : currentStep
-                          )
-                        );
-                      }}
-                    />
-                  </label>
-
-                  <label>
-                    Type
-                    <select
-                      value={step.type}
-                      onChange={(event) => {
-                        const nextType = event.target.value as ApprovalStepType;
-                        setSteps((current) =>
-                          current.map((currentStep) =>
-                            currentStep.rowId === step.rowId ? { ...currentStep, type: nextType } : currentStep
-                          )
-                        );
-                      }}
-                    >
-                      <option value="APPROVE">APPROVE</option>
-                      <option value="CONSULT">CONSULT</option>
-                      <option value="AGREE">AGREE</option>
-                      <option value="CC">CC</option>
-                      <option value="RECEIVE">RECEIVE</option>
-                    </select>
-                  </label>
-
-                  <label>
-                    Approver
-                    <select
-                      value={step.approverEmployeeId}
-                      onChange={(event) => {
-                        const nextApprover = event.target.value;
-                        setSteps((current) =>
-                          current.map((currentStep) =>
-                            currentStep.rowId === step.rowId
-                              ? { ...currentStep, approverEmployeeId: nextApprover }
-                              : currentStep
-                          )
-                        );
-                      }}
-                    >
-                      <option value="">Select employee</option>
-                      {employees.map((employee) => (
-                        <option key={employee.id} value={employee.id}>
-                          {employee.employeeNumber} - {employee.nameKr}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSteps((current) => current.filter((currentStep) => currentStep.rowId !== step.rowId));
-                    }}
-                    disabled={steps.length === 1}
-                  >
-                    Remove
-                  </button>
-                  <span>Step #{index + 1}</span>
-                </div>
-              ))}
+              <h2>{t("결재선 설정", "Configure Approval Line")}</h2>
+              <SearchableEmployeeSelector
+                employees={employees}
+                selectedEmployeeIds={approverEmployeeIds}
+                onChange={setApproverEmployeeIds}
+                label={t("결재자 선택 (순서는 선택 순서 기준)", "Select approvers (order follows selection)")}
+                placeholder={t("홍길동처럼 이름 일부로 검색", "Type part of a name")}
+              />
 
               <div className="inline-actions">
-                <button
-                  type="button"
-                  onClick={() => setSteps((current) => [...current, createStepRow(current.length + 1, "")])}
-                >
-                  Add Step
-                </button>
                 <button type="submit" disabled={savingInProgress}>
-                  {savingInProgress ? "Saving..." : "Save Approval Line"}
+                  {savingInProgress ? t("저장 중...", "Saving...") : t("결재선 저장", "Save Approval Line")}
                 </button>
-              </div>
-
-              <div className="inline-actions">
                 <button
                   type="button"
                   onClick={() => void handleSubmitApproval()}
                   disabled={!selectedDocument.approvalLine?.id || submitInProgress}
                 >
-                  {submitInProgress ? "Submitting..." : "Submit For Approval"}
+                  {submitInProgress ? t("상신 중...", "Submitting...") : t("결재 상신", "Submit For Approval")}
                 </button>
                 <button
                   type="button"
                   onClick={() => void handleRenderPdf(selectedDocument.currentVersionNo)}
                   disabled={submitInProgress}
                 >
-                  Render + Download PDF
+                  {t("PDF 생성/다운로드", "Render + Download PDF")}
                 </button>
               </div>
             </form>
           </section>
 
-          <h2>Document Versions</h2>
+          <h2>{t("문서 버전", "Document Versions")}</h2>
           <table className="data-table">
             <thead>
               <tr>
-                <th>Version</th>
-                <th>Author</th>
-                <th>Attachments</th>
+                <th>{t("버전", "Version")}</th>
+                <th>{t("작성자", "Author")}</th>
+                <th>{t("첨부파일", "Attachments")}</th>
                 <th>PDF</th>
-                <th>Created</th>
+                <th>{t("생성일", "Created")}</th>
               </tr>
             </thead>
             <tbody>
@@ -749,15 +677,10 @@ export default function DocumentsPage() {
                 <tr key={version.id}>
                   <td>v{version.versionNo}</td>
                   <td>{version.authoredBy.name}</td>
-                  <td>
-                    {version.attachments.map((attachment) => attachment.file.originalName).join(", ") || "-"}
-                  </td>
+                  <td>{version.attachments.map((attachment) => attachment.file.originalName).join(", ") || "-"}</td>
                   <td>
                     {version.pdfFile ? (
-                      <button
-                        type="button"
-                        onClick={() => void downloadFile(version.pdfFile!.id, version.pdfFile!.originalName)}
-                      >
+                      <button type="button" onClick={() => void downloadFile(version.pdfFile!.id, version.pdfFile!.originalName)}>
                         {version.pdfFile.originalName}
                       </button>
                     ) : (
@@ -770,21 +693,21 @@ export default function DocumentsPage() {
             </tbody>
           </table>
 
-          <h2>Approval Trail</h2>
+          <h2>{t("결재 이력", "Approval Trail")}</h2>
           {selectedDocument.approvalLine ? (
             <>
               <p>
-                Line status: <strong>{selectedDocument.approvalLine.status}</strong>
+                {t("결재선 상태", "Line status")}: <strong>{selectedDocument.approvalLine.status}</strong>
               </p>
 
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Order</th>
-                    <th>Type</th>
-                    <th>Approver</th>
-                    <th>Status</th>
-                    <th>Comment</th>
+                    <th>{t("순서", "Order")}</th>
+                    <th>{t("유형", "Type")}</th>
+                    <th>{t("결재자", "Approver")}</th>
+                    <th>{t("상태", "Status")}</th>
+                    <th>{t("코멘트", "Comment")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -805,10 +728,10 @@ export default function DocumentsPage() {
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Action</th>
-                    <th>Actor</th>
-                    <th>Comment</th>
-                    <th>At</th>
+                    <th>{t("액션", "Action")}</th>
+                    <th>{t("실행자", "Actor")}</th>
+                    <th>{t("코멘트", "Comment")}</th>
+                    <th>{t("시각", "At")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -822,17 +745,18 @@ export default function DocumentsPage() {
                   ))}
                   {selectedDocument.approvalLine.actions.length === 0 ? (
                     <tr>
-                      <td colSpan={4}>No approval actions yet.</td>
+                      <td colSpan={4}>{t("아직 결재 액션이 없습니다.", "No approval actions yet.")}</td>
                     </tr>
                   ) : null}
                 </tbody>
               </table>
             </>
           ) : (
-            <p>No approval line configured yet.</p>
+            <p>{t("아직 결재선이 설정되지 않았습니다.", "No approval line configured yet.")}</p>
           )}
         </>
       ) : null}
+      </section>
     </main>
   );
 }

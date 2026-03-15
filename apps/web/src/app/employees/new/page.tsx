@@ -113,8 +113,9 @@ export default function NewEmployeePage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Create Employee</h1>
 
       <form className="form-grid" onSubmit={onSubmit}>
@@ -174,6 +175,7 @@ export default function NewEmployeePage() {
       </form>
 
       {error ? <p className="error-text">{error}</p> : null}
+      </section>
     </main>
   );
 }

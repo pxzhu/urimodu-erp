@@ -118,8 +118,9 @@ export default function EditEmployeePage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Edit Employee</h1>
       <form className="form-grid" onSubmit={onSubmit}>
         <label htmlFor="employee-name">Name (Korean)</label>
@@ -170,6 +171,7 @@ export default function EditEmployeePage() {
       </form>
 
       {error ? <p className="error-text">{error}</p> : null}
+      </section>
     </main>
   );
 }

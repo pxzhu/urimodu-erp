@@ -10,6 +10,9 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "smoke": "./scripts/smoke-stack.sh",
+    "qa:init": "./scripts/qa-init-run.sh",
+    "qa:validate": "./scripts/qa-validate.sh",
+    "qa:screenshots": "pnpm dlx @playwright/test test scripts/capture-role-screenshots.spec.ts --headed --reporter=line --workers=1",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {

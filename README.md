@@ -47,28 +47,52 @@ We are actively collecting post-release alpha feedback.
 
 ## Screenshots
 
-Captured from a seeded local stack for the `v0.1.0-alpha.0` prerelease branch.  
+Captured from a seeded local stack with Korean-first defaults (light mode + sidebar shell).  
 Capture inventory and recapture guide: [docs/screenshots/README.md](./docs/screenshots/README.md)
 
-### Employees Directory (`/employees`)
+### Admin View
 
-![Employees directory](./docs/screenshots/01-employees-directory.png)
+#### Employees Directory (`/employees`)
 
-### Documents And Templates (`/documents`)
+![Admin employees directory](./docs/screenshots/admin-01-employees-directory.png)
 
-![Documents and templates](./docs/screenshots/02-documents-and-templates.png)
+#### Documents And Templates (`/documents`)
 
-### Approvals Inbox (`/approvals`)
+![Admin documents and templates](./docs/screenshots/admin-02-documents-and-templates.png)
 
-![Approvals inbox](./docs/screenshots/03-approvals-inbox.png)
+#### Approvals Inbox (`/approvals`)
 
-### Attendance Ledger (`/attendance/ledger`)
+![Admin approvals inbox](./docs/screenshots/admin-03-approvals-inbox.png)
 
-![Attendance ledger](./docs/screenshots/04-attendance-ledger.png)
+#### Attendance Ledger (`/attendance/ledger`)
 
-### Expense Claims (`/expenses`)
+![Admin attendance ledger](./docs/screenshots/admin-04-attendance-ledger.png)
 
-![Expense claims](./docs/screenshots/05-expense-claims.png)
+#### Expense Claims (`/expenses`)
+
+![Admin expense claims](./docs/screenshots/admin-05-expense-claims.png)
+
+### User View
+
+#### Employees Directory (`/employees`)
+
+![User employees directory](./docs/screenshots/user-01-employees-directory.png)
+
+#### Documents And Templates (`/documents`)
+
+![User documents and templates](./docs/screenshots/user-02-documents-and-templates.png)
+
+#### Approvals Inbox (`/approvals`)
+
+![User approvals inbox](./docs/screenshots/user-03-approvals-inbox.png)
+
+#### Attendance Ledger (`/attendance/ledger`)
+
+![User attendance ledger](./docs/screenshots/user-04-attendance-ledger.png)
+
+#### Expense Claims (`/expenses`)
+
+![User expense claims](./docs/screenshots/user-05-expense-claims.png)
 
 ## Quickstart
 
@@ -115,6 +139,16 @@ Default password: `ChangeMe123!` (override with `SEED_DEFAULT_PASSWORD`)
 make smoke
 ```
 
+### QA Archive Workflow
+
+```bash
+pnpm qa:init
+pnpm qa:validate
+pnpm qa:screenshots
+```
+
+Complete the generated checklist files under `docs/qa/runs/<run-id>/` for API/page/feature-level evidence.
+
 ## Roadmap / What Comes Next
 
 See [docs/roadmap.md](./docs/roadmap.md).
@@ -141,6 +175,7 @@ Planned next focus areas:
 - Architecture diagrams: [docs/architecture/README.md](./docs/architecture/README.md)
 - ADRs: [docs/adr](./docs/adr)
 - API notes: [docs/api/README.md](./docs/api/README.md)
+- QA archive guide: [docs/qa/README.md](./docs/qa/README.md)
 - Operations notes: [docs/ops/README.md](./docs/ops/README.md)
 - Release notes draft: [docs/releases/v0.1.0-alpha.0.md](./docs/releases/v0.1.0-alpha.0.md)
 - Changelog: [CHANGELOG.md](./CHANGELOG.md)

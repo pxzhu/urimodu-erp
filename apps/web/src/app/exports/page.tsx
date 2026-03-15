@@ -138,8 +138,9 @@ export default function ExportsPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Export Jobs</h1>
       <p>Generate CSV/JSON exports from expense claim list and download job result files.</p>
 
@@ -240,6 +241,7 @@ export default function ExportsPage() {
           </p>
         </section>
       ) : null}
+      </section>
     </main>
   );
 }

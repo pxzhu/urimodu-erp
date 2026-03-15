@@ -80,8 +80,9 @@ export default function JournalEntryDetailPage() {
   }, [journalEntryId, router]);
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Journal Entry Detail</h1>
 
       {error ? <p className="error-text">{error}</p> : null}
@@ -145,6 +146,7 @@ export default function JournalEntryDetailPage() {
       ) : (
         <p>Loading...</p>
       )}
+      </section>
     </main>
   );
 }

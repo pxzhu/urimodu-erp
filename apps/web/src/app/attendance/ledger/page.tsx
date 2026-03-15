@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../../components/dashboard-nav";
+import { useLocaleText } from "../../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../../lib/api";
 import { loadSession, type LoginSession } from "../../../lib/auth";
 
@@ -42,6 +43,7 @@ interface AttendanceLedgerItem {
 
 export default function AttendanceLedgerPage() {
   const router = useRouter();
+  const t = useLocaleText();
   const [session, setSession] = useState<LoginSession | null>(null);
   const [rows, setRows] = useState<AttendanceLedgerItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +62,7 @@ export default function AttendanceLedgerPage() {
       if (refreshError instanceof ApiError) {
         setError(refreshError.message);
       } else {
-        setError("Failed to load attendance ledger");
+        setError(t("근태 원장을 불러오지 못했습니다.", "Failed to load attendance ledger."));
       }
     } finally {
       setLoading(false);
@@ -83,14 +85,15 @@ export default function AttendanceLedgerPage() {
   }, [router]);
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
-      <h1>Attendance Ledger</h1>
-      <p>Normalized work-date ledger rows generated from immutable raw events.</p>
+      <section className="app-shell-content">
+      <h1>{t("근태 원장", "Attendance Ledger")}</h1>
+      <p>{t("불변 원본 이벤트를 기준으로 정규화된 근무일 원장입니다.", "Normalized work-date ledger rows generated from immutable raw events.")}</p>
 
       <div className="inline-actions">
         <button type="button" disabled={!session || loading} onClick={() => session && void refresh(session)}>
-          {loading ? "Loading..." : "Refresh"}
+          {loading ? t("로딩 중...", "Loading...") : t("새로고침", "Refresh")}
         </button>
       </div>
 
@@ -99,13 +102,13 @@ export default function AttendanceLedgerPage() {
       <table className="data-table">
         <thead>
           <tr>
-            <th>Work Date</th>
-            <th>Employee</th>
-            <th>Status</th>
-            <th>Check In / Out</th>
-            <th>Worked / Overtime</th>
-            <th>Policy</th>
-            <th>Source Events</th>
+            <th>{t("근무일", "Work Date")}</th>
+            <th>{t("직원", "Employee")}</th>
+            <th>{t("상태", "Status")}</th>
+            <th>{t("출근 / 퇴근", "Check In / Out")}</th>
+            <th>{t("근무 / 연장(분)", "Worked / Overtime")}</th>
+            <th>{t("정책", "Policy")}</th>
+            <th>{t("원본 이벤트 수", "Source Events")}</th>
           </tr>
         </thead>
         <tbody>
@@ -117,14 +120,14 @@ export default function AttendanceLedgerPage() {
               </td>
               <td>
                 {row.status}
-                {row.needsReview ? " (review)" : ""}
+                {row.needsReview ? ` (${t("검토필요", "review")})` : ""}
               </td>
               <td>
                 {row.checkInAt ? new Date(row.checkInAt).toLocaleTimeString() : "-"} /{" "}
                 {row.checkOutAt ? new Date(row.checkOutAt).toLocaleTimeString() : "-"}
               </td>
               <td>
-                {row.workedMinutes} / {row.overtimeMinutes} min
+                {row.workedMinutes} / {row.overtimeMinutes}
               </td>
               <td>
                 {row.shiftPolicy ? `${row.shiftPolicy.code} v${row.policyVersion ?? row.shiftPolicy.version}` : "-"}
@@ -134,11 +137,12 @@ export default function AttendanceLedgerPage() {
           ))}
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={7}>No normalized ledger rows found.</td>
+              <td colSpan={7}>{t("정규화된 원장 데이터가 없습니다.", "No normalized ledger rows found.")}</td>
             </tr>
           ) : null}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }

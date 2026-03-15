@@ -48,8 +48,9 @@ export default function AccountsPage() {
   }, [router]);
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Chart of Accounts</h1>
       <p>Starter chart of accounts seeded for Korean ERP finance workflows.</p>
 
@@ -82,6 +83,7 @@ export default function AccountsPage() {
           ) : null}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }

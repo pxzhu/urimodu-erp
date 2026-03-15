@@ -128,8 +128,9 @@ export default function CompanyDetailPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Company Detail</h1>
       {company ? (
         <>
@@ -183,6 +184,7 @@ export default function CompanyDetailPage() {
       )}
 
       {error ? <p className="error-text">{error}</p> : null}
+      </section>
     </main>
   );
 }
