@@ -19,6 +19,15 @@ Current repository baseline includes completed scope from `PROMPT02` through `PR
 
 This is an **alpha prerelease candidate** for early adopters and contributors, not a production GA.
 
+## Alpha Feedback
+
+We are actively collecting post-release alpha feedback.
+
+- Announcement issue: [#25](https://github.com/pxzhu/urimodu-erp/issues/25)
+- Feedback tracker: [#19](https://github.com/pxzhu/urimodu-erp/issues/19)
+- Stabilization milestone: `v0.1.1-alpha.1` ([Milestones](https://github.com/pxzhu/urimodu-erp/milestones))
+- Report a new issue: [New issue form](https://github.com/pxzhu/urimodu-erp/issues/new/choose)
+
 ## Core Modules Implemented So Far
 
 - `auth`: local session auth + RBAC + OIDC-ready abstraction
