@@ -43,7 +43,7 @@ Create a clean, public OSS-ready repository foundation for a self-hosted Korean 
    - `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`
    - `.editorconfig`, `.gitignore`, GitHub issue templates, PR template
 7. Add docs and conventions:
-   - `README.md` (EN), `README.ko.md` (KO), `README.en.md` (EN mirror), `docs/adr/*`, concise root `AGENTS.md`
+   - `README.md` (KO primary), `README.en.md` (EN mirror), `docs/adr/*`, concise root `AGENTS.md`
 8. Run scaffold checks and record results.
 
 ## Acceptance Checklist
@@ -517,8 +517,7 @@ Finalize the repository so another engineer can clone, run, seed, and explore th
   - docs-service runtime smoke tests (`apps/docs-service/test/server.smoke.test.ts`)
   - stack smoke script (`scripts/smoke-stack.sh`, `make smoke`)
 - README structure normalized:
-  - `README.md` (English canonical)
-  - `README.ko.md` (Korean)
+  - `README.md` (Korean canonical)
   - `README.en.md` (English mirror)
 - Validation:
   - `pnpm -r lint` passed
@@ -541,7 +540,7 @@ Prepare the first public prerelease documentation and presentation layer for `v0
 ## Ordered Steps
 
 1. Re-validate baseline (`lint`, `typecheck`, `test`, `build`) and keep current green status.
-2. Improve `README.md` (EN) and `README.ko.md` (KO) for public prerelease presentation:
+2. Improve `README.md` (KO, primary) and `README.en.md` (EN mirror) for public prerelease presentation:
    - project status
    - implemented core modules
    - screenshots
