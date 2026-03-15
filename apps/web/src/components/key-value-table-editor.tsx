@@ -14,6 +14,7 @@ interface KeyValueTableEditorProps {
   valuePlaceholder?: string;
   keyReadOnly?: boolean;
   hideRemove?: boolean;
+  keyLabelResolver?: (rawKey: string) => string;
 }
 
 export function KeyValueTableEditor({
@@ -22,7 +23,8 @@ export function KeyValueTableEditor({
   keyPlaceholder,
   valuePlaceholder,
   keyReadOnly = false,
-  hideRemove = false
+  hideRemove = false,
+  keyLabelResolver
 }: KeyValueTableEditorProps) {
   const t = useLocaleText();
 
@@ -58,10 +60,11 @@ export function KeyValueTableEditor({
             <tr key={`kv-${index}`}>
               <td>
                 <input
-                  value={row.key}
+                  value={keyReadOnly && keyLabelResolver ? keyLabelResolver(row.key) : row.key}
                   readOnly={keyReadOnly}
                   onChange={(event) => updateRow(index, "key", event.target.value)}
                   placeholder={keyPlaceholder ?? t("필드명", "Field name")}
+                  title={keyReadOnly ? row.key : undefined}
                 />
               </td>
               <td>
