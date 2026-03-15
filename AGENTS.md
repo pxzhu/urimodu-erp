@@ -13,6 +13,7 @@
 - Task orchestration: `turbo`
 - Git workflow is mandatory for every task
 - Git workflow checklist:
+  0. Always start from `main` and sync latest first (`git switch main && git pull --ff-only`)
   1. Create a task-specific branch from `main` (use `codex/<task-name>`)
   2. Implement the task on that branch
   3. Commit changes with clear messages

@@ -33,6 +33,7 @@ interface NormalizedAttendanceResult {
   breakMinutes: number;
   workedMinutes: number;
   overtimeMinutes: number;
+  nightMinutes: number;
   status: NormalizationLedgerStatus;
   needsReview: boolean;
   notes?: string;
@@ -67,6 +68,60 @@ interface LocalDateTimeParts {
 function minutesBetween(start: Date, end: Date): number {
   const diffMs = end.getTime() - start.getTime();
   return Math.max(0, Math.floor(diffMs / 60000));
+}
+
+function overlapMinutes(input: {
+  leftStart: Date;
+  leftEnd: Date;
+  rightStart: Date;
+  rightEnd: Date;
+}): number {
+  const overlapStart = Math.max(input.leftStart.getTime(), input.rightStart.getTime());
+  const overlapEnd = Math.min(input.leftEnd.getTime(), input.rightEnd.getTime());
+  if (overlapEnd <= overlapStart) {
+    return 0;
+  }
+
+  return Math.floor((overlapEnd - overlapStart) / 60000);
+}
+
+function startOfUtcDate(date: Date): Date {
+  const value = new Date(date.getTime());
+  value.setUTCHours(0, 0, 0, 0);
+  return value;
+}
+
+function calculateNightMinutesInRange(input: { start: Date; end: Date }): number {
+  if (input.end.getTime() <= input.start.getTime()) {
+    return 0;
+  }
+
+  const firstDay = startOfUtcDate(input.start);
+  firstDay.setUTCDate(firstDay.getUTCDate() - 1);
+
+  const lastDay = startOfUtcDate(input.end);
+  let total = 0;
+
+  const cursor = new Date(firstDay.getTime());
+  while (cursor.getTime() <= lastDay.getTime()) {
+    const nightStart = new Date(cursor.getTime());
+    nightStart.setUTCHours(22, 0, 0, 0);
+
+    const nightEnd = new Date(cursor.getTime());
+    nightEnd.setUTCDate(nightEnd.getUTCDate() + 1);
+    nightEnd.setUTCHours(6, 0, 0, 0);
+
+    total += overlapMinutes({
+      leftStart: input.start,
+      leftEnd: input.end,
+      rightStart: nightStart,
+      rightEnd: nightEnd
+    });
+
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+
+  return total;
 }
 
 function eventPriority(type: string): number {
@@ -169,6 +224,7 @@ export function normalizeAttendanceEvents(
       breakMinutes: 0,
       workedMinutes: 0,
       overtimeMinutes: 0,
+      nightMinutes: 0,
       status: "NEEDS_REVIEW",
       needsReview: true,
       notes: "No source events"
@@ -195,6 +251,7 @@ export function normalizeAttendanceEvents(
 
   let breakMinutes = 0;
   let breakStartedAt: Date | null = null;
+  const breakRanges: Array<{ start: Date; end: Date }> = [];
   for (const event of sorted) {
     const normalizedType = event.eventType.toUpperCase();
 
@@ -205,6 +262,10 @@ export function normalizeAttendanceEvents(
 
     if (normalizedType === "BREAK_IN" && breakStartedAt) {
       breakMinutes += minutesBetween(breakStartedAt, event.eventTimestamp);
+      breakRanges.push({
+        start: breakStartedAt,
+        end: event.eventTimestamp
+      });
       breakStartedAt = null;
     }
   }
@@ -215,6 +276,7 @@ export function normalizeAttendanceEvents(
   }
 
   let overtimeMinutes = 0;
+  let nightMinutes = 0;
   let status: NormalizationLedgerStatus = "NEEDS_REVIEW";
   let needsReview = false;
 
@@ -239,6 +301,21 @@ export function normalizeAttendanceEvents(
     const scheduledMinutes = Math.max(0, scheduledSpanMinutes - Math.max(shiftPolicy.breakMinutes, 0));
 
     overtimeMinutes = Math.max(0, workedMinutes - scheduledMinutes);
+    const grossNightMinutes = calculateNightMinutesInRange({
+      start: checkIn,
+      end: checkOut
+    });
+    const breakNightMinutes = breakRanges.reduce((accumulator, range) => {
+      return (
+        accumulator +
+        calculateNightMinutesInRange({
+          start: range.start,
+          end: range.end
+        })
+      );
+    }, 0);
+
+    nightMinutes = Math.max(0, grossNightMinutes - breakNightMinutes);
 
     if (checkIn.getTime() > shiftStartWithGrace.getTime()) {
       status = "LATE";
@@ -255,6 +332,7 @@ export function normalizeAttendanceEvents(
     breakMinutes,
     workedMinutes,
     overtimeMinutes,
+    nightMinutes,
     status,
     needsReview,
     notes: needsReview ? "Manual review required" : undefined
@@ -480,7 +558,7 @@ export async function normalizeAttendanceJob(): Promise<void> {
           breakMinutes: normalized.breakMinutes,
           workedMinutes: normalized.workedMinutes,
           overtimeMinutes: normalized.overtimeMinutes,
-          nightMinutes: 0,
+          nightMinutes: normalized.nightMinutes,
           holidayMinutes: 0,
           policyVersion: policy?.version,
           needsReview: normalized.needsReview,
@@ -496,7 +574,7 @@ export async function normalizeAttendanceJob(): Promise<void> {
           breakMinutes: normalized.breakMinutes,
           workedMinutes: normalized.workedMinutes,
           overtimeMinutes: normalized.overtimeMinutes,
-          nightMinutes: 0,
+          nightMinutes: normalized.nightMinutes,
           holidayMinutes: 0,
           policyVersion: policy?.version,
           needsReview: normalized.needsReview,
@@ -540,6 +618,7 @@ export async function normalizeAttendanceJob(): Promise<void> {
             checkOutAt: normalized.checkOutAt,
             workedMinutes: normalized.workedMinutes,
             overtimeMinutes: normalized.overtimeMinutes,
+            nightMinutes: normalized.nightMinutes,
             needsReview: normalized.needsReview
           },
           metadataJson: {

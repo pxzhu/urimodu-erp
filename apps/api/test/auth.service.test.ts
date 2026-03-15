@@ -110,3 +110,34 @@ test("AuthService login failure raises UnauthorizedException and writes failure 
 
   assert.equal(audit.logs.some((entry) => entry.action === "AUTH_LOGIN_FAILED"), true);
 });
+
+test("AuthService throws Unsupported auth provider when provider map is empty", async () => {
+  const prisma = {
+    user: {
+      findUnique: async () => null
+    }
+  } as unknown as PrismaService;
+
+  const audit = createMockAuditService();
+  const authService = new AuthService(
+    prisma,
+    audit.service,
+    undefined as unknown as LocalAuthProvider,
+    undefined as unknown as OidcAuthProvider
+  );
+
+  await assert.rejects(
+    async () => {
+      await authService.login({
+        email: "admin@acme.local",
+        password: "ChangeMe123!",
+        provider: "local"
+      });
+    },
+    (error: unknown) => {
+      assert.equal(error instanceof UnauthorizedException, true);
+      assert.match(String((error as Error).message), /Unsupported auth provider/i);
+      return true;
+    }
+  );
+});

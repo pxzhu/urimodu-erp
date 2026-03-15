@@ -1,24 +1,17 @@
 import { createServer } from "node:http";
 
+import {
+  normalizeIngestionPayload,
+  resolveEdgeAgentKey,
+  toIngressPayload,
+  type EdgeAttendanceEvent
+} from "./ingestion";
+
 const port = Number(process.env.CONNECTOR_GATEWAY_PORT ?? 4200);
 const edgeAgentKey = process.env.EDGE_AGENT_SHARED_KEY ?? "dev-edge-agent-key";
 const integrationIngressUrl = process.env.INTEGRATION_INGEST_URL ?? "http://localhost:4000/integrations/attendance/raw";
 const integrationIngressKey = process.env.INTEGRATION_INGEST_API_KEY ?? "dev-integration-key";
 const defaultCompanyCode = process.env.DEFAULT_COMPANY_CODE ?? "ACME_KR";
-
-interface EdgeAttendanceEvent {
-  companyCode?: string;
-  provider?: string;
-  source?: string;
-  externalUserId?: string;
-  employeeNumber?: string;
-  eventType?: string;
-  eventTimestamp?: string;
-  deviceId?: string;
-  siteCode?: string;
-  dedupeHash?: string;
-  rawPayloadCsv?: string;
-}
 
 function unauthorized(res: import("node:http").ServerResponse) {
   res.writeHead(401, { "Content-Type": "application/json" });
@@ -35,23 +28,7 @@ async function readJsonBody<T>(req: import("node:http").IncomingMessage): Promis
 }
 
 async function forwardToApi(event: EdgeAttendanceEvent) {
-  const payload = {
-    companyCode: event.companyCode ?? defaultCompanyCode,
-    provider: (event.provider ?? "GENERIC").toUpperCase(),
-    source: (event.source ?? "AGENT_CSV").toUpperCase(),
-    event: {
-      externalUserId: event.externalUserId,
-      employeeNumber: event.employeeNumber,
-      eventType: event.eventType,
-      eventTimestamp: event.eventTimestamp,
-      deviceId: event.deviceId,
-      siteCode: event.siteCode,
-      dedupeKey: event.dedupeHash,
-      rawPayload: {
-        rawPayloadCsv: event.rawPayloadCsv
-      }
-    }
-  };
+  const payload = toIngressPayload(event, defaultCompanyCode);
 
   const response = await fetch(integrationIngressUrl, {
     method: "POST",
@@ -87,7 +64,7 @@ const server = createServer((req, res) => {
   if (req.method === "POST" && req.url === "/ingestion/events") {
     void (async () => {
       const requestKey = req.headers["x-edge-agent-key"];
-      const headerKey = typeof requestKey === "string" ? requestKey : requestKey?.[0];
+      const headerKey = resolveEdgeAgentKey(req.headers);
 
       if (headerKey !== edgeAgentKey) {
         unauthorized(res);
@@ -96,7 +73,7 @@ const server = createServer((req, res) => {
 
       try {
         const payload = await readJsonBody<EdgeAttendanceEvent | EdgeAttendanceEvent[]>(req);
-        const events = Array.isArray(payload) ? payload : [payload];
+        const events = normalizeIngestionPayload(payload);
 
         if (events.length === 0) {
           res.writeHead(400, { "Content-Type": "application/json" });

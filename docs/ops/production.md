@@ -2,6 +2,16 @@
 
 This repository is self-hosted first. Use Docker Compose for single-node/small setups and Helm for Kubernetes.
 
+## Helm Tooling Path
+
+- Use `./scripts/helmw.sh` to avoid hard local Helm dependency in day-to-day flows.
+- Wrapper behavior:
+  - local `helm` exists -> uses local binary
+  - local `helm` missing + Docker exists -> runs `alpine/helm` container
+- Helpful targets:
+  - `make helm-lint`
+  - `make helm-template`
+
 ## Environment Baseline
 
 At minimum configure:
@@ -14,6 +24,7 @@ At minimum configure:
 - `EDGE_AGENT_SHARED_KEY`
 - `DEFAULT_COMPANY_CODE`
 - `WORKER_TICK_MS` (optional; default `60000`)
+- `WORKER_JOB_STALE_MS` (optional; default `600000`, stale RUNNING import/export retry window)
 
 Do not use development defaults in production.
 

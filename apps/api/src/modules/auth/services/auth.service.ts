@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 
 import type { AuthContext } from "../../../common/auth/request-context";
 import { createSessionToken, hashToken } from "../../../common/auth/token.util";
@@ -16,13 +16,17 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
-    localAuthProvider: LocalAuthProvider,
-    oidcAuthProvider: OidcAuthProvider
+    @Inject(LocalAuthProvider) localAuthProvider: LocalAuthProvider,
+    @Inject(OidcAuthProvider) oidcAuthProvider: OidcAuthProvider
   ) {
-    this.providers = new Map<string, AuthProvider>([
-      [localAuthProvider.providerName, localAuthProvider],
-      [oidcAuthProvider.providerName, oidcAuthProvider]
-    ]);
+    this.providers = new Map<string, AuthProvider>();
+
+    for (const provider of [localAuthProvider, oidcAuthProvider]) {
+      if (!provider || typeof provider.providerName !== "string" || provider.providerName.length === 0) {
+        continue;
+      }
+      this.providers.set(provider.providerName, provider);
+    }
   }
 
   async login(dto: LoginDto, ipAddress?: string, userAgent?: string) {

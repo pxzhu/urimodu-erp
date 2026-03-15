@@ -14,6 +14,7 @@ This section is the practical runbook for local development and self-hosted oper
 
 - Docker Compose guide: `docs/deploy/docker-compose.md`
 - Helm values guide: `docs/deploy/helm-values.md`
+- Helm wrapper script (local/dockerd fallback): `scripts/helmw.sh`
 
 ## Service Health Endpoints
 

@@ -10,7 +10,7 @@
     "dev": "node -e \"console.log('No dev step for config package')\"",
     "lint": "node -e \"console.log('Config lint placeholder')\"",
     "typecheck": "node -e \"console.log('Config typecheck placeholder')\"",
-    "test": "node -e \"console.log('No tests for config package')\"",
+    "test": "node --test test/*.test.mjs",
     "clean": "node -e \"console.log('Nothing to clean for config package')\""
   }
 }

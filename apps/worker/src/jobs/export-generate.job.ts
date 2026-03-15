@@ -7,6 +7,7 @@ import { getDefaultWorkerStorage, type WorkerObjectStorage } from "../common/obj
 
 const prisma = new PrismaClient();
 const storage = getDefaultWorkerStorage();
+const WORKER_JOB_STALE_MS = Number(process.env.WORKER_JOB_STALE_MS ?? 10 * 60 * 1000);
 
 interface ExportGenerateDependencies {
   prismaClient?: PrismaClient;
@@ -98,12 +99,26 @@ function buildStorageKey(companyId: string, originalName: string): string {
   return `${companyId}/${datePrefix}/${randomUUID()}-${safeName}`;
 }
 
+function buildStaleRunningFilter(staleBefore: Date): Prisma.ExportJobWhereInput {
+  return {
+    status: JobStatus.RUNNING,
+    OR: [{ startedAt: null }, { startedAt: { lte: staleBefore } }]
+  };
+}
+
+export function buildExportJobClaimWhere(now: Date): Prisma.ExportJobWhereInput {
+  const staleBefore = new Date(now.getTime() - WORKER_JOB_STALE_MS);
+  return {
+    type: "EXPENSE_CLAIMS",
+    OR: [{ status: JobStatus.PENDING }, buildStaleRunningFilter(staleBefore)]
+  };
+}
+
 async function claimNextExpenseExportJob(prismaClient: PrismaClient, now: Date) {
+  const staleBefore = new Date(now.getTime() - WORKER_JOB_STALE_MS);
+  const claimableWhere = buildExportJobClaimWhere(now);
   const pending = await prismaClient.exportJob.findFirst({
-    where: {
-      type: "EXPENSE_CLAIMS",
-      status: JobStatus.PENDING
-    },
+    where: claimableWhere,
     orderBy: {
       createdAt: "asc"
     }
@@ -116,7 +131,7 @@ async function claimNextExpenseExportJob(prismaClient: PrismaClient, now: Date) 
   const claimed = await prismaClient.exportJob.updateMany({
     where: {
       id: pending.id,
-      status: JobStatus.PENDING
+      OR: [{ status: JobStatus.PENDING }, buildStaleRunningFilter(staleBefore)]
     },
     data: {
       status: JobStatus.RUNNING,
