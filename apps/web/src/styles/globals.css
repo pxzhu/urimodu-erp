@@ -248,6 +248,42 @@ button:hover {
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
+.step-tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.6rem;
+  margin: 0.9rem 0 1rem;
+}
+
+.step-tab {
+  text-align: left;
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+}
+
+.step-tab strong {
+  font-size: 0.93rem;
+}
+
+.step-tab span {
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.step-tab.is-active {
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--line));
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+}
+
+.step-tab:disabled {
+  opacity: 0.58;
+}
+
 input,
 textarea,
 select,
@@ -321,6 +357,10 @@ button:disabled {
   color: var(--text);
 }
 
+.data-table tr.is-selected td {
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface-2));
+}
+
 .checkbox-grid {
   display: grid;
   gap: 0.45rem;
@@ -334,6 +374,22 @@ button:disabled {
   gap: 0.5rem;
   flex-wrap: wrap;
   align-items: center;
+}
+
+.detail-tabs {
+  display: inline-flex;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+}
+
+.detail-tab {
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+.detail-tab.is-active {
+  border-color: color-mix(in srgb, var(--primary) 46%, var(--line));
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface-2));
 }
 
 .step-row {
