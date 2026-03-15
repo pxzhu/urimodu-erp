@@ -1,93 +1,87 @@
 [English](./README.md) | [English Mirror](./README.en.md)
 
-# 우리모두 ERP (한국형 사용자 설치형 ERP)
+# 우리모두 ERP
 
-한국 실무 워크플로우를 중심으로 한 Apache-2.0 공개 오픈소스 사용자 설치형 ERP/업무 플랫폼입니다.
+한국 실무 워크플로우를 중심으로 설계된 Apache-2.0 공개 오픈소스 사용자 설치형(Self-hosted) ERP/업무 플랫폼입니다.
 
-## 비전
+## 프로젝트 상태
 
-프로젝트 방향성과 원칙은 [VISION.md](./VISION.md)를 먼저 읽는 것을 권장합니다.  
-영문 비전: [VISION.en.md](./VISION.en.md)
+`v0.1.0-alpha.0` 프리릴리스 준비 단계입니다.
 
-## 현재 상태
+현재 저장소에는 `PROMPT02`~`PROMPT07` 범위가 완료된 기준선이 반영되어 있습니다.
 
-현재 저장소에는 PROMPT02-PROMPT07 기준의 실행 가능한 기반이 포함되어 있습니다.
+- 실행 가능한 모노레포 및 배포 스캐폴딩
+- 모듈형 모놀리스 API와 웹 UI 기반
+- 문서/전자결재 워크플로우 베이스라인
+- 근태/휴가 연동 및 edge-agent 스캐폴드
+- 경비/회계/가져오기·내보내기 스타터
+- 운영 문서, ADR, 스모크 체크 기반
 
-- `pnpm` + `turbo` 모노레포
-- Next.js 웹 앱 (`apps/web`)
-- NestJS 모듈형 모놀리스 API (`apps/api`)
-- Worker (`apps/worker`), docs-service (`apps/docs-service`), connector gateway (`apps/connector-gateway`)
-- Go edge-agent 스캐폴드 (`agents/edge-agent`)
-- Docker Compose 스택 + Helm 시작 차트
-- Prisma 스키마, 마이그레이션, 한국 샘플 시드 데이터
+본 상태는 **알파 프리릴리스 후보**이며, 아직 프로덕션 GA 릴리스가 아닙니다.
 
-## 프롬프트 진행 현황
+## 현재까지 구현된 핵심 모듈
 
-- PROMPT02: OSS 부트스트랩, 모노레포 기반, CI/배포 스켈레톤
-- PROMPT03: auth/org/employee/audit 모듈
-- PROMPT04: files/documents/approvals/signatures/PDF 수직 슬라이스
-- PROMPT05: attendance/leave/integrations/edge-agent 수직 슬라이스
-- PROMPT06: expenses/finance/import-export 수직 슬라이스
-- PROMPT07: 최종화 문서, ADR 보강, 운영 런북, 스모크 테스트, 로드맵
+- `auth`: 로컬 세션 인증 + RBAC + OIDC 확장 추상화
+- `org`: 회사/법인/사업장/부서 베이스라인
+- `employee`: 직원 마스터 + 마스킹 + 감사 훅
+- `files`: MinIO 기반 파일 오브젝트 메타데이터/조회
+- `documents`: 템플릿/버전/첨부 + PDF 렌더링 흐름
+- `approvals`: 상신/승인/반려 워크플로우 베이스라인
+- `signatures`: 서명/도장 에셋 스타터
+- `attendance`: raw 이벤트 수집 + 정규화 ledger 모델
+- `leave`: 휴가 요청/근태 정정 스타터
+- `expenses`: 경비청구 스타터
+- `finance`: 계정과목표/분개 스타터
+- `import-export`: 가져오기/내보내기 잡 + 행 단위 리포팅
+- `integrations`: generic ingress 계약 + connector gateway
+- `audit`: 핵심 변경행위 감사로그
 
-## 아키텍처 기준
+## 스크린샷
 
-- 코어 API는 모듈형 모놀리스 구조를 유지합니다.
-- 문서 전략은 HWPX 우선이며, 레거시 HWP는 fallback 전용 어댑터로 제한합니다.
-- 근태는 immutable raw 이벤트와 normalized ledger를 분리합니다.
-- 중요한 변경 동작은 audit log를 기록합니다.
-- 외부 연동은 generic contract + edge-agent/gateway 경계를 사용합니다.
+`v0.1.0-alpha.0` 프리릴리스 브랜치 기준으로 시드 데이터가 있는 로컬 스택에서 실제 캡처했습니다.  
+인벤토리/재촬영 절차는 [docs/screenshots/README.md](./docs/screenshots/README.md)를 참고하세요.
 
-아키텍처 다이어그램: [docs/architecture/README.md](./docs/architecture/README.md)
+### 직원 디렉터리 (`/employees`)
 
-## 모노레포 구조
+![직원 디렉터리](./docs/screenshots/01-employees-directory.png)
 
-```text
-apps/
-  web/
-  api/
-  worker/
-  docs-service/
-  connector-gateway/
-agents/
-  edge-agent/
-packages/
-  ui/
-  domain/
-  contracts/
-  sdk/
-  shared/
-  config/
-deploy/
-  compose/
-  helm/
-docs/
-  architecture/
-  adr/
-  api/
-  deploy/
-  ops/
-  testing/
-```
+### 문서 및 템플릿 (`/documents`)
 
-## 로컬 설정
+![문서 및 템플릿](./docs/screenshots/02-documents-and-templates.png)
+
+### 결재함 (`/approvals`)
+
+![결재함](./docs/screenshots/03-approvals-inbox.png)
+
+### 근태 원장 (`/attendance/ledger`)
+
+![근태 원장](./docs/screenshots/04-attendance-ledger.png)
+
+### 경비청구 (`/expenses`)
+
+![경비청구](./docs/screenshots/05-expense-claims.png)
+
+## 빠른 시작 (Quickstart)
 
 ### 사전 요구사항
 
 - Node.js 20+
 - pnpm 10+
 - Docker / Docker Compose (권장)
-- Go 1.19+ (edge-agent 실행 시)
+- Go 1.19+ (edge-agent 로컬 실행 시)
 
-### 설치 및 실행
+### 로컬 부팅
 
 ```bash
 make bootstrap
 cp .env.example .env
+cp deploy/compose/.env.example deploy/compose/.env
+make compose-up
+pnpm --filter @korean-erp/api prisma:seed
 pnpm dev
 ```
 
-### 서비스 엔드포인트
+### 로컬 엔드포인트
 
 - Web: `http://localhost:3000`
 - API: `http://localhost:4000`
@@ -97,28 +91,7 @@ pnpm dev
 - Connector gateway health: `http://localhost:4200/health`
 - Docs service health: `http://localhost:4300/health`
 
-## Docker Compose
-
-```bash
-cp deploy/compose/.env.example deploy/compose/.env
-make compose-up
-```
-
-중지:
-
-```bash
-make compose-down
-```
-
-가이드: [docs/deploy/docker-compose.md](./docs/deploy/docker-compose.md)
-
-## 시드 데이터
-
-```bash
-pnpm --filter @korean-erp/api prisma:seed
-```
-
-시드 사용자:
+### 시드 계정
 
 - `admin@acme.local`
 - `hr@acme.local`
@@ -127,35 +100,17 @@ pnpm --filter @korean-erp/api prisma:seed
 
 기본 비밀번호: `ChangeMe123!` (`SEED_DEFAULT_PASSWORD`로 변경 가능)
 
-시드/템플릿 상세: [docs/ops/seeding.md](./docs/ops/seeding.md)
-
-## 운영 및 보안
-
-- 운영 문서 인덱스: [docs/ops/README.md](./docs/ops/README.md)
-- 백업/복구: [docs/ops/backup-restore.md](./docs/ops/backup-restore.md)
-- 운영 환경 노트: [docs/ops/production.md](./docs/ops/production.md)
-- 보안 체크리스트: [docs/ops/security-checklist.md](./docs/ops/security-checklist.md)
-- 스모크 테스트: [docs/testing/smoke-tests.md](./docs/testing/smoke-tests.md)
-
-부팅 후 스모크 테스트:
+### 스모크 체크
 
 ```bash
 make smoke
 ```
 
-## Helm
+## 로드맵 / 다음 단계
 
-차트 경로: `deploy/helm/korean-erp`
+[docs/roadmap.md](./docs/roadmap.md)를 참고하세요.
 
-```bash
-helm install korean-erp deploy/helm/korean-erp
-```
-
-Values 가이드: [docs/deploy/helm-values.md](./docs/deploy/helm-values.md)
-
-## 로드맵
-
-다음 단계 우선순위는 [docs/roadmap.md](./docs/roadmap.md)에서 관리합니다.
+다음 우선순위:
 
 - payroll
 - advanced accounting
@@ -163,6 +118,23 @@ Values 가이드: [docs/deploy/helm-values.md](./docs/deploy/helm-values.md)
 - HWPX export hardening
 - mobile app
 - notification integrations
+
+## 지원 및 기여
+
+- 비전: [VISION.md](./VISION.md) / [VISION.en.md](./VISION.en.md)
+- 기여 가이드: [CONTRIBUTING.md](./CONTRIBUTING.md)
+- 보안 정책: [SECURITY.md](./SECURITY.md)
+- 이슈 트래커: [GitHub Issues](https://github.com/pxzhu/urimodu-erp/issues)
+
+## 문서 맵
+
+- 실행 계획 로그: [docs/PLAN.md](./docs/PLAN.md)
+- 아키텍처 다이어그램: [docs/architecture/README.md](./docs/architecture/README.md)
+- ADR: [docs/adr](./docs/adr)
+- API 노트: [docs/api/README.md](./docs/api/README.md)
+- 운영 노트: [docs/ops/README.md](./docs/ops/README.md)
+- 릴리스 노트 초안: [docs/releases/v0.1.0-alpha.0.md](./docs/releases/v0.1.0-alpha.0.md)
+- 변경 이력: [CHANGELOG.md](./CHANGELOG.md)
 
 ## 라이선스
 

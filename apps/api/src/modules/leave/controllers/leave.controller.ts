@@ -1,15 +1,15 @@
 import { Body, Controller, Get, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import type { AuthContext, RequestWithAuth } from "../../../common/auth/request-context";
+import { AuthContext, RequestWithAuth } from "../../../common/auth/request-context";
 import { CurrentAuth } from "../../../common/decorators/auth-context.decorator";
 import { ApiCompanyContextHeader } from "../../../common/decorators/api-company-context-header.decorator";
 import { SessionAuthGuard } from "../../../common/guards/session-auth.guard";
 import { getHeaderValue } from "../../../common/utils/request.util";
-import type { AttendanceCorrectionQueryDto } from "../dto/attendance-correction-query.dto";
-import type { CreateAttendanceCorrectionDto } from "../dto/create-attendance-correction.dto";
-import type { CreateLeaveRequestDto } from "../dto/create-leave-request.dto";
-import type { LeaveRequestQueryDto } from "../dto/leave-request-query.dto";
+import { AttendanceCorrectionQueryDto } from "../dto/attendance-correction-query.dto";
+import { CreateAttendanceCorrectionDto } from "../dto/create-attendance-correction.dto";
+import { CreateLeaveRequestDto } from "../dto/create-leave-request.dto";
+import { LeaveRequestQueryDto } from "../dto/leave-request-query.dto";
 import { LeaveService } from "../services/leave.service";
 
 @ApiTags("leave")

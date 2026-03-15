@@ -1,93 +1,87 @@
 [한국어](./README.ko.md) | [English Mirror](./README.en.md)
 
-# Urimodu ERP (Korean Self-Hosted ERP)
+# Urimodu ERP
 
-Open-source, Apache-2.0 licensed, self-hosted ERP/work platform focused on Korean business workflows.
+Self-hosted, Apache-2.0 open-source ERP/work platform with Korean-first business workflow design.
 
-## Vision
+## Project Status
 
-Read [VISION.md](./VISION.md) first for project direction and principles.  
-English vision: [VISION.en.md](./VISION.en.md)
+`v0.1.0-alpha.0` prerelease preparation is in progress.
 
-## Current Status
+Current repository baseline includes completed scope from `PROMPT02` through `PROMPT07`:
 
-The repository currently provides a runnable PROMPT02-PROMPT07 baseline:
+- runnable monorepo and deployment scaffolding
+- core modular-monolith API and web UI
+- document and approval workflow baseline
+- attendance/leave integration and edge-agent scaffold
+- expenses/finance/import-export starter
+- operational docs, ADRs, and smoke check foundation
 
-- `pnpm` + `turbo` monorepo
-- Next.js web app (`apps/web`)
-- NestJS modular-monolith API (`apps/api`)
-- Worker (`apps/worker`), docs-service (`apps/docs-service`), connector gateway (`apps/connector-gateway`)
-- Go edge-agent scaffold (`agents/edge-agent`)
-- Docker Compose stack + Helm chart starter
-- Prisma schema, migrations, Korean sample seed data
+This is an **alpha prerelease candidate** for early adopters and contributors, not a production GA.
 
-## Prompt Progress
+## Core Modules Implemented So Far
 
-- PROMPT02: OSS bootstrap, monorepo foundation, CI and deploy skeleton
-- PROMPT03: auth/org/employee/audit modules
-- PROMPT04: files/documents/approvals/signatures/PDF vertical slice
-- PROMPT05: attendance/leave/integrations/edge-agent vertical slice
-- PROMPT06: expenses/finance/import-export vertical slice
-- PROMPT07: finalization docs, ADR hardening, runbooks, smoke tests, roadmap
+- `auth`: local session auth + RBAC + OIDC-ready abstraction
+- `org`: company/legal entity/business site/department baseline
+- `employee`: employee master with masking and audit hooks
+- `files`: MinIO-backed file object metadata + retrieval
+- `documents`: template/version/attachment and PDF rendering flow
+- `approvals`: submit/approve/reject workflow baseline
+- `signatures`: signature/seal asset starter
+- `attendance`: raw event ingestion + normalized ledger model
+- `leave`: leave requests and attendance correction starter
+- `expenses`: expense claim starter
+- `finance`: chart of accounts and journal entry starter
+- `import-export`: import/export jobs with row-level reporting
+- `integrations`: generic ingress contract + connector gateway
+- `audit`: key mutation audit logs
 
-## Architecture Baseline
+## Screenshots
 
-- Core API remains a modular monolith.
-- Document strategy is HWPX-first, with legacy HWP fallback-only adapters.
-- Attendance keeps immutable raw events and normalized ledgers.
-- Important mutations write audit logs.
-- Edge integrations use generic contracts and edge-agent/gateway boundaries.
+Captured from a seeded local stack for the `v0.1.0-alpha.0` prerelease branch.  
+Capture inventory and recapture guide: [docs/screenshots/README.md](./docs/screenshots/README.md)
 
-Architecture diagrams: [docs/architecture/README.md](./docs/architecture/README.md)
+### Employees Directory (`/employees`)
 
-## Monorepo Structure
+![Employees directory](./docs/screenshots/01-employees-directory.png)
 
-```text
-apps/
-  web/
-  api/
-  worker/
-  docs-service/
-  connector-gateway/
-agents/
-  edge-agent/
-packages/
-  ui/
-  domain/
-  contracts/
-  sdk/
-  shared/
-  config/
-deploy/
-  compose/
-  helm/
-docs/
-  architecture/
-  adr/
-  api/
-  deploy/
-  ops/
-  testing/
-```
+### Documents And Templates (`/documents`)
 
-## Local Setup
+![Documents and templates](./docs/screenshots/02-documents-and-templates.png)
+
+### Approvals Inbox (`/approvals`)
+
+![Approvals inbox](./docs/screenshots/03-approvals-inbox.png)
+
+### Attendance Ledger (`/attendance/ledger`)
+
+![Attendance ledger](./docs/screenshots/04-attendance-ledger.png)
+
+### Expense Claims (`/expenses`)
+
+![Expense claims](./docs/screenshots/05-expense-claims.png)
+
+## Quickstart
 
 ### Prerequisites
 
 - Node.js 20+
 - pnpm 10+
 - Docker / Docker Compose (recommended)
-- Go 1.19+ (if running edge-agent)
+- Go 1.19+ (if running edge-agent locally)
 
-### Install and Run
+### Local Boot
 
 ```bash
 make bootstrap
 cp .env.example .env
+cp deploy/compose/.env.example deploy/compose/.env
+make compose-up
+pnpm --filter @korean-erp/api prisma:seed
 pnpm dev
 ```
 
-### Service Endpoints
+### Local Endpoints
 
 - Web: `http://localhost:3000`
 - API: `http://localhost:4000`
@@ -97,65 +91,26 @@ pnpm dev
 - Connector gateway health: `http://localhost:4200/health`
 - Docs service health: `http://localhost:4300/health`
 
-## Docker Compose
-
-```bash
-cp deploy/compose/.env.example deploy/compose/.env
-make compose-up
-```
-
-Stop:
-
-```bash
-make compose-down
-```
-
-Guide: [docs/deploy/docker-compose.md](./docs/deploy/docker-compose.md)
-
-## Seed Data
-
-```bash
-pnpm --filter @korean-erp/api prisma:seed
-```
-
-Seed users:
+### Seeded Accounts
 
 - `admin@acme.local`
 - `hr@acme.local`
 - `manager@acme.local`
 - `employee@acme.local`
 
-Default password: `ChangeMe123!` (override via `SEED_DEFAULT_PASSWORD`)
+Default password: `ChangeMe123!` (override with `SEED_DEFAULT_PASSWORD`)
 
-Seed + template details: [docs/ops/seeding.md](./docs/ops/seeding.md)
-
-## Operations and Security
-
-- Ops index: [docs/ops/README.md](./docs/ops/README.md)
-- Backup/restore: [docs/ops/backup-restore.md](./docs/ops/backup-restore.md)
-- Production notes: [docs/ops/production.md](./docs/ops/production.md)
-- Security checklist: [docs/ops/security-checklist.md](./docs/ops/security-checklist.md)
-- Smoke tests: [docs/testing/smoke-tests.md](./docs/testing/smoke-tests.md)
-
-Run smoke checks after boot:
+### Smoke Check
 
 ```bash
 make smoke
 ```
 
-## Helm
+## Roadmap / What Comes Next
 
-Chart path: `deploy/helm/korean-erp`
+See [docs/roadmap.md](./docs/roadmap.md).
 
-```bash
-helm install korean-erp deploy/helm/korean-erp
-```
-
-Values guide: [docs/deploy/helm-values.md](./docs/deploy/helm-values.md)
-
-## Roadmap
-
-Next roadmap priorities are tracked in [docs/roadmap.md](./docs/roadmap.md):
+Planned next focus areas:
 
 - payroll
 - advanced accounting
@@ -163,6 +118,23 @@ Next roadmap priorities are tracked in [docs/roadmap.md](./docs/roadmap.md):
 - HWPX export hardening
 - mobile app
 - notification integrations
+
+## Support and Contributing
+
+- Vision: [VISION.md](./VISION.md) / [VISION.en.md](./VISION.en.md)
+- Contributing guide: [CONTRIBUTING.md](./CONTRIBUTING.md)
+- Security policy: [SECURITY.md](./SECURITY.md)
+- Issues: [GitHub Issues](https://github.com/pxzhu/urimodu-erp/issues)
+
+## Documentation Map
+
+- Execution plan log: [docs/PLAN.md](./docs/PLAN.md)
+- Architecture diagrams: [docs/architecture/README.md](./docs/architecture/README.md)
+- ADRs: [docs/adr](./docs/adr)
+- API notes: [docs/api/README.md](./docs/api/README.md)
+- Operations notes: [docs/ops/README.md](./docs/ops/README.md)
+- Release notes draft: [docs/releases/v0.1.0-alpha.0.md](./docs/releases/v0.1.0-alpha.0.md)
+- Changelog: [CHANGELOG.md](./CHANGELOG.md)
 
 ## License
 

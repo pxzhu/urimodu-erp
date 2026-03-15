@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 
-import type { AuthContext, RequestWithAuth } from "../../../common/auth/request-context";
+import { AuthContext, RequestWithAuth } from "../../../common/auth/request-context";
 import { CurrentAuth } from "../../../common/decorators/auth-context.decorator";
 import { ApiCompanyContextHeader } from "../../../common/decorators/api-company-context-header.decorator";
 import { SessionAuthGuard } from "../../../common/guards/session-auth.guard";
 import { getHeaderValue } from "../../../common/utils/request.util";
-import type { CreateExpenseClaimDto } from "../dto/create-expense-claim.dto";
-import type { ExpenseClaimQueryDto } from "../dto/expense-claim-query.dto";
+import { CreateExpenseClaimDto } from "../dto/create-expense-claim.dto";
+import { ExpenseClaimQueryDto } from "../dto/expense-claim-query.dto";
 import { ExpensesService } from "../services/expenses.service";
 
 @ApiTags("expenses")
