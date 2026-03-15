@@ -538,3 +538,77 @@ Prepare the first public prerelease documentation and presentation layer for `v0
   - `pnpm -r typecheck` passed
   - `pnpm -r test` passed
   - `pnpm -r build` passed
+
+---
+
+# v0.1.1-alpha.1 Stabilization Plan
+
+Date: 2026-03-15  
+Scope source: `PROMPT01.md` + `AGENTS.md` + stabilization run request
+
+## Objective
+
+Ship a focused hardening release for post-alpha stabilization without expanding into new feature scope.
+
+## Ordered Steps
+
+1. Re-validate baseline first:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+2. Implement approval outcome synchronization:
+   - reflect approval terminal states into `LeaveRequest` and `AttendanceCorrection`
+   - preserve approval/document history and add explicit audit logs
+3. Harden attendance normalization:
+   - support overnight shift normalization (cross-midnight)
+   - keep raw events immutable
+   - persist applied shift-policy version and ledger-source linkage
+4. Move import/export execution to async worker flow:
+   - lifecycle: `PENDING` → `RUNNING` → `SUCCEEDED|FAILED`
+   - preserve `ImportJobRow` validation/error reporting and export result tracking
+5. Strengthen smoke/e2e-oriented coverage for critical flows:
+   - login, dashboard availability, documents/approvals, attendance ledger, expenses
+   - include approval outcome status sync verification where practical
+6. Update release hardening docs and notes:
+   - `docs/releases/v0.1.1-alpha.1.md`
+   - `CHANGELOG.md`
+   - ops/testing/api docs only where behavior changed
+7. Re-run final validation and require green:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+   - `cd agents/edge-agent && go test ./...` (if Go touched)
+
+## Constraints
+
+- Stabilization/bugfix only; no PROMPT08+ scope.
+- Keep core API as modular monolith.
+- Preserve OSS repo quality and existing conventions.
+- Keep README language files aligned if changed.
+
+## Completion Snapshot
+
+- Approval status synchronization added in approvals domain:
+  - terminal approval outcomes now sync linked `LeaveRequest` / `AttendanceCorrection` statuses
+  - synchronization mutations emit dedicated audit logs
+- Attendance normalization hardening:
+  - overnight shift policy windows are accepted
+  - post-midnight event work-date mapping is covered for overnight scenarios
+  - worker tests added for overnight normalization behavior
+- Import/export async workerization:
+  - API create endpoints queue jobs as `PENDING`
+  - worker claims and processes jobs (`RUNNING` -> `SUCCEEDED|FAILED`)
+  - import row-level error persistence retained (`ImportJobRow`)
+  - export result file tracking retained (`resultFileId` + summary)
+- Smoke baseline hardening:
+  - stack smoke script now verifies login/authenticated APIs and core web routes
+- Docs/release hardening:
+  - added `docs/releases/v0.1.1-alpha.1.md`
+  - updated `CHANGELOG.md` and ops/testing/api docs for stabilization behavior
+- Validation (post-implementation):
+  - `pnpm -r lint` passed
+  - `pnpm -r typecheck` passed
+  - `pnpm -r test` passed
+  - `pnpm -r build` passed

@@ -7,14 +7,20 @@ import { exportGenerateJob } from "./jobs/export-generate.job";
 import { notificationDispatchJob } from "./jobs/notification-dispatch.job";
 
 const port = Number(process.env.WORKER_PORT ?? 4100);
+const tickMs = Number(process.env.WORKER_TICK_MS ?? 60_000);
 
-setInterval(() => {
+async function runWorkerTick() {
   void normalizeAttendanceJob();
   void renderPdfJob();
   void importParseJob();
   void exportGenerateJob();
   void notificationDispatchJob();
-}, 60_000);
+}
+
+void runWorkerTick();
+setInterval(() => {
+  void runWorkerTick();
+}, tickMs);
 
 const server = createServer((req, res) => {
   if (req.url === "/health") {

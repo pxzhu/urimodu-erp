@@ -28,6 +28,7 @@
 - API auth convention: `Authorization: Bearer <session-token>` + `x-company-id` header
 - Secured API controllers should expose `x-company-id` in Swagger via shared decorator
 - Mutation endpoints (create/update/delete + auth-sensitive actions) must write `AuditLog`
+- Import/export APIs enqueue jobs as `PENDING`; worker processes lifecycle transitions (`RUNNING` -> `SUCCEEDED|FAILED`)
 - Employee response payloads should keep sensitive fields masked by default
 - API tests use Node test runner via `tsx --test` for lightweight TypeScript coverage
 - Prefer service-level tests with mocked Prisma/Audit dependencies before heavier e2e wiring

@@ -20,6 +20,7 @@ Use this checklist before merging major changes or cutting a release.
 
 - [ ] Sensitive fields are masked in API responses where required
 - [ ] Critical mutations write `AuditLog`
+- [ ] Approval terminal outcomes are synchronized to linked leave/correction records with audit logs
 - [ ] Backup/restore drill was executed recently
 - [ ] Raw attendance source records remain immutable
 
@@ -35,3 +36,4 @@ Use this checklist before merging major changes or cutting a release.
 - [ ] Required status checks pass (`lint`, `typecheck`, `test`, `build`)
 - [ ] PR diff reviewed for accidental README rename/language regressions
 - [ ] Dependency upgrades with major version bumps reviewed manually
+- [ ] Worker services are included in deployment topology for async import/export lifecycle handling

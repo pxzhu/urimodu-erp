@@ -20,7 +20,7 @@ interface NormalizationInputEvent {
   eventTimestamp: Date;
 }
 
-interface NormalizationShiftPolicy {
+export interface NormalizationShiftPolicy {
   workStartMinutes: number;
   workEndMinutes: number;
   breakMinutes: number;
@@ -56,6 +56,14 @@ interface GroupedEvents {
   events: PendingRawEvent[];
 }
 
+interface LocalDateTimeParts {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+}
+
 function minutesBetween(start: Date, end: Date): number {
   const diffMs = end.getTime() - start.getTime();
   return Math.max(0, Math.floor(diffMs / 60000));
@@ -89,7 +97,68 @@ function toShiftDate(date: Date, minutes: number): Date {
   return shifted;
 }
 
-function normalizeAttendanceEvents(
+function formatDateKey(parts: Pick<LocalDateTimeParts, "year" | "month" | "day">): string {
+  return `${parts.year.toString().padStart(4, "0")}-${parts.month.toString().padStart(2, "0")}-${parts.day
+    .toString()
+    .padStart(2, "0")}`;
+}
+
+function shiftDateKey(dateKey: string, deltaDays: number): string {
+  const date = new Date(`${dateKey}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + deltaDays);
+  return date.toISOString().slice(0, 10);
+}
+
+function getLocalDateTimeParts(date: Date, timezone: string): LocalDateTimeParts {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23"
+  });
+  const parts = formatter.formatToParts(date);
+
+  const byType = new Map(parts.map((part) => [part.type, part.value]));
+  return {
+    year: Number(byType.get("year") ?? "1970"),
+    month: Number(byType.get("month") ?? "1"),
+    day: Number(byType.get("day") ?? "1"),
+    hour: Number(byType.get("hour") ?? "0"),
+    minute: Number(byType.get("minute") ?? "0")
+  };
+}
+
+export function resolveWorkDateKeyForEvent(input: {
+  eventTimestamp: Date;
+  timezone: string;
+  shiftPolicy?: NormalizationShiftPolicy | null;
+}): string {
+  const local = getLocalDateTimeParts(input.eventTimestamp, input.timezone);
+  const localDateKey = formatDateKey(local);
+
+  if (!input.shiftPolicy) {
+    return localDateKey;
+  }
+
+  const isOvernightShift = input.shiftPolicy.workEndMinutes <= input.shiftPolicy.workStartMinutes;
+  if (!isOvernightShift) {
+    return localDateKey;
+  }
+
+  const localMinutes = local.hour * 60 + local.minute;
+  const carryoverCutoffMinutes = input.shiftPolicy.workEndMinutes + Math.max(input.shiftPolicy.graceMinutes, 0);
+
+  if (localMinutes < carryoverCutoffMinutes) {
+    return shiftDateKey(localDateKey, -1);
+  }
+
+  return localDateKey;
+}
+
+export function normalizeAttendanceEvents(
   events: NormalizationInputEvent[],
   shiftPolicy?: NormalizationShiftPolicy
 ): NormalizedAttendanceResult {
@@ -156,16 +225,22 @@ function normalizeAttendanceEvents(
     status = "NEEDS_REVIEW";
     needsReview = true;
   } else {
-    const shiftStart = toShiftDate(checkIn, shiftPolicy.workStartMinutes + Math.max(shiftPolicy.graceMinutes, 0));
-    const shiftEnd = toShiftDate(checkIn, shiftPolicy.workEndMinutes);
-    const scheduledMinutes = Math.max(
-      0,
-      shiftPolicy.workEndMinutes - shiftPolicy.workStartMinutes - Math.max(shiftPolicy.breakMinutes, 0)
-    );
+    const shiftReference = checkIn ?? sorted[0]?.eventTimestamp ?? new Date();
+    const shiftStart = toShiftDate(shiftReference, shiftPolicy.workStartMinutes);
+    const shiftStartWithGrace = new Date(shiftStart.getTime() + Math.max(shiftPolicy.graceMinutes, 0) * 60_000);
+    const shiftEnd = toShiftDate(shiftReference, shiftPolicy.workEndMinutes);
+    const isOvernightShift = shiftPolicy.workEndMinutes <= shiftPolicy.workStartMinutes;
+
+    if (isOvernightShift || shiftEnd.getTime() <= shiftStart.getTime()) {
+      shiftEnd.setUTCDate(shiftEnd.getUTCDate() + 1);
+    }
+
+    const scheduledSpanMinutes = minutesBetween(shiftStart, shiftEnd);
+    const scheduledMinutes = Math.max(0, scheduledSpanMinutes - Math.max(shiftPolicy.breakMinutes, 0));
 
     overtimeMinutes = Math.max(0, workedMinutes - scheduledMinutes);
 
-    if (checkIn.getTime() > shiftStart.getTime()) {
+    if (checkIn.getTime() > shiftStartWithGrace.getTime()) {
       status = "LATE";
     } else if (checkOut.getTime() < shiftEnd.getTime()) {
       status = "EARLY_LEAVE";
@@ -246,11 +321,46 @@ async function resolvePolicy(input: {
   return fallback ?? null;
 }
 
-function groupPendingEvents(events: PendingRawEvent[]): GroupedEvents[] {
+async function groupPendingEvents(events: PendingRawEvent[], policyCache: Map<string, ShiftPolicy | null>): Promise<GroupedEvents[]> {
   const groups = new Map<string, GroupedEvents>();
 
   for (const event of events) {
-    const workDate = toDateStringInTimezone(event.eventTimestamp, event.companyTimezone);
+    const localDateKey = toDateStringInTimezone(event.eventTimestamp, event.companyTimezone);
+    const localDate = parseDateOnly(localDateKey);
+    let policy = await resolvePolicy({
+      companyId: event.companyId,
+      employeeId: event.employeeId,
+      workDate: localDate,
+      cache: policyCache
+    });
+
+    let workDate = resolveWorkDateKeyForEvent({
+      eventTimestamp: event.eventTimestamp,
+      timezone: event.companyTimezone,
+      shiftPolicy: policy
+        ? {
+            workStartMinutes: policy.workStartMinutes,
+            workEndMinutes: policy.workEndMinutes,
+            breakMinutes: policy.breakMinutes,
+            graceMinutes: policy.graceMinutes
+          }
+        : undefined
+    });
+
+    if (workDate !== localDateKey) {
+      const adjustedDate = parseDateOnly(workDate);
+      const adjustedPolicy = await resolvePolicy({
+        companyId: event.companyId,
+        employeeId: event.employeeId,
+        workDate: adjustedDate,
+        cache: policyCache
+      });
+
+      if (adjustedPolicy) {
+        policy = adjustedPolicy;
+      }
+    }
+
     const key = `${event.companyId}:${event.employeeId}:${workDate}`;
 
     const existing = groups.get(key);
@@ -317,8 +427,8 @@ export async function normalizeAttendanceJob(): Promise<void> {
     });
   }
 
-  const grouped = groupPendingEvents(mappedEvents);
   const policyCache = new Map<string, ShiftPolicy | null>();
+  const grouped = await groupPendingEvents(mappedEvents, policyCache);
 
   let processedGroups = 0;
   let processedEvents = 0;
