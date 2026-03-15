@@ -479,3 +479,62 @@ Finalize the repository so another engineer can clone, run, seed, and explore th
   - `pnpm -r test` passed
   - `pnpm -r build` passed
   - `docker compose -f deploy/compose/docker-compose.yml config` passed
+
+---
+
+# v0.1.0-alpha.0 Prerelease Preparation Plan
+
+Date: 2026-03-14  
+Scope source: `PROMPT01.md` + `AGENTS.md` + release-prep request
+
+## Objective
+
+Prepare the first public prerelease documentation and presentation layer for `v0.1.0-alpha.0` without changing product scope or remote GitHub state.
+
+## Ordered Steps
+
+1. Re-validate baseline (`lint`, `typecheck`, `test`, `build`) and keep current green status.
+2. Improve `README.md` (EN) and `README.ko.md` (KO) for public prerelease presentation:
+   - project status
+   - implemented core modules
+   - screenshots
+   - quickstart
+   - roadmap
+   - support/contributing links
+3. Handle screenshots with practical fallback policy:
+   - capture real screenshots only if stable in this environment
+   - otherwise add repeatable capture guide under `docs/screenshots/README.md` and README TODO placeholders
+4. Add release-prep docs:
+   - `CHANGELOG.md`
+   - `docs/releases/v0.1.0-alpha.0.md` (draft prerelease notes)
+   - `docs/releases/README.md` (release checklist)
+5. Re-run validations and keep all passing.
+
+## Constraints
+
+- No new product scope beyond release prep.
+- No remote GitHub mutations (no tags/releases/push-side actions).
+- Keep README EN/KO structure aligned.
+
+## Completion Snapshot
+
+- Updated prerelease-facing README structure for both EN/KO:
+  - project status
+  - implemented module summary
+  - screenshots section
+  - quickstart
+  - roadmap
+  - support/contributing links
+- Screenshot outcome for this run: fallback documentation (no fabricated images)
+  - added `docs/screenshots/README.md` with repeatable capture guide
+  - added TODO screenshot path placeholders in README files
+- Added release prep docs:
+  - `CHANGELOG.md`
+  - `docs/releases/v0.1.0-alpha.0.md` (draft prerelease notes)
+  - `docs/releases/README.md` (release checklist)
+- Added `VISION.ko.md` compatibility alias pointing to Korean canonical vision doc.
+- Validation (pre and post implementation):
+  - `pnpm -r lint` passed
+  - `pnpm -r typecheck` passed
+  - `pnpm -r test` passed
+  - `pnpm -r build` passed
