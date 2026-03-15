@@ -139,6 +139,15 @@ pnpm dev
 make smoke
 ```
 
+### Helm 체크 (로컬 Helm 선택)
+
+```bash
+make helm-lint
+make helm-template
+```
+
+Helm 래퍼(`scripts/helmw.sh`)는 로컬 `helm`이 있으면 우선 사용하고, 없으면 Docker `alpine/helm`으로 fallback 합니다.
+
 ### QA 아카이브 워크플로우
 
 ```bash

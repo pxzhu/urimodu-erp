@@ -283,6 +283,29 @@ Enforce a repeatable QA evidence workflow for every task/PR so that all APIs, pa
 - Repeatable validation logs archived per run
 - Screenshot evidence conventions aligned with admin/user role views
 
+---
+
+# Open Issues Hardening Plan (v0.1.1-alpha.1 backlog)
+
+Date: 2026-03-15
+
+## Objective
+
+Resolve currently open stabilization issues (#19, #20, #21, #22, #23, #24, #25, #27) against latest `main`, then merge via PR workflow.
+
+## Execution Order
+
+1. Sync from `main` (`git switch main && git pull --ff-only`) and branch.
+2. Fix #27 API dev startup DI failure (`tsx watch`) and verify boot.
+3. Close correctness gaps and tests for #20/#21/#22:
+   - approval cancel status sync test
+   - night-minute normalization coverage
+   - stale RUNNING import/export retry claim behavior
+4. Address #24 by replacing remaining placeholder test commands with runnable baseline tests.
+5. Address #23 by adding helm wrapper fallback (`scripts/helmw.sh`) + docs/make target updates.
+6. Update changelog/release notes/docs where behavior changed.
+7. Run full validations (`lint`, `typecheck`, `test`, `build`) and merge via PR.
+
 ## Completion Notes
 
 - Re-validation before implementation:

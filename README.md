@@ -139,6 +139,15 @@ Default password: `ChangeMe123!` (override with `SEED_DEFAULT_PASSWORD`)
 make smoke
 ```
 
+### Helm Check (Local Helm Optional)
+
+```bash
+make helm-lint
+make helm-template
+```
+
+The Helm wrapper (`scripts/helmw.sh`) uses local `helm` when available and falls back to Docker `alpine/helm`.
+
 ### QA Archive Workflow
 
 ```bash

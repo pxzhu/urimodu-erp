@@ -9,8 +9,8 @@ import {
   resolveWorkDateKeyForEvent,
   type NormalizationShiftPolicy
 } from "../src/jobs/attendance-normalize.job";
-import { processVendorImportJob } from "../src/jobs/import-parse.job";
-import { processExpenseClaimExportJob } from "../src/jobs/export-generate.job";
+import { buildImportJobClaimWhere, processVendorImportJob } from "../src/jobs/import-parse.job";
+import { buildExportJobClaimWhere, processExpenseClaimExportJob } from "../src/jobs/export-generate.job";
 
 test("attendance normalization handles overnight shift check-in/check-out", () => {
   const overnightPolicy: NormalizationShiftPolicy = {
@@ -46,6 +46,7 @@ test("attendance normalization handles overnight shift check-in/check-out", () =
   assert.equal(result.needsReview, false);
   assert.equal(result.workedMinutes, 420);
   assert.equal(result.overtimeMinutes, 0);
+  assert.equal(result.nightMinutes, 420);
 });
 
 test("resolveWorkDateKeyForEvent maps post-midnight event to previous work date for overnight policy", () => {
@@ -61,6 +62,32 @@ test("resolveWorkDateKeyForEvent maps post-midnight event to previous work date 
   });
 
   assert.equal(workDate, "2026-03-15");
+});
+
+test("attendance normalization calculates night minutes for partial night work", () => {
+  const policy: NormalizationShiftPolicy = {
+    workStartMinutes: 9 * 60,
+    workEndMinutes: 18 * 60,
+    breakMinutes: 0,
+    graceMinutes: 0
+  };
+
+  const result = normalizeAttendanceEvents(
+    [
+      {
+        eventType: "IN",
+        eventTimestamp: new Date("2026-03-15T20:00:00.000Z")
+      },
+      {
+        eventType: "OUT",
+        eventTimestamp: new Date("2026-03-15T23:30:00.000Z")
+      }
+    ],
+    policy
+  );
+
+  assert.equal(result.workedMinutes, 210);
+  assert.equal(result.nightMinutes, 90);
 });
 
 test("worker import job keeps row-level errors and marks job FAILED when any row is invalid", async () => {
@@ -211,4 +238,24 @@ test("worker export job persists result file tracking and marks job SUCCEEDED", 
   assert.equal(finalUpdate.status, JobStatus.SUCCEEDED);
   assert.equal(finalUpdate.resultFileId, "file_export_1");
   assert.equal(putObjects.length, 1);
+});
+
+test("import/export claim filters include stale RUNNING jobs for retry-safe processing", () => {
+  const now = new Date("2026-03-15T12:00:00.000Z");
+
+  const importWhere = buildImportJobClaimWhere(now) as {
+    OR?: Array<Record<string, unknown>>;
+    type?: string;
+  };
+  const exportWhere = buildExportJobClaimWhere(now) as {
+    OR?: Array<Record<string, unknown>>;
+    type?: string;
+  };
+
+  assert.equal(importWhere.type, "VENDOR");
+  assert.equal(exportWhere.type, "EXPENSE_CLAIMS");
+  assert.equal(Array.isArray(importWhere.OR), true);
+  assert.equal(Array.isArray(exportWhere.OR), true);
+  assert.equal(importWhere.OR?.some((condition) => condition.status === JobStatus.RUNNING), true);
+  assert.equal(exportWhere.OR?.some((condition) => condition.status === JobStatus.RUNNING), true);
 });

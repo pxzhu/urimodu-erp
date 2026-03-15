@@ -77,5 +77,9 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
 }
 
 export function requireCompanyId(session: LoginSession): string {
-  return session.defaultCompanyId ?? session.memberships[0]?.companyId ?? "";
+  if (session.defaultCompanyId && session.defaultCompanyId.trim().length > 0) {
+    return session.defaultCompanyId;
+  }
+
+  return session.memberships[0]?.companyId ?? "";
 }

@@ -264,3 +264,103 @@ test("ApprovalsService reject syncs linked leave and correction to REJECTED", as
   assert.deepEqual(syncedLeaveStatuses, ["REJECTED"]);
   assert.deepEqual(syncedCorrectionStatuses, ["REJECTED"]);
 });
+
+test("ApprovalsService cancel syncs linked leave and correction to CANCELED", async () => {
+  const syncedLeaveStatuses: string[] = [];
+  const syncedCorrectionStatuses: string[] = [];
+  const auditActions: string[] = [];
+
+  const baseLine = {
+    id: "line_canceled",
+    status: "IN_REVIEW",
+    currentOrder: 1,
+    submittedByEmployeeId: "emp_submitter",
+    documentId: "doc_canceled",
+    document: {
+      id: "doc_canceled",
+      companyId: "company_1",
+      title: "휴가 취소 요청서",
+      status: "IN_REVIEW",
+      currentVersionNo: 1
+    },
+    steps: [
+      {
+        id: "step_pending",
+        orderNo: 1,
+        status: "PENDING",
+        type: "APPROVE",
+        approverEmployeeId: "emp_approver",
+        approverEmployee: {
+          id: "emp_approver",
+          userId: "user_approver",
+          employeeNumber: "10000002",
+          nameKr: "결재자"
+        }
+      }
+    ],
+    actions: []
+  };
+
+  const prisma = {
+    employee: {
+      findFirst: async () => ({ id: "emp_submitter" })
+    },
+    approvalLine: {
+      findUnique: async () => baseLine,
+      update: async () => ({ id: "line_canceled" })
+    },
+    approvalStep: {
+      updateMany: async () => ({ count: 1 })
+    },
+    document: {
+      update: async () => ({ id: "doc_canceled" })
+    },
+    approvalAction: {
+      create: async () => ({ id: "action_cancel" })
+    },
+    leaveRequest: {
+      findMany: async () => [{ id: "leave_3", status: "REQUESTED" }],
+      update: async ({ data }: { data: { status: string } }) => {
+        syncedLeaveStatuses.push(data.status);
+        return { id: "leave_3", status: data.status };
+      }
+    },
+    attendanceCorrection: {
+      findMany: async () => [{ id: "corr_3", status: "REQUESTED" }],
+      update: async ({ data }: { data: { status: string } }) => {
+        syncedCorrectionStatuses.push(data.status);
+        return { id: "corr_3", status: data.status };
+      }
+    }
+  } as unknown as PrismaService;
+
+  const auditService = {
+    async log(input: { action: string }) {
+      auditActions.push(input.action);
+      return input;
+    }
+  } as unknown as AuditService;
+
+  const service = new ApprovalsService(prisma, auditService);
+
+  await service.cancel(
+    {
+      ...approverAuth,
+      userId: "user_submitter",
+      role: "EMPLOYEE",
+      memberships: [{ companyId: "company_1", role: "EMPLOYEE", companyName: "Acme Korea" }]
+    },
+    "line_canceled",
+    { comment: "상신 취소" },
+    {
+      ipAddress: "127.0.0.1",
+      userAgent: "node-test"
+    }
+  );
+
+  assert.deepEqual(syncedLeaveStatuses, ["CANCELED"]);
+  assert.deepEqual(syncedCorrectionStatuses, ["CANCELED"]);
+  assert.equal(auditActions.includes("LEAVE_REQUEST_STATUS_SYNC_FROM_APPROVAL"), true);
+  assert.equal(auditActions.includes("ATTENDANCE_CORRECTION_STATUS_SYNC_FROM_APPROVAL"), true);
+  assert.equal(auditActions.includes("APPROVAL_CANCEL"), true);
+});

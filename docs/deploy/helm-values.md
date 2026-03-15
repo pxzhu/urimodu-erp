@@ -45,8 +45,17 @@ Use `envFromSecrets` for production secrets and keep plaintext values for non-se
 ## Example Installation
 
 ```bash
-helm install korean-erp deploy/helm/korean-erp \
+./scripts/helmw.sh install korean-erp deploy/helm/korean-erp \
   --set api.image.repository=ghcr.io/your-org/korean-erp-api \
   --set web.image.repository=ghcr.io/your-org/korean-erp-web \
   --set worker.image.repository=ghcr.io/your-org/korean-erp-worker
 ```
+
+## Local Helm Dependency Reduction
+
+- Preferred wrapper: `./scripts/helmw.sh`
+  - uses local `helm` if installed
+  - otherwise runs `alpine/helm` through Docker
+- Make targets:
+  - `make helm-lint`
+  - `make helm-template`

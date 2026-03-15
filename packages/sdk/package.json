@@ -10,7 +10,7 @@
     "dev": "tsup src/index.ts --format cjs --dts --watch",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "node -e \"console.log('No tests yet for @korean-erp/sdk')\"",
+    "test": "tsx --test test/*.test.ts",
     "clean": "rm -rf dist"
   }
 }

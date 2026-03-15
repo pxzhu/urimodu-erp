@@ -8,6 +8,7 @@ import { getDefaultWorkerStorage, type WorkerObjectStorage } from "../common/obj
 
 const prisma = new PrismaClient();
 const storage = getDefaultWorkerStorage();
+const WORKER_JOB_STALE_MS = Number(process.env.WORKER_JOB_STALE_MS ?? 10 * 60 * 1000);
 
 interface ParsedVendorRow {
   rowNo: number;
@@ -235,12 +236,26 @@ function buildImportSummary(input: { totalRows: number; createdRows: number; upd
   };
 }
 
+function buildStaleRunningFilter(staleBefore: Date): Prisma.ImportJobWhereInput {
+  return {
+    status: JobStatus.RUNNING,
+    OR: [{ startedAt: null }, { startedAt: { lte: staleBefore } }]
+  };
+}
+
+export function buildImportJobClaimWhere(now: Date): Prisma.ImportJobWhereInput {
+  const staleBefore = new Date(now.getTime() - WORKER_JOB_STALE_MS);
+  return {
+    type: "VENDOR",
+    OR: [{ status: JobStatus.PENDING }, buildStaleRunningFilter(staleBefore)]
+  };
+}
+
 async function claimNextVendorImportJob(prismaClient: PrismaClient, now: Date) {
+  const staleBefore = new Date(now.getTime() - WORKER_JOB_STALE_MS);
+  const claimableWhere = buildImportJobClaimWhere(now);
   const pending = await prismaClient.importJob.findFirst({
-    where: {
-      type: "VENDOR",
-      status: JobStatus.PENDING
-    },
+    where: claimableWhere,
     include: {
       sourceFile: {
         select: {
@@ -262,7 +277,7 @@ async function claimNextVendorImportJob(prismaClient: PrismaClient, now: Date) {
   const claimed = await prismaClient.importJob.updateMany({
     where: {
       id: pending.id,
-      status: JobStatus.PENDING
+      OR: [{ status: JobStatus.PENDING }, buildStaleRunningFilter(staleBefore)]
     },
     data: {
       status: JobStatus.RUNNING,

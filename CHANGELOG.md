@@ -10,12 +10,15 @@ Post-release stabilization hardening after `v0.1.0-alpha.0`.
 
 ### Changed
 
+- fixed API dev startup DI failure under `pnpm --filter @korean-erp/api dev` (`tsx watch`)
 - approval outcomes now synchronize linked business statuses:
   - `LeaveRequest`
   - `AttendanceCorrection`
 - shift policy starter accepts overnight windows and worker normalization covers cross-midnight grouping for covered starter scenarios
+- attendance normalization now persists `nightMinutes` for covered night-work windows
 - import/export execution moved to asynchronous worker flow with lifecycle transitions:
   - `PENDING` -> `RUNNING` -> `SUCCEEDED|FAILED`
+- import/export worker claim logic now retries stale `RUNNING` jobs using `WORKER_JOB_STALE_MS`
 
 ### Added
 
@@ -27,12 +30,20 @@ Post-release stabilization hardening after `v0.1.0-alpha.0`.
   - summary/error updates and audit logs
 - worker test baseline:
   - overnight normalization behavior
+  - night-minute calculation behavior
   - import job row-level failure lifecycle
   - export job result-file persistence lifecycle
+- package/app test baseline upgrades replacing placeholder test commands:
+  - `apps/web`, `apps/connector-gateway`
+  - `packages/config`, `packages/contracts`, `packages/domain`, `packages/sdk`, `packages/shared`, `packages/ui`
 - smoke-stack coverage expansion:
   - login/authenticated checks
   - core API visibility checks
   - core web route load checks
+- helm wrapper script and make targets:
+  - `scripts/helmw.sh`
+  - `make helm-lint`
+  - `make helm-template`
 
 ### Documentation
 
@@ -92,5 +103,5 @@ First public prerelease candidate.
 ### Known Limitations
 
 - This is an alpha prerelease, not production GA.
-- Some package-level tests remain placeholders where domain logic has not yet been implemented.
-- Helm linting depends on local Helm binary availability.
+- Some package-level logic is still intentionally minimal, though placeholder test commands were replaced by runnable baseline tests in `v0.1.1-alpha.1`.
+- Helm linting no longer requires a local binary when Docker is available (`scripts/helmw.sh` fallback path).
