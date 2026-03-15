@@ -259,6 +259,30 @@ Complete remaining PROMPT04 vertical-slice deliverables on top of current baseli
 - Any PROMPT05+ domain work
 - Premature module/service splitting beyond modular monolith
 
+---
+
+# QA Archive Standardization Plan
+
+Date: 2026-03-15
+
+## Objective
+
+Enforce a repeatable QA evidence workflow for every task/PR so that all APIs, pages, and core features are validated with stored artifacts usable for later whitepaper/release documentation.
+
+## Execution Steps
+
+1. Add repository convention updates in `AGENTS.md` as merge-gate QA rules.
+2. Introduce `docs/qa` guide and templates for run reports and feature-level evidence.
+3. Add run scaffolding + validation scripts to create `docs/qa/runs/<run-id>/` with API/page inventories.
+4. Wire root scripts (`pnpm qa:init`, `pnpm qa:validate`, `pnpm qa:screenshots`).
+5. Link QA archive workflow in README docs and smoke-test documentation.
+
+## Expected Output
+
+- QA run folder template with API/page/feature evidence slots
+- Repeatable validation logs archived per run
+- Screenshot evidence conventions aligned with admin/user role views
+
 ## Completion Notes
 
 - Re-validation before implementation:

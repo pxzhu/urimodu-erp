@@ -1,29 +1,42 @@
+"use client";
+
 import Link from "next/link";
 
+import { useLocaleText, useUiShell } from "../components/ui-shell-provider";
+
 export default function HomePage() {
+  const t = useLocaleText();
+  const { locale, toggleLocale, theme, toggleTheme } = useUiShell();
+
   return (
     <main className="container">
-      <h1>Korean Self-Hosted ERP</h1>
+      <div className="inline-actions" style={{ justifyContent: "flex-end" }}>
+        <button type="button" onClick={toggleLocale}>
+          {locale === "ko" ? "EN" : "KO"}
+        </button>
+        <button type="button" onClick={toggleTheme}>
+          {theme === "dark" ? t("라이트", "Light") : t("다크", "Dark")}
+        </button>
+      </div>
+
+      <h1>{t("우리모두ERP", "Urimodu ERP")}</h1>
       <p>
-        Public open-source bootstrap is ready. This workspace uses pnpm + Turborepo and a
-        modular-monolith API foundation.
+        {t(
+          "한국형 업무 흐름에 맞춘 사용자 설치형 오픈소스 ERP/워크플랫폼입니다.",
+          "A self-hosted open-source ERP/work platform designed for Korean business workflows."
+        )}
       </p>
       <ul>
-        <li>Web app: Next.js</li>
-        <li>Core API: NestJS + Swagger</li>
-        <li>Worker: Redis queue-ready process</li>
-        <li>Storage stack: PostgreSQL + Redis + MinIO</li>
+        <li>Web: Next.js</li>
+        <li>API: NestJS + Swagger</li>
+        <li>Worker: Redis queue-ready</li>
+        <li>Storage: PostgreSQL + Redis + MinIO</li>
       </ul>
       <p>
-        Health endpoint: <code>/health</code>
+        {t("헬스 체크", "Health endpoint")}: <code>/health</code>
       </p>
       <p>
-        <Link href="/login">Open login page</Link>
-      </p>
-      <p>
-        After login: <Link href="/files">Files</Link> · <Link href="/documents">Documents</Link> ·{" "}
-        <Link href="/approvals">Approvals</Link> · <Link href="/expenses">Expenses</Link> ·{" "}
-        <Link href="/accounting/journal-entries">Journal Entries</Link>
+        <Link href="/login">{t("로그인 화면 열기", "Open login page")}</Link>
       </p>
     </main>
   );

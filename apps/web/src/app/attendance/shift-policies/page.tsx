@@ -176,8 +176,9 @@ export default function ShiftPoliciesPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Shift Policy Management</h1>
       <p>Create or version shift policies used by attendance normalization.</p>
 
@@ -357,6 +358,7 @@ export default function ShiftPoliciesPage() {
           ) : null}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }

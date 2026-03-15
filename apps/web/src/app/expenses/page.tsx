@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../components/dashboard-nav";
+import { useLocaleText } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
 
@@ -50,6 +51,12 @@ interface ProjectItem {
   name: string;
 }
 
+interface FileItem {
+  id: string;
+  originalName: string;
+  mimeType: string;
+}
+
 interface ExpenseItemForm {
   incurredOn: string;
   category: string;
@@ -72,11 +79,13 @@ const DEFAULT_ITEM: ExpenseItemForm = {
 
 export default function ExpensesPage() {
   const router = useRouter();
+  const t = useLocaleText();
   const [session, setSession] = useState<LoginSession | null>(null);
   const [claims, setClaims] = useState<ExpenseClaimListItem[]>([]);
   const [vendors, setVendors] = useState<VendorItem[]>([]);
   const [costCenters, setCostCenters] = useState<CostCenterItem[]>([]);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [files, setFiles] = useState<FileItem[]>([]);
 
   const [form, setForm] = useState({
     title: "",
@@ -87,28 +96,34 @@ export default function ExpensesPage() {
   });
 
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingItemIndex, setUploadingItemIndex] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const companyId = useMemo(() => (session ? requireCompanyId(session) : ""), [session]);
 
   async function refresh(activeSession: LoginSession) {
-    const [claimData, vendorData, costCenterData, projectData] = await Promise.all([
+    const activeCompanyId = requireCompanyId(activeSession);
+    const [claimData, vendorData, costCenterData, projectData, fileData] = await Promise.all([
       apiRequest<ExpenseClaimListItem[]>("/expenses/claims?limit=100", {
         token: activeSession.token,
-        companyId: requireCompanyId(activeSession)
+        companyId: activeCompanyId
       }),
       apiRequest<VendorItem[]>("/finance/vendors", {
         token: activeSession.token,
-        companyId: requireCompanyId(activeSession)
+        companyId: activeCompanyId
       }),
       apiRequest<CostCenterItem[]>("/finance/cost-centers", {
         token: activeSession.token,
-        companyId: requireCompanyId(activeSession)
+        companyId: activeCompanyId
       }),
       apiRequest<ProjectItem[]>("/finance/projects", {
         token: activeSession.token,
-        companyId: requireCompanyId(activeSession)
+        companyId: activeCompanyId
+      }),
+      apiRequest<FileItem[]>("/files", {
+        token: activeSession.token,
+        companyId: activeCompanyId
       })
     ]);
 
@@ -116,6 +131,7 @@ export default function ExpensesPage() {
     setVendors(vendorData);
     setCostCenters(costCenterData);
     setProjects(projectData);
+    setFiles(fileData.filter((file) => file.mimeType.startsWith("image/")));
   }
 
   useEffect(() => {
@@ -134,13 +150,13 @@ export default function ExpensesPage() {
         if (refreshError instanceof ApiError) {
           setError(refreshError.message);
         } else {
-          setError("Failed to load expense data");
+          setError(t("경비 데이터를 불러오지 못했습니다.", "Failed to load expense data."));
         }
       }
     }
 
     void run();
-  }, [router]);
+  }, [router, t]);
 
   function updateItem(index: number, key: keyof ExpenseItemForm, value: string) {
     setForm((current) => {
@@ -176,6 +192,43 @@ export default function ExpensesPage() {
     }));
   }
 
+  async function uploadReceiptForItem(index: number, file: File) {
+    if (!session) {
+      return;
+    }
+
+    setUploadingItemIndex(index);
+    setError(null);
+
+    try {
+      const uploadPayload = new FormData();
+      uploadPayload.append("file", file);
+      uploadPayload.append(
+        "metadataJson",
+        JSON.stringify({ category: "expense-receipt", source: "expenses-ui" })
+      );
+
+      const uploaded = await apiRequest<FileItem>("/files/upload", {
+        method: "POST",
+        token: session.token,
+        companyId,
+        body: uploadPayload
+      });
+
+      updateItem(index, "receiptFileId", uploaded.id);
+      await refresh(session);
+      setSuccess(t("영수증 이미지를 업로드했습니다.", "Receipt image uploaded."));
+    } catch (uploadError) {
+      if (uploadError instanceof ApiError) {
+        setError(uploadError.message);
+      } else {
+        setError(t("영수증 업로드에 실패했습니다.", "Failed to upload receipt."));
+      }
+    } finally {
+      setUploadingItemIndex(null);
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session) {
@@ -208,7 +261,7 @@ export default function ExpensesPage() {
         }
       });
 
-      setSuccess("Expense claim created.");
+      setSuccess(t("경비 청구를 생성했습니다.", "Expense claim created."));
       setForm({
         title: "",
         currency: "KRW",
@@ -221,7 +274,7 @@ export default function ExpensesPage() {
       if (submitError instanceof ApiError) {
         setError(submitError.message);
       } else {
-        setError("Failed to create expense claim");
+        setError(t("경비 청구 생성에 실패했습니다.", "Failed to create expense claim."));
       }
     } finally {
       setSubmitting(false);
@@ -229,19 +282,25 @@ export default function ExpensesPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
-      <h1>Expense Claims</h1>
-      <p>Create expense claims and link evidence files via existing FileObject IDs.</p>
+      <section className="app-shell-content">
+      <h1>{t("경비 청구", "Expense Claims")}</h1>
+      <p>
+        {t(
+          "경비 항목을 등록하고 영수증 이미지를 업로드/첨부할 수 있습니다.",
+          "Create expense claims and attach uploaded receipt images."
+        )}
+      </p>
 
       <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
         <label>
-          Title
+          {t("제목", "Title")}
           <input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required />
         </label>
 
         <label>
-          Currency
+          {t("통화", "Currency")}
           <input
             value={form.currency}
             onChange={(event) => setForm((current) => ({ ...current, currency: event.target.value.toUpperCase() }))}
@@ -251,12 +310,12 @@ export default function ExpensesPage() {
         </label>
 
         <label>
-          Cost center
+          {t("코스트센터", "Cost center")}
           <select
             value={form.costCenterId}
             onChange={(event) => setForm((current) => ({ ...current, costCenterId: event.target.value }))}
           >
-            <option value="">(none)</option>
+            <option value="">{t("선택 안함", "(none)")}</option>
             {costCenters.map((costCenter) => (
               <option key={costCenter.id} value={costCenter.id}>
                 {costCenter.code} - {costCenter.name}
@@ -266,9 +325,9 @@ export default function ExpensesPage() {
         </label>
 
         <label>
-          Project
+          {t("프로젝트", "Project")}
           <select value={form.projectId} onChange={(event) => setForm((current) => ({ ...current, projectId: event.target.value }))}>
-            <option value="">(none)</option>
+            <option value="">{t("선택 안함", "(none)")}</option>
             {projects.map((project) => (
               <option key={project.id} value={project.id}>
                 {project.code} - {project.name}
@@ -278,11 +337,11 @@ export default function ExpensesPage() {
         </label>
 
         <fieldset>
-          <legend>Expense items</legend>
+          <legend>{t("경비 항목", "Expense items")}</legend>
           {form.items.map((item, index) => (
             <div key={`item-${index}`} className="step-row">
               <label>
-                Date
+                {t("사용일", "Date")}
                 <input
                   type="date"
                   value={item.incurredOn}
@@ -292,7 +351,7 @@ export default function ExpensesPage() {
               </label>
 
               <label>
-                Category
+                {t("카테고리", "Category")}
                 <input
                   value={item.category}
                   onChange={(event) => updateItem(index, "category", event.target.value)}
@@ -301,9 +360,9 @@ export default function ExpensesPage() {
               </label>
 
               <label>
-                Vendor
+                {t("거래처", "Vendor")}
                 <select value={item.vendorId} onChange={(event) => updateItem(index, "vendorId", event.target.value)}>
-                  <option value="">(none)</option>
+                  <option value="">{t("선택 안함", "(none)")}</option>
                   {vendors.map((vendor) => (
                     <option key={vendor.id} value={vendor.id}>
                       {vendor.code} - {vendor.name}
@@ -313,7 +372,7 @@ export default function ExpensesPage() {
               </label>
 
               <label>
-                Amount
+                {t("금액", "Amount")}
                 <input
                   type="number"
                   min="0"
@@ -336,52 +395,74 @@ export default function ExpensesPage() {
               </label>
 
               <label>
-                Receipt FileObject ID
+                {t("상세 설명", "Description")}
                 <input
-                  value={item.receiptFileId}
-                  onChange={(event) => updateItem(index, "receiptFileId", event.target.value)}
-                  placeholder="file_xxx"
+                  value={item.description}
+                  onChange={(event) => updateItem(index, "description", event.target.value)}
                 />
               </label>
 
               <label>
-                Description
-                <input value={item.description} onChange={(event) => updateItem(index, "description", event.target.value)} />
+                {t("영수증 이미지 업로드", "Upload receipt image")}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      void uploadReceiptForItem(index, file);
+                    }
+                    event.currentTarget.value = "";
+                  }}
+                />
+              </label>
+
+              <label>
+                {t("영수증 선택", "Choose receipt")}
+                <select value={item.receiptFileId} onChange={(event) => updateItem(index, "receiptFileId", event.target.value)}>
+                  <option value="">{t("선택 안함", "(none)")}</option>
+                  {files.map((file) => (
+                    <option key={file.id} value={file.id}>
+                      {file.originalName}
+                    </option>
+                  ))}
+                </select>
               </label>
 
               <div className="inline-actions">
                 <button type="button" onClick={() => removeItem(index)} disabled={form.items.length === 1}>
-                  Remove item
+                  {t("항목 삭제", "Remove item")}
                 </button>
+                {uploadingItemIndex === index ? <span>{t("영수증 업로드 중...", "Uploading receipt...")}</span> : null}
               </div>
             </div>
           ))}
 
-          <div className="inline-actions">
-            <button type="button" onClick={addItem}>
-              Add item
-            </button>
-          </div>
+          <button type="button" onClick={addItem}>
+            {t("항목 추가", "Add item")}
+          </button>
         </fieldset>
 
         <button type="submit" disabled={submitting}>
-          {submitting ? "Creating..." : "Create expense claim"}
+          {submitting ? t("생성 중...", "Creating...") : t("경비 청구 생성", "Create expense claim")}
         </button>
       </form>
 
       {error ? <p className="error-text">{error}</p> : null}
       {success ? <p className="success-text">{success}</p> : null}
 
+      <h2>{t("청구 목록", "Claim list")}</h2>
       <table className="data-table">
         <thead>
           <tr>
-            <th>Claim</th>
-            <th>Employee</th>
-            <th>Amount</th>
-            <th>Status</th>
-            <th>Cost Center / Project</th>
-            <th>Items</th>
-            <th>Created</th>
+            <th>{t("제목", "Title")}</th>
+            <th>{t("작성자", "Employee")}</th>
+            <th>{t("상태", "Status")}</th>
+            <th>{t("금액", "Amount")}</th>
+            <th>{t("코스트센터", "Cost center")}</th>
+            <th>{t("프로젝트", "Project")}</th>
+            <th>{t("항목 수", "Items")}</th>
+            <th>{t("생성일", "Created")}</th>
           </tr>
         </thead>
         <tbody>
@@ -389,31 +470,28 @@ export default function ExpensesPage() {
             <tr key={claim.id}>
               <td>
                 <Link href={`/expenses/${claim.id}`}>{claim.title}</Link>
-                <div>
-                  <code>{claim.id}</code>
-                </div>
               </td>
               <td>
                 {claim.employee.employeeNumber} {claim.employee.nameKr}
               </td>
+              <td>{claim.status}</td>
               <td>
                 {claim.totalAmount} {claim.currency}
               </td>
-              <td>{claim.status}</td>
-              <td>
-                {claim.costCenter ? `${claim.costCenter.code}` : "-"} / {claim.project ? `${claim.project.code}` : "-"}
-              </td>
+              <td>{claim.costCenter ? `${claim.costCenter.code} ${claim.costCenter.name}` : "-"}</td>
+              <td>{claim.project ? `${claim.project.code} ${claim.project.name}` : "-"}</td>
               <td>{claim._count.items}</td>
               <td>{new Date(claim.createdAt).toLocaleString()}</td>
             </tr>
           ))}
           {claims.length === 0 ? (
             <tr>
-              <td colSpan={7}>No expense claims yet.</td>
+              <td colSpan={8}>{t("경비 청구가 없습니다.", "No expense claims yet.")}</td>
             </tr>
           ) : null}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }

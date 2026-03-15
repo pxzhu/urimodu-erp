@@ -2,10 +2,18 @@
 
 Use smoke checks after local boot or deployment changes.
 
+For full QA evidence (all APIs/pages/features), use the QA archive process in `docs/qa/README.md`.
+
 ## Run
 
 ```bash
 ./scripts/smoke-stack.sh
+```
+
+or
+
+```bash
+pnpm smoke
 ```
 
 Optional overrides:
@@ -41,3 +49,18 @@ SMOKE_LOGIN_PASSWORD=ChangeMe123! \
   - `/expenses`
 
 If a check fails, review logs and run the command again after fixing service startup issues.
+
+## Full QA Evidence Workflow
+
+```bash
+pnpm qa:init
+pnpm qa:validate
+pnpm qa:screenshots
+```
+
+Then complete the generated files under `docs/qa/runs/<run-id>/`:
+
+- `api/openapi-endpoints.csv`: endpoint-by-endpoint execution status
+- `pages/page-checklist.csv`: page-by-page screenshot status (admin/user)
+- `features/*.md`: feature-level detail with step/result notes for whitepaper reuse
+- `report.md`: final pass/fail summary and follow-up actions

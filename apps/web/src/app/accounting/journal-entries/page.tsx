@@ -225,8 +225,9 @@ export default function JournalEntriesPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Journal Entries</h1>
       <p>Create balanced journal entries and review accounting ledger headers.</p>
 
@@ -390,6 +391,7 @@ export default function JournalEntriesPage() {
           ) : null}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }

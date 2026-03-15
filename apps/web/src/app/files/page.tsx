@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../components/dashboard-nav";
+import { KeyValueTableEditor, type KeyValueRow } from "../../components/key-value-table-editor";
+import { useLocaleText } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
 
@@ -36,11 +38,27 @@ function formatBytes(value: string | number): string {
   return `${(parsed / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function rowsToObject(rows: KeyValueRow[]): Record<string, string> {
+  return rows.reduce<Record<string, string>>((accumulator, row) => {
+    const key = row.key.trim();
+    if (!key) {
+      return accumulator;
+    }
+
+    accumulator[key] = row.value.trim();
+    return accumulator;
+  }, {});
+}
+
 export default function FilesPage() {
   const router = useRouter();
+  const t = useLocaleText();
   const [session, setSession] = useState<LoginSession | null>(null);
   const [items, setItems] = useState<FileItem[]>([]);
-  const [metadataJson, setMetadataJson] = useState("{\"category\":\"approval-attachment\"}");
+  const [metadataRows, setMetadataRows] = useState<KeyValueRow[]>([
+    { key: "category", value: "approval-attachment" },
+    { key: "note", value: "" }
+  ]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -80,7 +98,7 @@ export default function FilesPage() {
   async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session || !selectedFile) {
-      setError("Please select a file first.");
+      setError(t("먼저 파일을 선택해주세요.", "Please choose a file first."));
       return;
     }
 
@@ -88,14 +106,12 @@ export default function FilesPage() {
     setError(null);
 
     try {
-      if (metadataJson.trim()) {
-        JSON.parse(metadataJson);
-      }
+      const metadataObject = rowsToObject(metadataRows);
 
       const payload = new FormData();
       payload.append("file", selectedFile);
-      if (metadataJson.trim()) {
-        payload.append("metadataJson", metadataJson.trim());
+      if (Object.keys(metadataObject).length > 0) {
+        payload.append("metadataJson", JSON.stringify(metadataObject));
       }
 
       await apiRequest<FileItem>("/files/upload", {
@@ -113,7 +129,7 @@ export default function FilesPage() {
       } else if (uploadError instanceof Error) {
         setError(uploadError.message);
       } else {
-        setError("Unexpected upload error");
+        setError(t("업로드 중 오류가 발생했습니다.", "Unexpected upload error."));
       }
     } finally {
       setSubmitting(false);
@@ -143,51 +159,54 @@ export default function FilesPage() {
       if (downloadError instanceof ApiError) {
         setError(downloadError.message);
       } else {
-        setError("Failed to download file");
+        setError(t("파일 다운로드에 실패했습니다.", "Failed to download file."));
       }
     }
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
-      <h1>Files</h1>
-      <p>Upload to MinIO-backed storage and reuse file IDs in document attachments.</p>
+      <section className="app-shell-content">
+      <h1>{t("파일 보관함", "File Storage")}</h1>
+      <p>
+        {t(
+          "MinIO 저장소에 업로드하고 문서/경비 증빙에 재사용하세요. 메타데이터는 표 형태로 입력합니다.",
+          "Upload to MinIO-backed storage and reuse for documents/expenses. Metadata is entered in table form."
+        )}
+      </p>
 
       <form className="form-grid" onSubmit={handleUpload}>
-        <label htmlFor="upload-file">File</label>
+        <label htmlFor="upload-file">{t("파일", "File")}</label>
         <input
           id="upload-file"
           type="file"
           onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
         />
 
-        <label htmlFor="metadata-json">Metadata JSON</label>
-        <textarea
-          id="metadata-json"
-          rows={3}
-          value={metadataJson}
-          onChange={(event) => setMetadataJson(event.target.value)}
-        />
+        <fieldset>
+          <legend>{t("파일 메타데이터", "File metadata")}</legend>
+          <KeyValueTableEditor rows={metadataRows} onChange={setMetadataRows} />
+        </fieldset>
 
         <button type="submit" disabled={submitting}>
-          {submitting ? "Uploading..." : "Upload File"}
+          {submitting ? t("업로드 중...", "Uploading...") : t("파일 업로드", "Upload file")}
         </button>
       </form>
 
       {error ? <p className="error-text">{error}</p> : null}
-      {refreshing ? <p>Refreshing list...</p> : null}
+      {refreshing ? <p>{t("목록 갱신 중...", "Refreshing list...")}</p> : null}
 
       <table className="data-table">
         <thead>
           <tr>
-            <th>Name</th>
+            <th>{t("파일명", "Name")}</th>
             <th>MIME</th>
-            <th>Size</th>
-            <th>Checksum</th>
-            <th>Uploader</th>
-            <th>Created</th>
-            <th>Download</th>
+            <th>{t("크기", "Size")}</th>
+            <th>{t("해시", "Checksum")}</th>
+            <th>{t("업로더", "Uploader")}</th>
+            <th>{t("생성일", "Created")}</th>
+            <th>{t("다운로드", "Download")}</th>
           </tr>
         </thead>
         <tbody>
@@ -208,18 +227,19 @@ export default function FilesPage() {
               <td>{new Date(item.createdAt).toLocaleString()}</td>
               <td>
                 <button type="button" onClick={() => void handleDownload(item)}>
-                  Download
+                  {t("다운로드", "Download")}
                 </button>
               </td>
             </tr>
           ))}
           {items.length === 0 ? (
             <tr>
-              <td colSpan={7}>No files uploaded yet.</td>
+              <td colSpan={7}>{t("아직 업로드된 파일이 없습니다.", "No files uploaded yet.")}</td>
             </tr>
           ) : null}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }

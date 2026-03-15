@@ -37,6 +37,22 @@
 - HWPX is first-class; legacy HWP is fallback only
 - Keep `README.md` in English and `README.ko.md` in Korean, with setup/architecture sections aligned
 - Keep `README.en.md` as an English mirror of `README.md`; when a PROMPT run is completed, reflect the update in both files
+- Web UI baseline is Korean-first + light mode default, with in-app dark mode and English toggles
+- UI screenshot QA should wait until data rows are visible and loading text is gone before capture
+- QA gate for every task/PR:
+  1. Validate all API surfaces (OpenAPI endpoint inventory + execution evidence)
+  2. Validate all web pages/routes with screenshot evidence
+  3. Validate all core feature flows with per-feature step/result notes
+  4. Store QA artifacts under `docs/qa/runs/<run-id>/` (not external-only)
+  5. Include role-specific captures (`admin`, `user`) where behavior differs
+- QA artifact minimum structure:
+  - `docs/qa/runs/<run-id>/report.md`
+  - `docs/qa/runs/<run-id>/api/openapi-endpoints.csv`
+  - `docs/qa/runs/<run-id>/pages/page-checklist.csv`
+  - `docs/qa/runs/<run-id>/features/*.md`
+  - `docs/qa/runs/<run-id>/screenshots/admin/*.png`
+  - `docs/qa/runs/<run-id>/screenshots/user/*.png`
+- Every page screenshot should include a short Korean description for later whitepaper reuse
 - Public OSS hygiene required: no secrets, no proprietary credentials, no vendor-private SDK assets
 
 ## Structure Baseline

@@ -51,8 +51,9 @@ export default function EmployeeDetailPage() {
   }, [employeeId]);
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Employee Detail</h1>
       {employee ? (
         <>
@@ -75,6 +76,7 @@ export default function EmployeeDetailPage() {
       ) : (
         <p>Loading...</p>
       )}
+      </section>
     </main>
   );
 }

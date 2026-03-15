@@ -47,28 +47,52 @@
 
 ## 스크린샷
 
-`v0.1.0-alpha.0` 프리릴리스 브랜치 기준으로 시드 데이터가 있는 로컬 스택에서 실제 캡처했습니다.  
+시드 데이터가 있는 로컬 스택에서 한국어 기본 UX(라이트모드 + 좌측 사이드바) 기준으로 실제 캡처했습니다.  
 인벤토리/재촬영 절차는 [docs/screenshots/README.md](./docs/screenshots/README.md)를 참고하세요.
 
-### 직원 디렉터리 (`/employees`)
+### 관리자 화면
 
-![직원 디렉터리](./docs/screenshots/01-employees-directory.png)
+#### 직원 디렉터리 (`/employees`)
 
-### 문서 및 템플릿 (`/documents`)
+![관리자 직원 디렉터리](./docs/screenshots/admin-01-employees-directory.png)
 
-![문서 및 템플릿](./docs/screenshots/02-documents-and-templates.png)
+#### 문서 및 템플릿 (`/documents`)
 
-### 결재함 (`/approvals`)
+![관리자 문서 및 템플릿](./docs/screenshots/admin-02-documents-and-templates.png)
 
-![결재함](./docs/screenshots/03-approvals-inbox.png)
+#### 결재함 (`/approvals`)
 
-### 근태 원장 (`/attendance/ledger`)
+![관리자 결재함](./docs/screenshots/admin-03-approvals-inbox.png)
 
-![근태 원장](./docs/screenshots/04-attendance-ledger.png)
+#### 근태 원장 (`/attendance/ledger`)
 
-### 경비청구 (`/expenses`)
+![관리자 근태 원장](./docs/screenshots/admin-04-attendance-ledger.png)
 
-![경비청구](./docs/screenshots/05-expense-claims.png)
+#### 경비청구 (`/expenses`)
+
+![관리자 경비청구](./docs/screenshots/admin-05-expense-claims.png)
+
+### 사용자 화면
+
+#### 직원 디렉터리 (`/employees`)
+
+![사용자 직원 디렉터리](./docs/screenshots/user-01-employees-directory.png)
+
+#### 문서 및 템플릿 (`/documents`)
+
+![사용자 문서 및 템플릿](./docs/screenshots/user-02-documents-and-templates.png)
+
+#### 결재함 (`/approvals`)
+
+![사용자 결재함](./docs/screenshots/user-03-approvals-inbox.png)
+
+#### 근태 원장 (`/attendance/ledger`)
+
+![사용자 근태 원장](./docs/screenshots/user-04-attendance-ledger.png)
+
+#### 경비청구 (`/expenses`)
+
+![사용자 경비청구](./docs/screenshots/user-05-expense-claims.png)
 
 ## 빠른 시작 (Quickstart)
 
@@ -115,6 +139,16 @@ pnpm dev
 make smoke
 ```
 
+### QA 아카이브 워크플로우
+
+```bash
+pnpm qa:init
+pnpm qa:validate
+pnpm qa:screenshots
+```
+
+생성된 `docs/qa/runs/<run-id>/` 체크리스트 파일을 채워 API/페이지/기능 단위 증적을 완료하세요.
+
 ## 로드맵 / 다음 단계
 
 [docs/roadmap.md](./docs/roadmap.md)를 참고하세요.
@@ -141,6 +175,7 @@ make smoke
 - 아키텍처 다이어그램: [docs/architecture/README.md](./docs/architecture/README.md)
 - ADR: [docs/adr](./docs/adr)
 - API 노트: [docs/api/README.md](./docs/api/README.md)
+- QA 아카이브 가이드: [docs/qa/README.md](./docs/qa/README.md)
 - 운영 노트: [docs/ops/README.md](./docs/ops/README.md)
 - 릴리스 노트 초안: [docs/releases/v0.1.0-alpha.0.md](./docs/releases/v0.1.0-alpha.0.md)
 - 변경 이력: [CHANGELOG.md](./CHANGELOG.md)

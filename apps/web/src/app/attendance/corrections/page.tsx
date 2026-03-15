@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../../components/dashboard-nav";
+import { SearchableEmployeeSelector } from "../../../components/searchable-employee-selector";
+import { useLocaleText, useUiShell } from "../../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../../lib/api";
 import { loadSession, type LoginSession } from "../../../lib/auth";
 
@@ -29,16 +31,25 @@ interface AttendanceCorrectionItem {
   } | null;
 }
 
+interface EmployeeItem {
+  id: string;
+  employeeNumber: string;
+  nameKr: string;
+}
+
 export default function AttendanceCorrectionsPage() {
   const router = useRouter();
+  const t = useLocaleText();
+  const { isAdminView } = useUiShell();
   const [session, setSession] = useState<LoginSession | null>(null);
   const [rows, setRows] = useState<AttendanceCorrectionItem[]>([]);
+  const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [form, setForm] = useState({
     workDate: "",
     requestedCheckInAt: "",
     requestedCheckOutAt: "",
     reason: "",
-    approverEmployeeIds: ""
+    approverEmployeeIds: [] as string[]
   });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -47,12 +58,20 @@ export default function AttendanceCorrectionsPage() {
   const companyId = useMemo(() => (session ? requireCompanyId(session) : ""), [session]);
 
   async function refresh(activeSession: LoginSession) {
-    const data = await apiRequest<AttendanceCorrectionItem[]>("/attendance-corrections?limit=100", {
-      token: activeSession.token,
-      companyId: requireCompanyId(activeSession)
-    });
+    const activeCompanyId = requireCompanyId(activeSession);
+    const [correctionData, employeeData] = await Promise.all([
+      apiRequest<AttendanceCorrectionItem[]>("/attendance-corrections?limit=100", {
+        token: activeSession.token,
+        companyId: activeCompanyId
+      }),
+      apiRequest<EmployeeItem[]>(`/employees?companyId=${activeCompanyId}`, {
+        token: activeSession.token,
+        companyId: activeCompanyId
+      })
+    ]);
 
-    setRows(data);
+    setRows(correctionData);
+    setEmployees(employeeData);
   }
 
   useEffect(() => {
@@ -70,13 +89,13 @@ export default function AttendanceCorrectionsPage() {
         if (loadError instanceof ApiError) {
           setError(loadError.message);
         } else {
-          setError("Failed to load attendance correction requests");
+          setError(t("근태 정정 요청 목록을 불러오지 못했습니다.", "Failed to load attendance correction requests."));
         }
       }
     }
 
     void run();
-  }, [router]);
+  }, [router, t]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -98,21 +117,18 @@ export default function AttendanceCorrectionsPage() {
           requestedCheckInAt: form.requestedCheckInAt || undefined,
           requestedCheckOutAt: form.requestedCheckOutAt || undefined,
           reason: form.reason,
-          approverEmployeeIds: form.approverEmployeeIds
-            .split(",")
-            .map((value) => value.trim())
-            .filter((value) => value.length > 0),
+          approverEmployeeIds: form.approverEmployeeIds,
           autoCreateDocument: true
         }
       });
 
-      setSuccess("Attendance correction request created.");
+      setSuccess(t("근태 정정 요청을 생성했습니다.", "Attendance correction request created."));
       setForm({
         workDate: "",
         requestedCheckInAt: "",
         requestedCheckOutAt: "",
         reason: "",
-        approverEmployeeIds: ""
+        approverEmployeeIds: []
       });
 
       await refresh(session);
@@ -120,7 +136,7 @@ export default function AttendanceCorrectionsPage() {
       if (submitError instanceof ApiError) {
         setError(submitError.message);
       } else {
-        setError("Failed to create attendance correction request");
+        setError(t("근태 정정 요청 생성에 실패했습니다.", "Failed to create attendance correction request."));
       }
     } finally {
       setSubmitting(false);
@@ -128,14 +144,26 @@ export default function AttendanceCorrectionsPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
-      <h1>Attendance Corrections</h1>
-      <p>Create correction requests and route them through document + approval flow.</p>
+      <section className="app-shell-content">
+      <h1>{t("근태 정정", "Attendance Corrections")}</h1>
+      <p>
+        {t(
+          "정정 요청을 생성하고 문서/결재 플로우로 라우팅합니다. 결재자는 이름으로 검색해 추가할 수 있습니다.",
+          "Create correction requests and route through document/approval flow with searchable approver selection."
+        )}
+      </p>
+
+      {!isAdminView ? (
+        <p className="role-note">
+          {t("사용자 권한에서는 본인 요청 처리 위주입니다.", "User role focuses on self-service correction requests.")}
+        </p>
+      ) : null}
 
       <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
         <label>
-          Work date
+          {t("근무일", "Work date")}
           <input
             type="date"
             value={form.workDate}
@@ -145,7 +173,7 @@ export default function AttendanceCorrectionsPage() {
         </label>
 
         <label>
-          Requested check-in
+          {t("요청 출근 시각", "Requested check-in")}
           <input
             type="datetime-local"
             value={form.requestedCheckInAt}
@@ -154,7 +182,7 @@ export default function AttendanceCorrectionsPage() {
         </label>
 
         <label>
-          Requested check-out
+          {t("요청 퇴근 시각", "Requested check-out")}
           <input
             type="datetime-local"
             value={form.requestedCheckOutAt}
@@ -163,16 +191,7 @@ export default function AttendanceCorrectionsPage() {
         </label>
 
         <label>
-          Approver employee IDs (comma-separated)
-          <input
-            value={form.approverEmployeeIds}
-            onChange={(event) => setForm((current) => ({ ...current, approverEmployeeIds: event.target.value }))}
-            placeholder="emp_xxx, emp_yyy"
-          />
-        </label>
-
-        <label>
-          Reason
+          {t("사유", "Reason")}
           <textarea
             rows={3}
             value={form.reason}
@@ -181,8 +200,16 @@ export default function AttendanceCorrectionsPage() {
           />
         </label>
 
+        <SearchableEmployeeSelector
+          employees={employees}
+          selectedEmployeeIds={form.approverEmployeeIds}
+          onChange={(nextIds) => setForm((current) => ({ ...current, approverEmployeeIds: nextIds }))}
+          label={t("결재자 선택", "Select approvers")}
+          placeholder={t("이름 일부로 검색 (예: 홍)", "Type part of a name to search")}
+        />
+
         <button type="submit" disabled={submitting}>
-          {submitting ? "Creating..." : "Create correction request"}
+          {submitting ? t("생성 중...", "Creating...") : t("정정 요청 생성", "Create correction request")}
         </button>
       </form>
 
@@ -192,12 +219,12 @@ export default function AttendanceCorrectionsPage() {
       <table className="data-table">
         <thead>
           <tr>
-            <th>Request</th>
-            <th>Employee</th>
-            <th>Work Date</th>
-            <th>Requested Time</th>
-            <th>Status</th>
-            <th>Document</th>
+            <th>{t("요청", "Request")}</th>
+            <th>{t("직원", "Employee")}</th>
+            <th>{t("근무일", "Work Date")}</th>
+            <th>{t("요청 시간", "Requested Time")}</th>
+            <th>{t("상태", "Status")}</th>
+            <th>{t("문서", "Document")}</th>
           </tr>
         </thead>
         <tbody>
@@ -220,11 +247,12 @@ export default function AttendanceCorrectionsPage() {
           ))}
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={6}>No attendance correction requests found.</td>
+              <td colSpan={6}>{t("근태 정정 요청이 없습니다.", "No attendance correction requests found.")}</td>
             </tr>
           ) : null}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }

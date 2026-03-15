@@ -98,8 +98,9 @@ export default function DepartmentsPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Departments</h1>
       <p>Flat list and tree view for Korean org structures.</p>
 
@@ -129,6 +130,7 @@ export default function DepartmentsPage() {
 
       <h2>Department Tree</h2>
       <ul>{tree.map(renderNode)}</ul>
+      </section>
     </main>
   );
 }

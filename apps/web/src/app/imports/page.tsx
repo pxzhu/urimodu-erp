@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../components/dashboard-nav";
+import { KeyValueTableEditor, type KeyValueRow } from "../../components/key-value-table-editor";
+import { useLocaleText, useUiShell } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
 
@@ -48,13 +50,37 @@ interface ImportJobDetail {
   }>;
 }
 
+function rowsToMapping(rows: KeyValueRow[]): Record<string, string> | undefined {
+  const mapping = rows.reduce<Record<string, string>>((accumulator, row) => {
+    const source = row.key.trim();
+    const target = row.value.trim();
+    if (!source || !target) {
+      return accumulator;
+    }
+
+    accumulator[source] = target;
+    return accumulator;
+  }, {});
+
+  if (Object.keys(mapping).length === 0) {
+    return undefined;
+  }
+
+  return mapping;
+}
+
 export default function ImportsPage() {
   const router = useRouter();
+  const t = useLocaleText();
+  const { isAdminView } = useUiShell();
   const [session, setSession] = useState<LoginSession | null>(null);
   const [jobs, setJobs] = useState<ImportJobListItem[]>([]);
   const [selectedJob, setSelectedJob] = useState<ImportJobDetail | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [mappingJson, setMappingJson] = useState("{}");
+  const [mappingRows, setMappingRows] = useState<KeyValueRow[]>([
+    { key: "code", value: "code" },
+    { key: "name", value: "name" }
+  ]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -92,18 +118,18 @@ export default function ImportsPage() {
         if (refreshError instanceof ApiError) {
           setError(refreshError.message);
         } else {
-          setError("Failed to load import jobs");
+          setError(t("가져오기 작업 목록을 불러오지 못했습니다.", "Failed to load import jobs."));
         }
       }
     }
 
     void run();
-  }, [router]);
+  }, [router, t]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session || !selectedFile) {
-      setError("Please choose a CSV/XLSX file.");
+      setError(t("CSV/XLSX 파일을 선택해주세요.", "Please choose a CSV/XLSX file."));
       return;
     }
 
@@ -124,19 +150,17 @@ export default function ImportsPage() {
         body: uploadPayload
       });
 
-      const parsedMapping = mappingJson.trim() ? (JSON.parse(mappingJson) as Record<string, unknown>) : undefined;
-
       const createdJob = await apiRequest<ImportJobDetail>("/import-export/import-jobs/vendors", {
         method: "POST",
         token: session.token,
         companyId,
         body: {
           sourceFileId: uploaded.id,
-          mappingJson: parsedMapping
+          mappingJson: rowsToMapping(mappingRows)
         }
       });
 
-      setSuccess("Vendor import job created.");
+      setSuccess(t("벤더 가져오기 작업을 생성했습니다.", "Vendor import job created."));
       setSelectedFile(null);
       await fetchJobs(session);
       await fetchJobDetail(session, createdJob.id);
@@ -146,7 +170,7 @@ export default function ImportsPage() {
       } else if (submitError instanceof Error) {
         setError(submitError.message);
       } else {
-        setError("Failed to create import job");
+        setError(t("가져오기 작업 생성에 실패했습니다.", "Failed to create import job."));
       }
     } finally {
       setSubmitting(false);
@@ -154,14 +178,26 @@ export default function ImportsPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
-      <h1>Import Jobs</h1>
-      <p>Upload CSV/XLSX and run vendor import with row-level validation results.</p>
+      <section className="app-shell-content">
+      <h1>{t("가져오기 작업", "Import Jobs")}</h1>
+      <p>
+        {t(
+          "CSV/XLSX 파일을 업로드하고 컬럼 매핑을 표로 지정한 뒤 행 단위 검증 결과를 확인하세요.",
+          "Upload CSV/XLSX, set column mapping in table form, and review row-level validation results."
+        )}
+      </p>
+
+      {!isAdminView ? (
+        <p className="role-note">
+          {t("사용자 권한에서는 가져오기 생성 권한이 제한될 수 있습니다.", "Import creation may be restricted for user role.")}
+        </p>
+      ) : null}
 
       <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
         <label>
-          Source file (CSV/XLSX)
+          {t("원본 파일 (CSV/XLSX)", "Source file (CSV/XLSX)")}
           <input
             type="file"
             accept=".csv,.xlsx"
@@ -170,30 +206,35 @@ export default function ImportsPage() {
           />
         </label>
 
-        <label>
-          Mapping JSON (optional)
-          <textarea rows={3} value={mappingJson} onChange={(event) => setMappingJson(event.target.value)} />
-        </label>
+        <fieldset>
+          <legend>{t("컬럼 매핑 (선택)", "Column mapping (optional)")}</legend>
+          <KeyValueTableEditor
+            rows={mappingRows}
+            onChange={setMappingRows}
+            keyPlaceholder={t("원본 컬럼", "Source column")}
+            valuePlaceholder={t("대상 필드", "Target field")}
+          />
+        </fieldset>
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Creating..." : "Create vendor import job"}
+        <button type="submit" disabled={submitting || !isAdminView}>
+          {submitting ? t("생성 중...", "Creating...") : t("벤더 가져오기 생성", "Create vendor import job")}
         </button>
       </form>
 
       {error ? <p className="error-text">{error}</p> : null}
       {success ? <p className="success-text">{success}</p> : null}
 
-      <h2>Jobs</h2>
+      <h2>{t("작업 목록", "Jobs")}</h2>
       <table className="data-table">
         <thead>
           <tr>
-            <th>Job</th>
-            <th>Type</th>
-            <th>Status</th>
-            <th>Source File</th>
-            <th>Rows</th>
-            <th>Finished</th>
-            <th>Error</th>
+            <th>{t("작업", "Job")}</th>
+            <th>{t("유형", "Type")}</th>
+            <th>{t("상태", "Status")}</th>
+            <th>{t("원본 파일", "Source File")}</th>
+            <th>{t("행 수", "Rows")}</th>
+            <th>{t("완료 시각", "Finished")}</th>
+            <th>{t("오류", "Error")}</th>
           </tr>
         </thead>
         <tbody>
@@ -201,7 +242,7 @@ export default function ImportsPage() {
             <tr key={job.id}>
               <td>
                 <button type="button" onClick={() => session && void fetchJobDetail(session, job.id)}>
-                  View
+                  {t("상세", "View")}
                 </button>
                 <div>
                   <code>{job.id}</code>
@@ -217,7 +258,7 @@ export default function ImportsPage() {
           ))}
           {jobs.length === 0 ? (
             <tr>
-              <td colSpan={7}>No import jobs yet.</td>
+              <td colSpan={7}>{t("아직 가져오기 작업이 없습니다.", "No import jobs yet.")}</td>
             </tr>
           ) : null}
         </tbody>
@@ -225,21 +266,21 @@ export default function ImportsPage() {
 
       {selectedJob ? (
         <>
-          <h2>Selected Job Detail</h2>
+          <h2>{t("선택된 작업 상세", "Selected Job Detail")}</h2>
           <p>
             <code>{selectedJob.id}</code> / {selectedJob.status}
           </p>
           <p>
-            Summary: {selectedJob.summaryJson ? JSON.stringify(selectedJob.summaryJson) : "-"}
+            {t("요약", "Summary")}: {selectedJob.summaryJson ? JSON.stringify(selectedJob.summaryJson) : "-"}
           </p>
 
           <table className="data-table">
             <thead>
               <tr>
-                <th>Row</th>
-                <th>Status</th>
-                <th>Error</th>
-                <th>Raw Data</th>
+                <th>{t("행", "Row")}</th>
+                <th>{t("상태", "Status")}</th>
+                <th>{t("오류", "Error")}</th>
+                <th>{t("원본 데이터", "Raw Data")}</th>
               </tr>
             </thead>
             <tbody>
@@ -255,13 +296,14 @@ export default function ImportsPage() {
               ))}
               {selectedJob.rows.length === 0 ? (
                 <tr>
-                  <td colSpan={4}>No row results.</td>
+                  <td colSpan={4}>{t("행 결과가 없습니다.", "No row results.")}</td>
                 </tr>
               ) : null}
             </tbody>
           </table>
         </>
       ) : null}
+      </section>
     </main>
   );
 }

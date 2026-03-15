@@ -76,8 +76,9 @@ export default function CompaniesPage() {
   }
 
   return (
-    <main className="container">
+    <main className="container with-shell">
       <DashboardNav />
+      <section className="app-shell-content">
       <h1>Companies</h1>
       <p>Company list and detail access for current memberships.</p>
 
@@ -118,6 +119,7 @@ export default function CompaniesPage() {
           ))}
         </tbody>
       </table>
+      </section>
     </main>
   );
 }
