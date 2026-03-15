@@ -1,0 +1,1111 @@
+.page {
+  position: relative;
+  overflow: clip;
+  max-width: 1320px;
+  display: grid;
+  gap: clamp(2.8rem, 6vw, 5.2rem);
+  padding: clamp(1.2rem, 3.2vw, 2.3rem);
+  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--line) 76%, rgba(255, 255, 255, 0.2));
+  background:
+    radial-gradient(circle at 2% 8%, rgba(76, 111, 255, 0.22), transparent 30%),
+    radial-gradient(circle at 100% 0%, rgba(122, 92, 255, 0.2), transparent 31%),
+    linear-gradient(178deg, color-mix(in srgb, var(--surface) 90%, #eef3ff), var(--surface));
+  box-shadow:
+    0 30px 70px rgba(2, 10, 28, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42);
+}
+
+.auroraLayer {
+  position: absolute;
+  inset: -20% -12% auto;
+  height: 48%;
+  background:
+    radial-gradient(circle at 30% 40%, rgba(76, 111, 255, 0.2), transparent 48%),
+    radial-gradient(circle at 70% 35%, rgba(122, 92, 255, 0.14), transparent 42%),
+    radial-gradient(circle at 48% 78%, rgba(32, 214, 199, 0.12), transparent 38%);
+  pointer-events: none;
+  filter: blur(5px);
+  animation: auroraDrift 18s ease-in-out infinite alternate;
+}
+
+.utilityBar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.brandGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.brandMark {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: color-mix(in srgb, var(--text) 74%, var(--primary));
+}
+
+.versionChip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.26rem 0.64rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--text) 85%, #ffffff 15%);
+  border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: color-mix(in srgb, var(--surface-3) 72%, transparent);
+}
+
+.utilityActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ghostControl {
+  min-height: 2.2rem;
+  padding: 0.42rem 0.76rem;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, rgba(255, 255, 255, 0.55));
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+}
+
+.inlineLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.2rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--line));
+  padding: 0.42rem 0.76rem;
+  color: color-mix(in srgb, var(--text) 86%, var(--primary));
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--surface-3) 72%, transparent);
+}
+
+.inlineLink:hover {
+  text-decoration: none;
+}
+
+.heroSection {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr);
+  gap: clamp(1.3rem, 2.6vw, 2.2rem);
+  align-items: stretch;
+}
+
+.heroCopy {
+  display: grid;
+  align-content: center;
+  gap: 1rem;
+  animation: revealUp 440ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.eyebrow {
+  margin: 0;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 42%, var(--line));
+  background: color-mix(in srgb, var(--surface-3) 70%, transparent);
+  padding: 0.36rem 0.74rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.heroTitle {
+  margin: 0;
+  font-size: clamp(2.2rem, 5.4vw, 4rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  color: color-mix(in srgb, var(--text) 88%, #081225 12%);
+}
+
+.heroBody {
+  margin: 0;
+  font-size: clamp(1rem, 1.7vw, 1.18rem);
+  line-height: 1.74;
+  color: color-mix(in srgb, var(--muted) 88%, var(--text));
+  max-width: 58ch;
+}
+
+.heroCtas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.8rem;
+  border-radius: 15px;
+  padding: 0.65rem 1.08rem;
+  font-weight: 700;
+  font-size: 0.94rem;
+  letter-spacing: -0.01em;
+  border: 1px solid transparent;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.ctaButton:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+.ctaButton:focus-visible,
+.ghostControl:focus-visible,
+.inlineLink:focus-visible,
+.interactiveCard:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 58%, #ffffff);
+  outline-offset: 2px;
+}
+
+.ctaPrimary {
+  color: #ffffff;
+  border-color: color-mix(in srgb, #4c6fff 58%, #1e40af);
+  background: linear-gradient(120deg, #4c6fff, #7a5cff);
+  box-shadow: 0 14px 26px rgba(55, 83, 192, 0.28);
+}
+
+.ctaSecondary {
+  color: color-mix(in srgb, var(--text) 82%, var(--primary));
+  border-color: color-mix(in srgb, var(--primary) 46%, var(--line));
+  background: color-mix(in srgb, var(--surface-3) 86%, transparent);
+}
+
+.trustList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.48rem;
+}
+
+.trustList li {
+  position: relative;
+  padding-left: 1rem;
+  color: color-mix(in srgb, var(--muted) 88%, var(--text));
+  font-size: 0.93rem;
+}
+
+.trustList li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.56rem;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #20d6c7, #4c6fff);
+}
+
+.dashboardFrame {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, rgba(255, 255, 255, 0.38));
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--surface) 88%, #f2f7ff), color-mix(in srgb, var(--surface-2) 92%, #f5f9ff));
+  box-shadow:
+    0 26px 58px rgba(14, 25, 50, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  animation: frameFloat 7.2s ease-in-out infinite;
+}
+
+.frameTopBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.24));
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent);
+}
+
+.frameDots {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.frameDots span {
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 30%, var(--line));
+}
+
+.frameTitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--muted) 72%, var(--text));
+}
+
+.dashboardBody {
+  display: grid;
+  grid-template-columns: 156px minmax(0, 1fr);
+  min-height: 0;
+}
+
+.dashboardSidebar {
+  display: grid;
+  align-content: start;
+  gap: 0.42rem;
+  padding: 0.9rem 0.72rem;
+  border-right: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.32));
+  background: color-mix(in srgb, var(--surface-2) 94%, transparent);
+}
+
+.dashboardSidebar span {
+  border-radius: 10px;
+  border: 1px solid transparent;
+  padding: 0.45rem 0.52rem;
+  font-size: 0.78rem;
+  color: color-mix(in srgb, var(--muted) 84%, var(--text));
+}
+
+.dashboardSidebar span:first-child {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+  color: color-mix(in srgb, var(--text) 90%, var(--primary));
+}
+
+.dashboardMain {
+  min-width: 0;
+  display: grid;
+  gap: 0.72rem;
+  padding: 0.85rem;
+}
+
+.copilotBar {
+  display: grid;
+  gap: 0.36rem;
+}
+
+.copilotLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--primary) 66%, var(--text));
+}
+
+.copilotBar input {
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.5));
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  color: color-mix(in srgb, var(--text) 84%, var(--muted));
+  font-size: 0.83rem;
+  padding: 0.46rem 0.6rem;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.52rem;
+}
+
+.kpiCard {
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.45));
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  padding: 0.56rem;
+  display: grid;
+  gap: 0.16rem;
+}
+
+.kpiCard p {
+  margin: 0;
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--muted) 88%, var(--text));
+}
+
+.kpiCard strong {
+  font-size: 1.1rem;
+  letter-spacing: -0.02em;
+  color: color-mix(in srgb, var(--text) 88%, #0f172a);
+}
+
+.kpiCard span {
+  font-size: 0.68rem;
+  color: color-mix(in srgb, var(--muted) 78%, var(--line));
+}
+
+.dashboardPanels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 0.9fr;
+  gap: 0.55rem;
+  min-height: 0;
+}
+
+.activityPanel,
+.chartPanel {
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.45));
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  padding: 0.58rem;
+  min-width: 0;
+}
+
+.activityPanel h3,
+.chartPanel h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--muted) 80%, var(--text));
+}
+
+.activityPanel ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.activityPanel li {
+  border-radius: 10px;
+  padding: 0.36rem 0.42rem;
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--text) 80%, var(--muted));
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+}
+
+.chartBars {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: end;
+  gap: 0.28rem;
+  height: 70px;
+}
+
+.chartBars span {
+  border-radius: 999px 999px 8px 8px;
+  min-height: 18%;
+  height: var(--bar-height);
+  background: linear-gradient(180deg, color-mix(in srgb, #4c6fff 80%, #7a5cff), color-mix(in srgb, #20d6c7 78%, #4c6fff));
+  animation: barRise 420ms var(--bar-delay) cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.quickChips {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.quickChips span {
+  border-radius: 999px;
+  padding: 0.24rem 0.45rem;
+  font-size: 0.67rem;
+  font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--line) 85%, rgba(255, 255, 255, 0.5));
+  background: color-mix(in srgb, var(--surface-2) 82%, transparent);
+  color: color-mix(in srgb, var(--muted) 82%, var(--text));
+}
+
+.scrollStorySection {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+  gap: clamp(1rem, 2.7vw, 2rem);
+}
+
+.storyStickyColumn {
+  position: sticky;
+  top: 1.4rem;
+  align-self: start;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.34));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 94%, transparent), color-mix(in srgb, var(--surface-2) 94%, transparent));
+  padding: 1rem;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.sectionTag {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--primary) 70%, var(--text));
+}
+
+.storyStickyColumn h2,
+.parallaxHeader h2,
+.cardsHeader h2,
+.finalCtaContent h2 {
+  margin: 0;
+  font-size: clamp(1.55rem, 2.5vw, 2.5rem);
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+}
+
+.storyStickyColumn p {
+  margin: 0;
+  color: color-mix(in srgb, var(--muted) 84%, var(--text));
+  line-height: 1.7;
+}
+
+.storyProgress {
+  margin: 0.15rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.storyProgress li {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.45));
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  padding: 0.5rem 0.62rem;
+  display: grid;
+  gap: 0.15rem;
+  color: color-mix(in srgb, var(--muted) 82%, var(--text));
+}
+
+.storyProgress li span {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.storyProgress li strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.storyProgressActive {
+  border-color: color-mix(in srgb, var(--primary) 44%, var(--line));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  color: color-mix(in srgb, var(--text) 88%, #1e3fa0) !important;
+}
+
+.storyBlocksColumn {
+  display: grid;
+  gap: 0.92rem;
+}
+
+.storyBlock {
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.42));
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  padding: 0.95rem;
+  display: grid;
+  gap: 0.72rem;
+  opacity: 0.56;
+  transform: translateY(12px);
+  transition:
+    opacity 320ms ease,
+    transform 360ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 280ms ease,
+    box-shadow 280ms ease;
+}
+
+.storyBlockActive {
+  opacity: 1;
+  transform: translateY(0);
+  border-color: color-mix(in srgb, var(--primary) 43%, var(--line));
+  box-shadow: 0 18px 34px rgba(15, 31, 64, 0.12);
+}
+
+.storyBlockHeader h3 {
+  margin: 0;
+  font-size: 1.22rem;
+}
+
+.storyBlockHeader p {
+  margin: 0.36rem 0 0;
+  line-height: 1.7;
+  color: color-mix(in srgb, var(--muted) 84%, var(--text));
+}
+
+.storyPreviewCard {
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.45));
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  padding: 0.72rem;
+}
+
+.storyPreviewCard p {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--primary) 66%, var(--text));
+}
+
+.storyPreviewCard ul {
+  margin: 0.45rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.storyPreviewCard li {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.4));
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  padding: 0.43rem 0.5rem;
+  font-size: 0.84rem;
+  color: color-mix(in srgb, var(--muted) 82%, var(--text));
+}
+
+.parallaxSection {
+  position: relative;
+  z-index: 1;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.42));
+  background: linear-gradient(180deg, color-mix(in srgb, #e7eefc 58%, var(--surface) 42%), color-mix(in srgb, var(--surface) 95%, #f4f8ff));
+  padding: clamp(1rem, 2.6vw, 1.8rem);
+  display: grid;
+  gap: 1rem;
+}
+
+.parallaxHeader {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.parallaxScene {
+  position: relative;
+  min-height: 440px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.4));
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(76, 111, 255, 0.12), transparent 35%),
+    radial-gradient(circle at 85% 25%, rgba(122, 92, 255, 0.12), transparent 34%),
+    linear-gradient(160deg, color-mix(in srgb, var(--surface) 94%, #eef4ff), color-mix(in srgb, var(--surface-2) 95%, #f4f8ff));
+}
+
+.sceneGridLayer,
+.sceneConnectorLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sceneGridLayer {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--line) 35%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 35%, transparent) 1px, transparent 1px);
+  background-size: 42px 42px;
+  transform: translate3d(calc(var(--parallax-x) * 0.15), calc(var(--parallax-y) * 0.08), 0);
+}
+
+.sceneConnectorLayer {
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 89px, color-mix(in srgb, var(--line) 65%, transparent) 89px 90px, transparent 90px),
+    radial-gradient(circle at 50% 50%, transparent 0 159px, color-mix(in srgb, var(--line) 48%, transparent) 159px 160px, transparent 160px),
+    radial-gradient(circle at 50% 50%, transparent 0 224px, color-mix(in srgb, var(--line) 35%, transparent) 224px 225px, transparent 225px);
+  transform: translate3d(calc(var(--parallax-x) * 0.05), calc(var(--parallax-y) * 0.05), 0);
+}
+
+.sceneCore {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(280px, 60vw);
+  min-height: 118px;
+  transform: translate3d(
+      calc(-50% + var(--parallax-x) * 0.12),
+      calc(-50% + var(--parallax-y) * 0.08 - var(--parallax-scroll) * 0.15),
+      0
+    );
+  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--primary) 48%, var(--line));
+  background: linear-gradient(140deg, color-mix(in srgb, #4c6fff 18%, var(--surface)), color-mix(in srgb, #7a5cff 16%, var(--surface)));
+  box-shadow:
+    0 18px 30px rgba(25, 50, 113, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  display: grid;
+  place-content: center;
+  gap: 0.35rem;
+  text-align: center;
+}
+
+.sceneCore span {
+  font-size: clamp(1rem, 1.5vw, 1.28rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.sceneCore small {
+  color: color-mix(in srgb, var(--muted) 82%, var(--text));
+  font-size: 0.82rem;
+}
+
+.moduleCard {
+  position: absolute;
+  width: min(180px, 42vw);
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.4));
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  box-shadow: 0 12px 22px rgba(18, 34, 66, 0.12);
+  padding: 0.55rem;
+  display: grid;
+  gap: 0.16rem;
+  transition: transform 280ms ease;
+}
+
+.moduleCard strong {
+  font-size: 0.88rem;
+}
+
+.moduleCard p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: color-mix(in srgb, var(--muted) 84%, var(--text));
+}
+
+.moduleCard span {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 85%, rgba(255, 255, 255, 0.42));
+  background: color-mix(in srgb, var(--surface-2) 85%, transparent);
+  padding: 0.2rem 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--muted) 86%, var(--text));
+}
+
+.sceneFloatingMeta {
+  position: absolute;
+  left: 1rem;
+  bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.sceneFloatingMeta span {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.4));
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  color: color-mix(in srgb, var(--text) 78%, var(--muted));
+  padding: 0.22rem 0.46rem;
+  font-size: 0.7rem;
+}
+
+.cardsSection {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 1rem;
+}
+
+.cardsHeader {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+.interactiveCard {
+  grid-column: span 4;
+  text-align: left;
+  min-height: 190px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.4));
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  padding: 0.78rem;
+  display: grid;
+  align-content: space-between;
+  gap: 0.68rem;
+  transition:
+    transform 180ms ease,
+    border-color 220ms ease,
+    box-shadow 180ms ease,
+    background-color 220ms ease;
+}
+
+.interactiveCard:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
+  box-shadow: 0 16px 26px rgba(23, 45, 92, 0.15);
+}
+
+.interactiveCard h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.interactiveCard p {
+  margin: 0.35rem 0 0;
+  color: color-mix(in srgb, var(--muted) 84%, var(--text));
+  line-height: 1.55;
+  font-size: 0.9rem;
+}
+
+.interactiveCard small {
+  color: color-mix(in srgb, var(--muted) 82%, var(--text));
+  font-size: 0.78rem;
+}
+
+.interactiveCardFeatured {
+  grid-column: span 6;
+  min-height: 220px;
+  background: linear-gradient(154deg, color-mix(in srgb, #4c6fff 12%, var(--surface)), color-mix(in srgb, #7a5cff 11%, var(--surface)));
+}
+
+.interactiveCardActive {
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--line));
+  box-shadow: 0 18px 30px rgba(24, 44, 90, 0.2);
+  background: color-mix(in srgb, var(--primary) 11%, var(--surface));
+}
+
+.cardMeta {
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.4));
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent);
+  padding: 0.4rem 0.52rem;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.cardMeta span {
+  font-size: 0.72rem;
+  color: color-mix(in srgb, var(--muted) 84%, var(--text));
+}
+
+.cardMeta strong {
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.cardDetailPanel {
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.4));
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  padding: 0.92rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.cardDetailPanel > p {
+  margin: 0;
+  color: color-mix(in srgb, var(--muted) 78%, var(--text));
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.cardDetailPanel h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.cardDetailPanel > :nth-child(3) {
+  margin: 0;
+  color: color-mix(in srgb, var(--muted) 84%, var(--text));
+  line-height: 1.7;
+}
+
+.detailStats {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.detailStats span {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--line) 87%, rgba(255, 255, 255, 0.4));
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent);
+  padding: 0.42rem 0.55rem;
+  color: color-mix(in srgb, var(--muted) 84%, var(--text));
+  font-size: 0.84rem;
+}
+
+.finalCtaSection {
+  position: relative;
+  z-index: 1;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, #4c6fff 36%, var(--line));
+  background:
+    linear-gradient(152deg, color-mix(in srgb, #081225 80%, #0f1a34), color-mix(in srgb, #10254f 70%, #182d63));
+  overflow: hidden;
+  display: grid;
+  gap: 1.1rem;
+  padding: clamp(1.1rem, 2.8vw, 1.8rem);
+  color: #ecf2ff;
+}
+
+.finalVisualEcho {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  opacity: 0.95;
+}
+
+.finalVisualChip {
+  border-radius: 999px;
+  border: 1px solid rgba(160, 190, 255, 0.38);
+  background: rgba(13, 26, 56, 0.42);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  padding: 0.32rem 0.58rem;
+  font-size: 0.76rem;
+  color: rgba(231, 240, 255, 0.95);
+}
+
+.finalCtaContent {
+  display: grid;
+  gap: 0.56rem;
+}
+
+.finalCtaContent .sectionTag {
+  color: rgba(177, 201, 255, 0.92);
+}
+
+.finalCtaContent h2 {
+  color: #ffffff;
+}
+
+.finalCtaContent > p:not(.sectionTag) {
+  margin: 0;
+  max-width: 66ch;
+  line-height: 1.72;
+  color: rgba(225, 235, 255, 0.88);
+}
+
+.finalCtaSection .ctaSecondary {
+  border-color: rgba(166, 189, 255, 0.45);
+  background: rgba(12, 29, 64, 0.5);
+  color: rgba(237, 244, 255, 0.95);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1100px) {
+  .page {
+    max-width: 100%;
+  }
+
+  .heroSection {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardBody {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboardSidebar {
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.35));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .scrollStorySection {
+    grid-template-columns: 1fr;
+  }
+
+  .storyStickyColumn {
+    position: static;
+  }
+
+  .storyProgress {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .interactiveCard {
+    grid-column: span 6;
+  }
+
+  .interactiveCardFeatured {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 820px) {
+  .utilityBar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .utilityActions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .heroTitle {
+    font-size: clamp(1.85rem, 9vw, 2.5rem);
+  }
+
+  .kpiGrid,
+  .dashboardPanels {
+    grid-template-columns: 1fr;
+  }
+
+  .storyProgress {
+    grid-template-columns: 1fr;
+  }
+
+  .parallaxScene {
+    min-height: 360px;
+  }
+
+  .sceneCore {
+    width: min(248px, 70vw);
+  }
+
+  .moduleCard {
+    width: min(150px, 52vw);
+  }
+
+  .interactiveCard,
+  .interactiveCardFeatured {
+    grid-column: span 12;
+    min-height: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    padding: 1rem;
+    border-radius: 18px;
+  }
+
+  .heroBody {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .ctaButton {
+    width: 100%;
+  }
+
+  .dashboardFrame {
+    border-radius: 18px;
+  }
+
+  .dashboardMain {
+    padding: 0.68rem;
+  }
+
+  .sceneCore {
+    width: min(220px, 78vw);
+    min-height: 96px;
+  }
+
+  .moduleCard {
+    width: min(138px, 58vw);
+    padding: 0.45rem;
+  }
+
+  .finalCtaSection {
+    border-radius: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auroraLayer,
+  .dashboardFrame,
+  .chartBars span {
+    animation: none !important;
+  }
+
+  .storyBlock,
+  .storyBlockActive,
+  .interactiveCard,
+  .interactiveCard:hover,
+  .ctaButton,
+  .ctaButton:hover {
+    transform: none !important;
+    transition-duration: 1ms !important;
+  }
+
+  .sceneGridLayer,
+  .sceneConnectorLayer {
+    transform: none !important;
+  }
+}
+
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.99);
+    filter: blur(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes barRise {
+  from {
+    opacity: 0.2;
+    transform: scaleY(0.35);
+    transform-origin: bottom;
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: bottom;
+  }
+}
+
+@keyframes auroraDrift {
+  from {
+    transform: translateX(-2%) translateY(-1%);
+  }
+
+  to {
+    transform: translateX(2%) translateY(1.2%);
+  }
+}
+
+@keyframes frameFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4px);
+  }
+}
