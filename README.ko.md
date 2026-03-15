@@ -19,6 +19,15 @@
 
 본 상태는 **알파 프리릴리스 후보**이며, 아직 프로덕션 GA 릴리스가 아닙니다.
 
+## 알파 피드백
+
+현재 `v0.1.0-alpha.0` 릴리스 이후 피드백을 적극적으로 수집하고 있습니다.
+
+- 공지 이슈: [#25](https://github.com/pxzhu/urimodu-erp/issues/25)
+- 피드백 트래커: [#19](https://github.com/pxzhu/urimodu-erp/issues/19)
+- 안정화 마일스톤: `v0.1.1-alpha.1` ([Milestones](https://github.com/pxzhu/urimodu-erp/milestones))
+- 신규 이슈 등록: [New issue form](https://github.com/pxzhu/urimodu-erp/issues/new/choose)
+
 ## 현재까지 구현된 핵심 모듈
 
 - `auth`: 로컬 세션 인증 + RBAC + OIDC 확장 추상화
