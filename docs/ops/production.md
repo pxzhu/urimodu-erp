@@ -13,6 +13,7 @@ At minimum configure:
 - `INTEGRATION_INGEST_API_KEY`
 - `EDGE_AGENT_SHARED_KEY`
 - `DEFAULT_COMPANY_CODE`
+- `WORKER_TICK_MS` (optional; default `60000`)
 
 Do not use development defaults in production.
 
@@ -41,3 +42,11 @@ Seed only for initial non-production bootstrap or controlled tenant setup.
 - Rotate gateway API keys
 - Persist failed-send buffer on durable volume
 - Treat vendor-specific attendance logic as adapter plugin scope
+
+## Import/Export Background Jobs
+
+- Import/export create API calls enqueue jobs in `PENDING` state.
+- Worker processes jobs asynchronously and advances lifecycle:
+  - `PENDING` -> `RUNNING` -> `SUCCEEDED|FAILED`
+- Keep worker service running in production; otherwise import/export jobs remain queued.
+- Monitor worker logs and `ImportJob`/`ExportJob` status tables for stuck jobs.

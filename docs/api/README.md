@@ -80,6 +80,11 @@ curl -fsS http://localhost:4000/swagger-json
 - `POST /approvals/lines/:id/resubmit`
 - `GET /approvals/inbox`
 
+Approval terminal outcomes are synchronized back to linked business records:
+
+- linked `LeaveRequest` status sync (`APPROVED`, `REJECTED`, `CANCELED`, `REQUESTED`)
+- linked `AttendanceCorrection` status sync (`APPROVED`, `REJECTED`, `CANCELED`, `REQUESTED`)
+
 ### Signatures
 
 - `GET /signatures/mine`
@@ -100,6 +105,8 @@ curl -fsS http://localhost:4000/swagger-json
 - `GET /attendance/shift-policies`
 - `POST /attendance/shift-policies`
 - `PATCH /attendance/shift-policies/:id`
+
+Shift policy starter now supports overnight windows (for example `22:00` to `06:00`) and normalization groups post-midnight events into the correct work date for covered scenarios.
 
 ### Leave + Corrections
 
@@ -138,6 +145,14 @@ curl -fsS http://localhost:4000/swagger-json
 - `GET /import-export/export-jobs`
 - `GET /import-export/export-jobs/:id`
 - `POST /import-export/export-jobs/expense-claims` (CSV/JSON)
+
+Job execution model:
+
+- API create endpoints enqueue jobs as `PENDING`
+- worker claims and transitions jobs to `RUNNING`
+- worker finalizes as `SUCCEEDED` or `FAILED`
+- import keeps row-level status/error reporting via `ImportJobRow`
+- export persists `resultFileId` and summary metadata
 
 ## Auth and RBAC Notes
 

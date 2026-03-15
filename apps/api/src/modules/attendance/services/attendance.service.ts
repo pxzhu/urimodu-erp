@@ -58,10 +58,6 @@ function normalizeShiftMinutes(input: { workStartMinutes: number; workEndMinutes
   if (input.workStartMinutes === input.workEndMinutes) {
     throw new BadRequestException("workStartMinutes and workEndMinutes cannot be equal");
   }
-
-  if (input.workEndMinutes < input.workStartMinutes) {
-    throw new BadRequestException("Overnight shift policy is not supported in this starter slice");
-  }
 }
 
 function toInputJson(value: unknown): Prisma.InputJsonValue {

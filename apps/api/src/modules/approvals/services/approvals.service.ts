@@ -8,7 +8,9 @@ import {
   ApprovalLineStatus,
   ApprovalStepStatus,
   ApprovalStepType,
+  CorrectionStatus,
   DocumentStatus,
+  LeaveRequestStatus,
   Prisma,
   type ApprovalLine,
   type MembershipRole
@@ -34,6 +36,40 @@ function toInputJson(value: unknown): Prisma.InputJsonValue | Prisma.NullableJso
   }
 
   return value as Prisma.InputJsonValue;
+}
+
+function mapBusinessStatusFromApproval(lineStatus: ApprovalLineStatus): {
+  leaveStatus: LeaveRequestStatus;
+  correctionStatus: CorrectionStatus;
+} {
+  switch (lineStatus) {
+    case ApprovalLineStatus.APPROVED:
+      return {
+        leaveStatus: LeaveRequestStatus.APPROVED,
+        correctionStatus: CorrectionStatus.APPROVED
+      };
+    case ApprovalLineStatus.REJECTED:
+      return {
+        leaveStatus: LeaveRequestStatus.REJECTED,
+        correctionStatus: CorrectionStatus.REJECTED
+      };
+    case ApprovalLineStatus.CANCELED:
+      return {
+        leaveStatus: LeaveRequestStatus.CANCELED,
+        correctionStatus: CorrectionStatus.CANCELED
+      };
+    case ApprovalLineStatus.DRAFT:
+    case ApprovalLineStatus.IN_REVIEW:
+      return {
+        leaveStatus: LeaveRequestStatus.REQUESTED,
+        correctionStatus: CorrectionStatus.REQUESTED
+      };
+    default:
+      return {
+        leaveStatus: LeaveRequestStatus.REQUESTED,
+        correctionStatus: CorrectionStatus.REQUESTED
+      };
+  }
 }
 
 @Injectable()
@@ -163,6 +199,103 @@ export class ApprovalsService {
     }
 
     return null;
+  }
+
+  private async syncBusinessStatusForDocument(input: {
+    auth: AuthContext;
+    lineId: string;
+    documentId: string;
+    lineStatus: ApprovalLineStatus;
+    requestMeta: RequestMeta;
+  }) {
+    const mappedStatus = mapBusinessStatusFromApproval(input.lineStatus);
+
+    const [leaveRequests, corrections] = await Promise.all([
+      this.prisma.leaveRequest.findMany({
+        where: {
+          companyId: input.auth.companyId,
+          documentId: input.documentId
+        },
+        select: {
+          id: true,
+          status: true
+        }
+      }),
+      this.prisma.attendanceCorrection.findMany({
+        where: {
+          companyId: input.auth.companyId,
+          documentId: input.documentId
+        },
+        select: {
+          id: true,
+          status: true
+        }
+      })
+    ]);
+
+    for (const request of leaveRequests) {
+      if (request.status === mappedStatus.leaveStatus) {
+        continue;
+      }
+
+      const updated = await this.prisma.leaveRequest.update({
+        where: { id: request.id },
+        data: {
+          status: mappedStatus.leaveStatus
+        }
+      });
+
+      await this.auditService.log({
+        companyId: input.auth.companyId,
+        actorId: input.auth.userId,
+        entityType: "LeaveRequest",
+        entityId: updated.id,
+        action: "LEAVE_REQUEST_STATUS_SYNC_FROM_APPROVAL",
+        beforeJson: {
+          status: request.status
+        },
+        afterJson: {
+          status: updated.status,
+          approvalLineId: input.lineId,
+          approvalStatus: input.lineStatus,
+          documentId: input.documentId
+        },
+        ipAddress: input.requestMeta.ipAddress,
+        userAgent: input.requestMeta.userAgent
+      });
+    }
+
+    for (const correction of corrections) {
+      if (correction.status === mappedStatus.correctionStatus) {
+        continue;
+      }
+
+      const updated = await this.prisma.attendanceCorrection.update({
+        where: { id: correction.id },
+        data: {
+          status: mappedStatus.correctionStatus
+        }
+      });
+
+      await this.auditService.log({
+        companyId: input.auth.companyId,
+        actorId: input.auth.userId,
+        entityType: "AttendanceCorrection",
+        entityId: updated.id,
+        action: "ATTENDANCE_CORRECTION_STATUS_SYNC_FROM_APPROVAL",
+        beforeJson: {
+          status: correction.status
+        },
+        afterJson: {
+          status: updated.status,
+          approvalLineId: input.lineId,
+          approvalStatus: input.lineStatus,
+          documentId: input.documentId
+        },
+        ipAddress: input.requestMeta.ipAddress,
+        userAgent: input.requestMeta.userAgent
+      });
+    }
   }
 
   async configureLine(auth: AuthContext, dto: ConfigureApprovalLineDto, requestMeta: RequestMeta) {
@@ -324,6 +457,14 @@ export class ApprovalsService {
       }
     });
 
+    await this.syncBusinessStatusForDocument({
+      auth,
+      lineId,
+      documentId: line.documentId,
+      lineStatus: nextOrder === null ? ApprovalLineStatus.APPROVED : ApprovalLineStatus.IN_REVIEW,
+      requestMeta
+    });
+
     await this.auditService.log({
       companyId: auth.companyId,
       actorId: auth.userId,
@@ -410,6 +551,14 @@ export class ApprovalsService {
       });
     }
 
+    await this.syncBusinessStatusForDocument({
+      auth,
+      lineId,
+      documentId: line.documentId,
+      lineStatus: nextOrder === null ? ApprovalLineStatus.APPROVED : ApprovalLineStatus.IN_REVIEW,
+      requestMeta
+    });
+
     await this.auditService.log({
       companyId: auth.companyId,
       actorId: auth.userId,
@@ -483,6 +632,14 @@ export class ApprovalsService {
         actionType: "REJECT",
         comment: dto.comment
       }
+    });
+
+    await this.syncBusinessStatusForDocument({
+      auth,
+      lineId,
+      documentId: line.documentId,
+      lineStatus: ApprovalLineStatus.REJECTED,
+      requestMeta
     });
 
     await this.auditService.log({
@@ -562,6 +719,14 @@ export class ApprovalsService {
         actionType: "CANCEL",
         comment: dto.comment
       }
+    });
+
+    await this.syncBusinessStatusForDocument({
+      auth,
+      lineId,
+      documentId: line.documentId,
+      lineStatus: ApprovalLineStatus.CANCELED,
+      requestMeta
     });
 
     await this.auditService.log({
@@ -654,6 +819,14 @@ export class ApprovalsService {
         actionType: "RESUBMIT",
         comment: dto.comment
       }
+    });
+
+    await this.syncBusinessStatusForDocument({
+      auth,
+      lineId,
+      documentId: line.documentId,
+      lineStatus: nextOrder === null ? ApprovalLineStatus.APPROVED : ApprovalLineStatus.IN_REVIEW,
+      requestMeta
     });
 
     await this.auditService.log({
