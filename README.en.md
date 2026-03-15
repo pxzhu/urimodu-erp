@@ -1,4 +1,4 @@
-[Primary English](./README.md) | [한국어](./README.ko.md)
+[한국어 (기본)](./README.md)
 
 # Urimodu ERP
 

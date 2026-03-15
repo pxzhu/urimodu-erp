@@ -18,8 +18,7 @@ Use this checklist before creating a public prerelease tag/release.
 
 ## Docs and Notes
 
-- [ ] `README.md` (EN) and `README.ko.md` (KO) are aligned for setup/architecture
-- [ ] `README.en.md` mirror is updated
+- [ ] `README.md` (KO, primary) and `README.en.md` (EN mirror) are aligned for setup/architecture
 - [ ] `CHANGELOG.md` includes release entry
 - [ ] `docs/releases/<version>.md` draft notes are ready
 - [ ] Screenshot assets are present under `docs/screenshots/` or fallback guide is updated

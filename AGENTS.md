@@ -38,8 +38,8 @@
 - Guard tests should use lightweight `ExecutionContext` stubs to keep auth/RBAC checks fast
 - Keep vendor attendance integrations generic via adapters/stubs
 - HWPX is first-class; legacy HWP is fallback only
-- Keep `README.md` in English and `README.ko.md` in Korean, with setup/architecture sections aligned
-- Keep `README.en.md` as an English mirror of `README.md`; when a PROMPT run is completed, reflect the update in both files
+- Keep `README.md` as the Korean-primary README and `README.en.md` as the English mirror
+- When setup/architecture changes, update both `README.md` and `README.en.md` together
 - Web UI baseline is Korean-first + light mode default, with in-app dark mode and English toggles
 - UI screenshot QA should wait until data rows are visible and loading text is gone before capture
 - QA gate for every task/PR:
