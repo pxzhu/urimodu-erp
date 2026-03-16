@@ -692,29 +692,28 @@ export default function DocumentsPage() {
           </p>
         ) : null}
 
+        <div className="step-tabs" role="tablist" aria-label={t("문서 단계", "Document flow steps")}>
+          {flowSteps.map((step) => {
+            const disabled = Boolean(bootstrapping || (step.requiresDocument && !selectedDocumentId));
+            return (
+              <button
+                key={step.id}
+                type="button"
+                role="tab"
+                aria-selected={activeStep === step.id}
+                className={`step-tab ${activeStep === step.id ? "is-active" : ""}`}
+                disabled={disabled}
+                onClick={() => setActiveStep(step.id)}
+              >
+                <strong>{locale === "ko" ? step.labelKo : step.labelEn}</strong>
+                <span>{locale === "ko" ? step.descriptionKo : step.descriptionEn}</span>
+              </button>
+            );
+          })}
+        </div>
         {bootstrapping ? (
-          <p className="muted-text">{t("문서 화면을 준비하는 중입니다...", "Preparing document workspace...")}</p>
-        ) : (
-          <div className="step-tabs" role="tablist" aria-label={t("문서 단계", "Document flow steps")}>
-            {flowSteps.map((step) => {
-              const disabled = Boolean(step.requiresDocument && !selectedDocumentId);
-              return (
-                <button
-                  key={step.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={activeStep === step.id}
-                  className={`step-tab ${activeStep === step.id ? "is-active" : ""}`}
-                  disabled={disabled}
-                  onClick={() => setActiveStep(step.id)}
-                >
-                  <strong>{locale === "ko" ? step.labelKo : step.labelEn}</strong>
-                  <span>{locale === "ko" ? step.descriptionKo : step.descriptionEn}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+          <p className="empty-note">{t("문서 화면을 준비하는 중입니다...", "Preparing document workspace...")}</p>
+        ) : null}
 
         {selectedDocument ? (
           <section className="form-grid">

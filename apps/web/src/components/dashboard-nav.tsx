@@ -12,11 +12,12 @@ interface MenuItem {
   href: string;
   ko: string;
   en: string;
-  section: "org" | "workflow" | "attendance" | "finance" | "ops";
+  section: "home" | "org" | "workflow" | "attendance" | "finance" | "collab" | "ops";
   adminOnly?: boolean;
 }
 
 const menuItems: MenuItem[] = [
+  { href: "/workspace", ko: "업무 홈", en: "Workspace", section: "home" },
   { href: "/companies", ko: "회사", en: "Companies", section: "org", adminOnly: true },
   { href: "/departments", ko: "부서", en: "Departments", section: "org", adminOnly: true },
   { href: "/employees", ko: "직원", en: "Employees", section: "org" },
@@ -31,6 +32,7 @@ const menuItems: MenuItem[] = [
   { href: "/expenses", ko: "경비", en: "Expenses", section: "finance" },
   { href: "/accounting/accounts", ko: "계정과목", en: "Accounts", section: "finance", adminOnly: true },
   { href: "/accounting/journal-entries", ko: "분개", en: "Journal Entries", section: "finance", adminOnly: true },
+  { href: "/collaboration", ko: "협업 허브", en: "Collaboration Hub", section: "collab" },
   { href: "/imports", ko: "가져오기", en: "Imports", section: "ops", adminOnly: true },
   { href: "/exports", ko: "내보내기", en: "Exports", section: "ops", adminOnly: true }
 ];
@@ -43,15 +45,29 @@ function isActivePath(pathname: string, targetPath: string): boolean {
   return pathname === targetPath || pathname.startsWith(`${targetPath}/`);
 }
 
-const orderedSections: Array<MenuItem["section"]> = ["org", "workflow", "attendance", "finance", "ops"];
+const orderedSections: Array<MenuItem["section"]> = [
+  "home",
+  "org",
+  "workflow",
+  "attendance",
+  "finance",
+  "collab",
+  "ops"
+];
+
+function normalizeText(value: string) {
+  return value.trim().toLowerCase();
+}
 
 export function DashboardNav() {
   const router = useRouter();
   const pathname = usePathname();
   const session = loadSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [menuQuery, setMenuQuery] = useState("");
   const {
     locale,
     toggleLocale,
@@ -65,31 +81,53 @@ export function DashboardNav() {
   } = useUiShell();
   const t = useLocaleText();
 
-  const visibleMenuItems = menuItems.filter((item) => isAdminView || !item.adminOnly);
+  const visibleMenuItems = useMemo(
+    () => menuItems.filter((item) => isAdminView || !item.adminOnly),
+    [isAdminView]
+  );
+  const filteredMenuItems = useMemo(() => {
+    const normalizedQuery = normalizeText(menuQuery);
+    if (!normalizedQuery) {
+      return visibleMenuItems;
+    }
+
+    return visibleMenuItems.filter((item) => {
+      const searchableText = `${item.ko} ${item.en} ${item.href}`.toLowerCase();
+      return searchableText.includes(normalizedQuery);
+    });
+  }, [menuQuery, visibleMenuItems]);
   const sectionedMenuItems = useMemo(
     () =>
       orderedSections
         .map((section) => ({
           section,
-          items: visibleMenuItems.filter((item) => item.section === section)
+          items: filteredMenuItems.filter((item) => item.section === section)
         }))
         .filter((entry) => entry.items.length > 0),
-    [visibleMenuItems]
+    [filteredMenuItems]
   );
 
   useEffect(() => {
-    function syncMobileMenuByViewport() {
-      if (window.innerWidth <= 1080) {
-        setMobileMenuOpen(true);
+    function syncViewportState() {
+      const mobile = window.innerWidth <= 1080;
+      setIsMobileView(mobile);
+      if (!mobile) {
+        setMobileMenuOpen(false);
       }
     }
 
-    syncMobileMenuByViewport();
-    window.addEventListener("resize", syncMobileMenuByViewport);
+    syncViewportState();
+    window.addEventListener("resize", syncViewportState);
     return () => {
-      window.removeEventListener("resize", syncMobileMenuByViewport);
+      window.removeEventListener("resize", syncViewportState);
     };
   }, []);
+
+  useEffect(() => {
+    if (isMobileView) {
+      setMobileMenuOpen(false);
+    }
+  }, [pathname, isMobileView]);
 
   useEffect(() => {
     function onEscape(event: KeyboardEvent) {
@@ -98,14 +136,16 @@ export function DashboardNav() {
       }
       setSettingsModalOpen(false);
       setLogoutModalOpen(false);
-      setMobileMenuOpen(false);
+      if (isMobileView) {
+        setMobileMenuOpen(false);
+      }
     }
 
     window.addEventListener("keydown", onEscape);
     return () => {
       window.removeEventListener("keydown", onEscape);
     };
-  }, []);
+  }, [isMobileView]);
 
   async function performLogout() {
     if (session) {
@@ -125,6 +165,9 @@ export function DashboardNav() {
   }
 
   function sectionLabel(section: MenuItem["section"]) {
+    if (section === "home") {
+      return t("홈", "Home");
+    }
     if (section === "org") {
       return t("조직", "Organization");
     }
@@ -137,17 +180,46 @@ export function DashboardNav() {
     if (section === "finance") {
       return t("경비 · 회계", "Expenses · Finance");
     }
+    if (section === "collab") {
+      return t("협업", "Collaboration");
+    }
 
     return t("운영", "Operations");
+  }
+
+  function sectionBadge(section: MenuItem["section"]) {
+    if (section === "home") {
+      return "HM";
+    }
+    if (section === "org") {
+      return "OR";
+    }
+    if (section === "workflow") {
+      return "WF";
+    }
+    if (section === "attendance") {
+      return "AT";
+    }
+    if (section === "finance") {
+      return "FN";
+    }
+    if (section === "collab") {
+      return "CL";
+    }
+    return "OP";
   }
 
   const roleLabel = isAdminView
     ? t("관리자", "Administrator")
     : t("사용자", "User");
+  const normalizedUserName = userName.trim().length > 0 ? userName : "Guest";
+  const showMobileMenu = isMobileView && mobileMenuOpen;
 
   return (
     <>
-      <nav className={`app-shell-nav ${sidebarCollapsed ? "is-collapsed" : ""} ${mobileMenuOpen ? "is-mobile-open" : ""}`}>
+      <nav
+        className={`app-shell-nav ${!isMobileView && sidebarCollapsed ? "is-collapsed" : ""} ${showMobileMenu ? "is-mobile-open" : ""}`}
+      >
         <div className="app-shell-nav__brand-row">
           <button
             type="button"
@@ -158,15 +230,15 @@ export function DashboardNav() {
           >
             {mobileMenuOpen ? "✕" : "☰"}
           </button>
-          <Link href="/" prefetch={false} className="app-shell-nav__brand" title="Urimodu ERP">
-            {sidebarCollapsed ? "우리" : "우리모두ERP"}
+          <Link href="/workspace" prefetch={false} className="app-shell-nav__brand" title="Urimodu ERP">
+            {!isMobileView && sidebarCollapsed ? "우리" : "우리모두ERP"}
           </Link>
         </div>
 
         <div className="app-shell-nav__meta">
-          <div className="app-shell-nav__user">{sidebarCollapsed ? userName.slice(0, 1) : userName}</div>
+          <div className="app-shell-nav__user">{!isMobileView && sidebarCollapsed ? normalizedUserName.slice(0, 1) : normalizedUserName}</div>
           <div className="app-shell-nav__role" title={role}>
-            {sidebarCollapsed ? roleLabel.slice(0, 1) : `${t("모드", "Mode")}: ${roleLabel}`}
+            {!isMobileView && sidebarCollapsed ? roleLabel.slice(0, 1) : `${t("모드", "Mode")}: ${roleLabel}`}
           </div>
         </div>
 
@@ -176,30 +248,46 @@ export function DashboardNav() {
             className="nav-chip nav-chip--ghost"
             onClick={() => setSettingsModalOpen(true)}
           >
-            {sidebarCollapsed ? t("설정", "Prefs") : t("표시 설정", "Display settings")}
+            {!isMobileView && sidebarCollapsed ? t("설정", "Prefs") : t("표시 설정", "Display settings")}
           </button>
           <button
             type="button"
             className="nav-chip nav-chip--danger"
             onClick={() => setLogoutModalOpen(true)}
           >
-            {sidebarCollapsed ? t("로그", "Out") : t("로그아웃", "Logout")}
+            {!isMobileView && sidebarCollapsed ? t("로그", "Out") : t("로그아웃", "Logout")}
           </button>
-          <button
-            type="button"
-            className="nav-icon-button nav-desktop-toggle"
-            onClick={toggleSidebar}
-            aria-label={sidebarCollapsed ? t("메뉴 넓히기", "Expand menu") : t("메뉴 줄이기", "Collapse menu")}
-          >
-            {sidebarCollapsed ? "⟫" : "⟪"}
-          </button>
+          {!isMobileView ? (
+            <button
+              type="button"
+              className="nav-icon-button nav-desktop-toggle"
+              onClick={toggleSidebar}
+              aria-label={sidebarCollapsed ? t("메뉴 넓히기", "Expand menu") : t("메뉴 줄이기", "Collapse menu")}
+            >
+              {sidebarCollapsed ? "⟫" : "⟪"}
+            </button>
+          ) : null}
         </div>
 
         <div className="app-shell-nav__menu-scroll">
+          <div className="app-shell-nav__search">
+            <input
+              value={menuQuery}
+              onChange={(event) => setMenuQuery(event.target.value)}
+              placeholder={t("메뉴 검색 (예: 근태, 결재, 경비)", "Search menu (e.g., attendance, approvals)")}
+              aria-label={t("메뉴 검색", "Search menu")}
+            />
+            {menuQuery ? (
+              <small>{t(`${filteredMenuItems.length}건 검색`, `${filteredMenuItems.length} results`)}</small>
+            ) : null}
+          </div>
           {sectionedMenuItems.map((entry) => (
             <section className="app-shell-nav__section" key={entry.section}>
               <h2 className="app-shell-nav__section-title">
-                {sidebarCollapsed ? "•" : sectionLabel(entry.section)}
+                <span className="app-shell-nav__section-badge" aria-hidden>
+                  {sectionBadge(entry.section)}
+                </span>
+                <span>{!isMobileView && sidebarCollapsed ? "•" : sectionLabel(entry.section)}</span>
               </h2>
               <ul className="app-shell-nav__menu">
                 {entry.items.map((item) => {
@@ -212,8 +300,13 @@ export function DashboardNav() {
                         href={item.href}
                         prefetch={false}
                         className={`app-shell-nav__link ${active ? "is-active" : ""}`}
+                        onClick={() => {
+                          if (isMobileView) {
+                            setMobileMenuOpen(false);
+                          }
+                        }}
                       >
-                        <span className="app-shell-nav__link-text">{sidebarCollapsed ? label.slice(0, 2) : label}</span>
+                        <span className="app-shell-nav__link-text">{!isMobileView && sidebarCollapsed ? label.slice(0, 2) : label}</span>
                       </Link>
                     </li>
                   );
@@ -223,13 +316,6 @@ export function DashboardNav() {
           ))}
         </div>
       </nav>
-      <button
-        type="button"
-        className={`app-shell-nav__backdrop ${mobileMenuOpen ? "is-open" : ""}`}
-        onClick={() => setMobileMenuOpen(false)}
-        aria-hidden={!mobileMenuOpen}
-        tabIndex={-1}
-      />
       {settingsModalOpen ? (
         <div className="app-modal-backdrop" role="presentation" onClick={() => setSettingsModalOpen(false)}>
           <section

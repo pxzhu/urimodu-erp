@@ -138,6 +138,10 @@ test("sidebar navigation stays responsive on mobile width with repeated open/clo
       await expect(menuScroll).toBeVisible();
 
       for (const route of scenario.routes.slice(0, 4)) {
+        if (!(await menuScroll.isVisible())) {
+          await page.getByRole("button", { name: /메뉴 열기|Open menu|메뉴 닫기|Close menu/ }).first().click();
+          await expect(menuScroll).toBeVisible();
+        }
         await page.locator(`.app-shell-nav__menu a[href="${route}"]`).first().click();
         await expect(page).toHaveURL(new RegExp(`${route.replace("/", "\\/")}$`));
         await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });

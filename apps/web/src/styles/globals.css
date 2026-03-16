@@ -2,15 +2,15 @@
   color-scheme: light;
   font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
   --sidebar-width: 280px;
-  --bg: #edf2f8;
+  --bg: #eef2f7;
   --surface: #ffffff;
-  --surface-2: #f7f9fc;
-  --surface-3: #eef2f8;
-  --line: #d5dde9;
-  --text: #142033;
-  --muted: #56637a;
-  --primary: #294ca3;
-  --primary-strong: #213f85;
+  --surface-2: #f8fafc;
+  --surface-3: #edf2f8;
+  --line: #d8e0eb;
+  --text: #17253a;
+  --muted: #57647c;
+  --primary: #2452b3;
+  --primary-strong: #1a3f90;
   --danger: #b4232d;
   --success: #0d7f55;
 }
@@ -41,7 +41,7 @@ body {
 
 body {
   margin: 0;
-  background: linear-gradient(180deg, #f8fafd 0%, var(--bg) 100%);
+  background: linear-gradient(180deg, #f9fbff 0%, var(--bg) 100%);
   color: var(--text);
 }
 
@@ -115,7 +115,9 @@ code {
   top: 0;
   height: 100vh;
   border-right: 1px solid var(--line);
-  background: var(--surface);
+  background:
+    radial-gradient(circle at 0% -20%, rgba(36, 82, 179, 0.08), transparent 42%),
+    var(--surface);
   padding: 0.9rem 0.8rem;
   display: flex;
   flex-direction: column;
@@ -132,17 +134,17 @@ code {
 }
 
 .app-shell-nav__brand {
-  font-size: 1.17rem;
-  font-weight: 800;
+  font-size: 1.12rem;
+  font-weight: 900;
   color: var(--text);
   white-space: nowrap;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .app-shell-nav__meta {
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--surface-2);
+  border: 1px solid color-mix(in srgb, var(--line) 88%, #ffffff);
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
   padding: 0.7rem;
   display: grid;
   gap: 0.3rem;
@@ -179,12 +181,50 @@ code {
 
 .app-shell-nav__section-title {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   color: var(--muted);
   font-size: 0.77rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 0 0.35rem;
+}
+
+.app-shell-nav__section-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  min-height: 1.3rem;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.5));
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent);
+  color: color-mix(in srgb, var(--primary) 70%, var(--text));
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.app-shell-nav__search {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.app-shell-nav__search input {
+  width: 100%;
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.5));
+  padding: 0.52rem 0.62rem;
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent);
+  font-size: 0.84rem;
+}
+
+.app-shell-nav__search small {
+  color: var(--muted);
+  font-size: 0.74rem;
+  padding: 0 0.15rem;
 }
 
 .app-shell-nav__menu {
@@ -201,14 +241,15 @@ code {
   justify-content: flex-start;
   gap: 0.2rem;
   padding: 0.58rem 0.64rem;
-  border-radius: 12px;
+  border-radius: 11px;
   color: var(--muted);
   border: 1px solid color-mix(in srgb, var(--line) 92%, transparent);
-  background: var(--surface);
-  font-size: 0.95rem;
-  font-weight: 500;
+  background: color-mix(in srgb, var(--surface) 98%, #f8fbff);
+  font-size: 0.93rem;
+  font-weight: 600;
   line-height: 1.35;
   min-height: 2.4rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .app-shell-nav__link:hover {
@@ -221,7 +262,7 @@ code {
 .app-shell-nav__link.is-active {
   color: #ffffff;
   border-color: color-mix(in srgb, var(--primary) 56%, var(--line));
-  background: linear-gradient(120deg, color-mix(in srgb, var(--primary-strong) 84%, #1d2f62), #1f3269);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--primary-strong) 84%, #1e3d82), #214995);
 }
 
 .nav-icon-button,
@@ -279,10 +320,6 @@ button:hover {
 
 .app-shell-nav.is-collapsed .app-shell-nav__section-title {
   text-align: center;
-}
-
-.app-shell-nav__backdrop {
-  display: none;
 }
 
 .app-modal-backdrop {
@@ -578,6 +615,8 @@ button:disabled {
   .app-shell-nav__menu-scroll {
     display: none;
     max-height: min(62vh, 460px);
+    border-top: 1px solid var(--line);
+    padding-top: 0.65rem;
   }
 
   .app-shell-nav.is-mobile-open .app-shell-nav__menu-scroll {
@@ -586,22 +625,6 @@ button:disabled {
 
   .app-shell-nav__menu {
     grid-template-columns: 1fr;
-  }
-
-  .app-shell-nav__backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.18);
-    z-index: 40;
-    border: 0;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .app-shell-nav__backdrop.is-open {
-    opacity: 1;
-    pointer-events: auto;
   }
 
   .app-shell-nav.is-collapsed .app-shell-nav__section-title,
