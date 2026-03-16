@@ -12,27 +12,28 @@ interface MenuItem {
   href: string;
   ko: string;
   en: string;
+  icon: string;
   section: "org" | "workflow" | "attendance" | "finance" | "ops";
   adminOnly?: boolean;
 }
 
 const menuItems: MenuItem[] = [
-  { href: "/companies", ko: "회사", en: "Companies", section: "org", adminOnly: true },
-  { href: "/departments", ko: "부서", en: "Departments", section: "org", adminOnly: true },
-  { href: "/employees", ko: "직원", en: "Employees", section: "org" },
-  { href: "/files", ko: "파일", en: "Files", section: "workflow" },
-  { href: "/documents", ko: "문서", en: "Documents", section: "workflow" },
-  { href: "/approvals", ko: "결재함", en: "Approvals", section: "workflow" },
-  { href: "/attendance/raw", ko: "근태 원본", en: "Attendance Raw", section: "attendance" },
-  { href: "/attendance/ledger", ko: "근태 원장", en: "Attendance Ledger", section: "attendance" },
-  { href: "/leave", ko: "휴가", en: "Leave", section: "attendance" },
-  { href: "/attendance/corrections", ko: "근태 정정", en: "Corrections", section: "attendance" },
-  { href: "/attendance/shift-policies", ko: "근무 정책", en: "Shift Policies", section: "attendance", adminOnly: true },
-  { href: "/expenses", ko: "경비", en: "Expenses", section: "finance" },
-  { href: "/accounting/accounts", ko: "계정과목", en: "Accounts", section: "finance", adminOnly: true },
-  { href: "/accounting/journal-entries", ko: "분개", en: "Journal Entries", section: "finance", adminOnly: true },
-  { href: "/imports", ko: "가져오기", en: "Imports", section: "ops", adminOnly: true },
-  { href: "/exports", ko: "내보내기", en: "Exports", section: "ops", adminOnly: true }
+  { href: "/companies", ko: "회사", en: "Companies", icon: "CO", section: "org", adminOnly: true },
+  { href: "/departments", ko: "부서", en: "Departments", icon: "DE", section: "org", adminOnly: true },
+  { href: "/employees", ko: "직원", en: "Employees", icon: "EM", section: "org" },
+  { href: "/files", ko: "파일", en: "Files", icon: "FI", section: "workflow" },
+  { href: "/documents", ko: "문서", en: "Documents", icon: "DO", section: "workflow" },
+  { href: "/approvals", ko: "결재함", en: "Approvals", icon: "AP", section: "workflow" },
+  { href: "/attendance/raw", ko: "근태 원본", en: "Attendance Raw", icon: "AR", section: "attendance" },
+  { href: "/attendance/ledger", ko: "근태 원장", en: "Attendance Ledger", icon: "AL", section: "attendance" },
+  { href: "/leave", ko: "휴가", en: "Leave", icon: "LV", section: "attendance" },
+  { href: "/attendance/corrections", ko: "근태 정정", en: "Corrections", icon: "AC", section: "attendance" },
+  { href: "/attendance/shift-policies", ko: "근무 정책", en: "Shift Policies", icon: "SP", section: "attendance", adminOnly: true },
+  { href: "/expenses", ko: "경비", en: "Expenses", icon: "EX", section: "finance" },
+  { href: "/accounting/accounts", ko: "계정과목", en: "Accounts", icon: "GL", section: "finance", adminOnly: true },
+  { href: "/accounting/journal-entries", ko: "분개", en: "Journal Entries", icon: "JE", section: "finance", adminOnly: true },
+  { href: "/imports", ko: "가져오기", en: "Imports", icon: "IM", section: "ops", adminOnly: true },
+  { href: "/exports", ko: "내보내기", en: "Exports", icon: "EX", section: "ops", adminOnly: true }
 ];
 
 function isActivePath(pathname: string, targetPath: string): boolean {
@@ -44,6 +45,13 @@ function isActivePath(pathname: string, targetPath: string): boolean {
 }
 
 const orderedSections: Array<MenuItem["section"]> = ["org", "workflow", "attendance", "finance", "ops"];
+const sectionIcons: Record<MenuItem["section"], string> = {
+  org: "OR",
+  workflow: "WF",
+  attendance: "AT",
+  finance: "FN",
+  ops: "OP"
+};
 
 export function DashboardNav() {
   const router = useRouter();
@@ -158,9 +166,16 @@ export function DashboardNav() {
           >
             {mobileMenuOpen ? "✕" : "☰"}
           </button>
-          <Link href="/" prefetch={false} className="app-shell-nav__brand" title="Urimodu ERP">
-            {sidebarCollapsed ? "우리" : "우리모두ERP"}
-          </Link>
+          <div className="app-shell-nav__brand-copy">
+            <Link href="/" prefetch={false} className="app-shell-nav__brand" title="Urimodu ERP">
+              {sidebarCollapsed ? "우리" : "우리모두ERP"}
+            </Link>
+            {!sidebarCollapsed ? (
+              <span className="app-shell-nav__brand-subtitle">
+                {t("운영 플랫폼", "Operations Platform")}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         <div className="app-shell-nav__meta">
@@ -199,7 +214,10 @@ export function DashboardNav() {
           {sectionedMenuItems.map((entry) => (
             <section className="app-shell-nav__section" key={entry.section}>
               <h2 className="app-shell-nav__section-title">
-                {sidebarCollapsed ? "•" : sectionLabel(entry.section)}
+                <span className="app-shell-nav__section-icon" aria-hidden="true">
+                  {sectionIcons[entry.section]}
+                </span>
+                {sidebarCollapsed ? null : sectionLabel(entry.section)}
               </h2>
               <ul className="app-shell-nav__menu">
                 {entry.items.map((item) => {
@@ -213,6 +231,9 @@ export function DashboardNav() {
                         prefetch={false}
                         className={`app-shell-nav__link ${active ? "is-active" : ""}`}
                       >
+                        <span className="app-shell-nav__link-icon" aria-hidden="true">
+                          {item.icon}
+                        </span>
                         <span className="app-shell-nav__link-text">{sidebarCollapsed ? label.slice(0, 2) : label}</span>
                       </Link>
                     </li>
