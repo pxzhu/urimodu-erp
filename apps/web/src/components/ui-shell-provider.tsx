@@ -75,6 +75,20 @@ export function UiShellProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    function normalizeSidebarForViewport() {
+      if (window.innerWidth <= 1080) {
+        setSidebarCollapsed(false);
+      }
+    }
+
+    normalizeSidebarForViewport();
+    window.addEventListener("resize", normalizeSidebarForViewport);
+    return () => {
+      window.removeEventListener("resize", normalizeSidebarForViewport);
+    };
+  }, []);
+
+  useEffect(() => {
     window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
     document.documentElement.lang = locale === "ko" ? "ko" : "en";
   }, [locale]);
