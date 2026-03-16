@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../../components/dashboard-nav";
+import { useLocaleText } from "../../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../../lib/api";
 import { loadSession } from "../../../lib/auth";
 
@@ -25,6 +26,7 @@ interface Employee {
 
 export default function NewEmployeePage() {
   const router = useRouter();
+  const t = useLocaleText();
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [positions, setPositions] = useState<NamedEntity[]>([]);
@@ -107,7 +109,7 @@ export default function NewEmployeePage() {
       if (submitError instanceof ApiError) {
         setError(submitError.message);
       } else {
-        setError("Failed to create employee");
+        setError(t("직원 생성에 실패했습니다.", "Failed to create employee."));
       }
     }
   }
@@ -116,10 +118,10 @@ export default function NewEmployeePage() {
     <main className="container with-shell">
       <DashboardNav />
       <section className="app-shell-content">
-      <h1>Create Employee</h1>
+      <h1>{t("직원 생성", "Create Employee")}</h1>
 
       <form className="form-grid" onSubmit={onSubmit}>
-        <label htmlFor="employee-number">Employee Number</label>
+        <label htmlFor="employee-number">{t("사원번호", "Employee Number")}</label>
         <input
           id="employee-number"
           value={employeeNumber}
@@ -127,10 +129,10 @@ export default function NewEmployeePage() {
           required
         />
 
-        <label htmlFor="employee-name">Name (Korean)</label>
+        <label htmlFor="employee-name">{t("성명(한글)", "Name (Korean)")}</label>
         <input id="employee-name" value={nameKr} onChange={(event) => setNameKr(event.target.value)} required />
 
-        <label htmlFor="employee-email">Work Email</label>
+        <label htmlFor="employee-email">{t("업무 이메일", "Work Email")}</label>
         <input
           id="employee-email"
           value={workEmail}
@@ -138,12 +140,12 @@ export default function NewEmployeePage() {
           onChange={(event) => setWorkEmail(event.target.value)}
         />
 
-        <label htmlFor="hire-date">Hire Date</label>
+        <label htmlFor="hire-date">{t("입사일", "Hire Date")}</label>
         <input id="hire-date" type="date" value={hireDate} onChange={(event) => setHireDate(event.target.value)} />
 
-        <label htmlFor="department-id">Department</label>
+        <label htmlFor="department-id">{t("부서", "Department")}</label>
         <select id="department-id" value={departmentId} onChange={(event) => setDepartmentId(event.target.value)}>
-          <option value="">(none)</option>
+          <option value="">{t("(없음)", "(none)")}</option>
           {departments.map((department) => (
             <option key={department.id} value={department.id}>
               {department.code} - {department.name}
@@ -151,9 +153,9 @@ export default function NewEmployeePage() {
           ))}
         </select>
 
-        <label htmlFor="position-id">Position</label>
+        <label htmlFor="position-id">{t("직위", "Position")}</label>
         <select id="position-id" value={positionId} onChange={(event) => setPositionId(event.target.value)}>
-          <option value="">(none)</option>
+          <option value="">{t("(없음)", "(none)")}</option>
           {positions.map((position) => (
             <option key={position.id} value={position.id}>
               {position.code} - {position.name}
@@ -161,9 +163,9 @@ export default function NewEmployeePage() {
           ))}
         </select>
 
-        <label htmlFor="job-title-id">Job Title</label>
+        <label htmlFor="job-title-id">{t("직책", "Job Title")}</label>
         <select id="job-title-id" value={jobTitleId} onChange={(event) => setJobTitleId(event.target.value)}>
-          <option value="">(none)</option>
+          <option value="">{t("(없음)", "(none)")}</option>
           {jobTitles.map((title) => (
             <option key={title.id} value={title.id}>
               {title.code} - {title.name}
@@ -171,7 +173,7 @@ export default function NewEmployeePage() {
           ))}
         </select>
 
-        <button type="submit">Create Employee</button>
+        <button type="submit">{t("직원 생성", "Create Employee")}</button>
       </form>
 
       {error ? <p className="error-text">{error}</p> : null}

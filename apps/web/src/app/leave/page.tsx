@@ -8,6 +8,7 @@ import { SearchableEmployeeSelector } from "../../components/searchable-employee
 import { useLocaleText, useUiShell } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
+import { translateStatus } from "../../lib/status-label";
 
 interface LeavePolicyItem {
   id: string;
@@ -293,8 +294,8 @@ export default function LeavePage() {
                 {request.startDate.slice(0, 10)} ~ {request.endDate.slice(0, 10)} ({request.quantity} {request.unit})
               </td>
               <td>{request.leavePolicy.name}</td>
-              <td>{request.status}</td>
-              <td>{request.document ? `${request.document.title} (${request.document.status})` : "-"}</td>
+              <td>{translateStatus(request.status, t)}</td>
+              <td>{request.document ? `${request.document.title} (${translateStatus(request.document.status, t)})` : "-"}</td>
             </tr>
           ))}
           {requests.length === 0 ? (

@@ -92,7 +92,7 @@ export function DashboardNav() {
         >
           {sidebarCollapsed ? "☰" : "◀"}
         </button>
-        <Link href="/" className="app-shell-nav__brand" title="Urimodu ERP">
+        <Link href="/" prefetch={false} className="app-shell-nav__brand" title="Urimodu ERP">
           {sidebarCollapsed ? "우리" : "우리모두ERP"}
         </Link>
       </div>
@@ -123,7 +123,7 @@ export function DashboardNav() {
 
           return (
             <li key={item.href}>
-              <Link href={item.href} className={`app-shell-nav__link ${active ? "is-active" : ""}`}>
+              <Link href={item.href} prefetch={false} className={`app-shell-nav__link ${active ? "is-active" : ""}`}>
                 <span className="app-shell-nav__link-dot">•</span>
                 <span className="app-shell-nav__link-text">{sidebarCollapsed ? label.slice(0, 2) : label}</span>
               </Link>

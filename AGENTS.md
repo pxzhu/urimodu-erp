@@ -5,13 +5,16 @@
 1. `korean-self-hosted-erp-blueprint.md`
 2. `korean-self-hosted-erp-starter-structure-and-schema.md`
 3. `PROMPT01.md`
-4. `PROMPT02.md` (or active phase prompt)
+4. `GIT_WORKFLOW.md`
+5. `PROMPT02.md` (or active phase prompt)
 
 ## Repository Conventions
 
 - Package manager: `pnpm`
 - Task orchestration: `turbo`
-- Git workflow is mandatory for every task
+- Git workflow is mandatory for every task and must follow `GIT_WORKFLOW.md`
+- No git work may skip `GIT_WORKFLOW.md` steps (main sync -> branch -> work -> QA -> commit/push -> PR -> merge -> main return)
+- `AGENTS.md` enforces `GIT_WORKFLOW.md` as the required execution standard for all Codex runs
 - Git workflow checklist:
   0. Always start from `main` and sync latest first (`git switch main && git pull --ff-only`)
   1. Create a task-specific branch from `main` (use `codex/<task-name>`)

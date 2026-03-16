@@ -7,6 +7,7 @@ import { DashboardNav } from "../../../components/dashboard-nav";
 import { useLocaleText } from "../../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../../lib/api";
 import { loadSession, type LoginSession } from "../../../lib/auth";
+import { translateStatus } from "../../../lib/status-label";
 
 interface AttendanceLedgerItem {
   id: string;
@@ -119,7 +120,7 @@ export default function AttendanceLedgerPage() {
                 {row.employee.employeeNumber} {row.employee.nameKr}
               </td>
               <td>
-                {row.status}
+                {translateStatus(row.status, t)}
                 {row.needsReview ? ` (${t("검토필요", "review")})` : ""}
               </td>
               <td>

@@ -117,7 +117,6 @@ interface DocumentDetail {
     id: string;
     versionNo: number;
     createdAt: string;
-    htmlSnapshot: string;
     authoredBy: {
       id: string;
       name: string;
@@ -172,6 +171,20 @@ interface DocumentDetail {
       };
     }>;
   } | null;
+}
+
+function compactDocumentDetail(detail: DocumentDetail): DocumentDetail {
+  return {
+    ...detail,
+    versions: detail.versions.map((version) => ({
+      id: version.id,
+      versionNo: version.versionNo,
+      createdAt: version.createdAt,
+      authoredBy: version.authoredBy,
+      pdfFile: version.pdfFile,
+      attachments: version.attachments
+    }))
+  };
 }
 
 function toggleSelection(current: string[], fileId: string): string[] {
@@ -288,6 +301,7 @@ export default function DocumentsPage() {
   const [activeStep, setActiveStep] = useState<DocumentFlowStep>("create");
   const [approvalDetailTab, setApprovalDetailTab] = useState<ApprovalDetailTab>("approval");
 
+  const [bootstrapping, setBootstrapping] = useState(true);
   const [submitInProgress, setSubmitInProgress] = useState(false);
   const [savingInProgress, setSavingInProgress] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -345,7 +359,7 @@ export default function DocumentsPage() {
       token: activeSession.token,
       companyId: requireCompanyId(activeSession)
     });
-    setSelectedDocument(detail);
+    setSelectedDocument(compactDocumentDetail(detail));
 
     if (detail.approvalLine?.steps.length) {
       setApproverEmployeeIds(detail.approvalLine.steps.map((step) => step.approverEmployeeId));
@@ -355,6 +369,8 @@ export default function DocumentsPage() {
   }
 
   useEffect(() => {
+    let cancelled = false;
+
     async function run() {
       const loaded = loadSession();
       if (!loaded) {
@@ -362,23 +378,48 @@ export default function DocumentsPage() {
         return;
       }
 
+      setBootstrapping(true);
       setSession(loaded);
-      await refreshReferences(loaded);
+      try {
+        await refreshReferences(loaded);
+      } catch (actionError) {
+        if (!cancelled) {
+          setFriendlyError(actionError);
+        }
+      } finally {
+        if (!cancelled) {
+          setBootstrapping(false);
+        }
+      }
     }
 
     void run();
-  }, [router]);
+    return () => {
+      cancelled = true;
+    };
+  }, [router, t]);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function run() {
       if (!session || !selectedDocumentId) {
         setSelectedDocument(null);
         return;
       }
-      await loadDocumentDetail(session, selectedDocumentId);
+      try {
+        await loadDocumentDetail(session, selectedDocumentId);
+      } catch (actionError) {
+        if (!cancelled) {
+          setFriendlyError(actionError);
+        }
+      }
     }
 
     void run();
+    return () => {
+      cancelled = true;
+    };
   }, [session, selectedDocumentId]);
 
   function setFriendlyError(actionError: unknown) {
@@ -651,25 +692,29 @@ export default function DocumentsPage() {
           </p>
         ) : null}
 
-        <div className="step-tabs" role="tablist" aria-label={t("문서 단계", "Document flow steps")}>
-          {flowSteps.map((step) => {
-            const disabled = Boolean(step.requiresDocument && !selectedDocumentId);
-            return (
-              <button
-                key={step.id}
-                type="button"
-                role="tab"
-                aria-selected={activeStep === step.id}
-                className={`step-tab ${activeStep === step.id ? "is-active" : ""}`}
-                disabled={disabled}
-                onClick={() => setActiveStep(step.id)}
-              >
-                <strong>{locale === "ko" ? step.labelKo : step.labelEn}</strong>
-                <span>{locale === "ko" ? step.descriptionKo : step.descriptionEn}</span>
-              </button>
-            );
-          })}
-        </div>
+        {bootstrapping ? (
+          <p className="muted-text">{t("문서 화면을 준비하는 중입니다...", "Preparing document workspace...")}</p>
+        ) : (
+          <div className="step-tabs" role="tablist" aria-label={t("문서 단계", "Document flow steps")}>
+            {flowSteps.map((step) => {
+              const disabled = Boolean(step.requiresDocument && !selectedDocumentId);
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeStep === step.id}
+                  className={`step-tab ${activeStep === step.id ? "is-active" : ""}`}
+                  disabled={disabled}
+                  onClick={() => setActiveStep(step.id)}
+                >
+                  <strong>{locale === "ko" ? step.labelKo : step.labelEn}</strong>
+                  <span>{locale === "ko" ? step.descriptionKo : step.descriptionEn}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {selectedDocument ? (
           <section className="form-grid">

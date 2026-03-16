@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../../../components/dashboard-nav";
+import { useLocaleText } from "../../../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../../../lib/api";
 import { loadSession } from "../../../../lib/auth";
 
@@ -24,6 +25,7 @@ interface EmployeeDetail {
 
 export default function EditEmployeePage() {
   const router = useRouter();
+  const t = useLocaleText();
   const params = useParams<{ id: string }>();
   const employeeId = params.id;
 
@@ -112,7 +114,7 @@ export default function EditEmployeePage() {
       if (updateError instanceof ApiError) {
         setError(updateError.message);
       } else {
-        setError("Failed to update employee");
+        setError(t("직원 수정에 실패했습니다.", "Failed to update employee."));
       }
     }
   }
@@ -121,14 +123,14 @@ export default function EditEmployeePage() {
     <main className="container with-shell">
       <DashboardNav />
       <section className="app-shell-content">
-      <h1>Edit Employee</h1>
+      <h1>{t("직원 수정", "Edit Employee")}</h1>
       <form className="form-grid" onSubmit={onSubmit}>
-        <label htmlFor="employee-name">Name (Korean)</label>
+        <label htmlFor="employee-name">{t("성명(한글)", "Name (Korean)")}</label>
         <input id="employee-name" value={nameKr} onChange={(event) => setNameKr(event.target.value)} />
 
-        <label htmlFor="department-id">Department</label>
+        <label htmlFor="department-id">{t("부서", "Department")}</label>
         <select id="department-id" value={departmentId} onChange={(event) => setDepartmentId(event.target.value)}>
-          <option value="">(none)</option>
+          <option value="">{t("(없음)", "(none)")}</option>
           {departments.map((department) => (
             <option key={department.id} value={department.id}>
               {department.code} - {department.name}
@@ -136,9 +138,9 @@ export default function EditEmployeePage() {
           ))}
         </select>
 
-        <label htmlFor="position-id">Position</label>
+        <label htmlFor="position-id">{t("직위", "Position")}</label>
         <select id="position-id" value={positionId} onChange={(event) => setPositionId(event.target.value)}>
-          <option value="">(none)</option>
+          <option value="">{t("(없음)", "(none)")}</option>
           {positions.map((position) => (
             <option key={position.id} value={position.id}>
               {position.code} - {position.name}
@@ -146,9 +148,9 @@ export default function EditEmployeePage() {
           ))}
         </select>
 
-        <label htmlFor="job-title-id">Job Title</label>
+        <label htmlFor="job-title-id">{t("직책", "Job Title")}</label>
         <select id="job-title-id" value={jobTitleId} onChange={(event) => setJobTitleId(event.target.value)}>
-          <option value="">(none)</option>
+          <option value="">{t("(없음)", "(none)")}</option>
           {jobTitles.map((title) => (
             <option key={title.id} value={title.id}>
               {title.code} - {title.name}
@@ -156,18 +158,18 @@ export default function EditEmployeePage() {
           ))}
         </select>
 
-        <label htmlFor="employment-status">Employment Status</label>
+        <label htmlFor="employment-status">{t("재직 상태", "Employment Status")}</label>
         <select
           id="employment-status"
           value={employmentStatus}
           onChange={(event) => setEmploymentStatus(event.target.value)}
         >
-          <option value="ACTIVE">ACTIVE</option>
-          <option value="ON_LEAVE">ON_LEAVE</option>
-          <option value="TERMINATED">TERMINATED</option>
+          <option value="ACTIVE">{t("재직", "ACTIVE")}</option>
+          <option value="ON_LEAVE">{t("휴직", "ON_LEAVE")}</option>
+          <option value="TERMINATED">{t("비활성", "TERMINATED")}</option>
         </select>
 
-        <button type="submit">Save</button>
+        <button type="submit">{t("저장", "Save")}</button>
       </form>
 
       {error ? <p className="error-text">{error}</p> : null}
