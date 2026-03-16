@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-erp}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -20,7 +20,7 @@ services:
     image: redis:7-alpine
     container_name: erp-redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -37,8 +37,8 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minio123}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:${MINIO_API_PORT:-9000}:9000"
+      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9001}:9001"
     volumes:
       - minio_data:/data
     healthcheck:
@@ -75,7 +75,7 @@ services:
       DOCS_SERVICE_BASE_URL: http://docs-service:4300
       INTEGRATION_INGEST_API_KEY: ${INTEGRATION_INGEST_API_KEY:-dev-integration-key}
     ports:
-      - "${API_PORT:-4000}:4000"
+      - "127.0.0.1:${API_PORT:-4000}:4000"
     depends_on:
       postgres:
         condition: service_healthy
@@ -99,7 +99,7 @@ services:
     environment:
       NEXT_PUBLIC_API_BASE_URL: http://api:4000
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
     depends_on:
       api:
         condition: service_healthy
@@ -121,7 +121,7 @@ services:
       ATTENDANCE_NORMALIZE_BATCH_SIZE: ${ATTENDANCE_NORMALIZE_BATCH_SIZE:-500}
       WORKER_JOB_STALE_MS: ${WORKER_JOB_STALE_MS:-600000}
     ports:
-      - "${WORKER_PORT:-4100}:4100"
+      - "127.0.0.1:${WORKER_PORT:-4100}:4100"
     depends_on:
       postgres:
         condition: service_healthy
@@ -145,7 +145,7 @@ services:
       INTEGRATION_INGEST_API_KEY: ${INTEGRATION_INGEST_API_KEY:-dev-integration-key}
       DEFAULT_COMPANY_CODE: ${DEFAULT_COMPANY_CODE:-ACME_KR}
     ports:
-      - "${CONNECTOR_GATEWAY_PORT:-4200}:4200"
+      - "127.0.0.1:${CONNECTOR_GATEWAY_PORT:-4200}:4200"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4200/health || exit 1"]
       interval: 15s
@@ -160,7 +160,7 @@ services:
     environment:
       DOCS_SERVICE_PORT: ${DOCS_SERVICE_PORT:-4300}
     ports:
-      - "${DOCS_SERVICE_PORT:-4300}:4300"
+      - "127.0.0.1:${DOCS_SERVICE_PORT:-4300}:4300"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4300/health || exit 1"]
       interval: 15s
