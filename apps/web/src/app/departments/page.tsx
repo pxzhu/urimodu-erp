@@ -4,6 +4,7 @@ import { FormEvent, type ReactNode, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../components/dashboard-nav";
+import { useLocaleText } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession } from "../../lib/auth";
 
@@ -17,6 +18,7 @@ interface Department {
 
 export default function DepartmentsPage() {
   const router = useRouter();
+  const t = useLocaleText();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [tree, setTree] = useState<Department[]>([]);
   const [code, setCode] = useState("");
@@ -45,6 +47,7 @@ export default function DepartmentsPage() {
 
     setDepartments(list);
     setTree(treeData);
+    setError(null);
   }
 
   useEffect(() => {
@@ -83,7 +86,7 @@ export default function DepartmentsPage() {
       if (createError instanceof ApiError) {
         setError(createError.message);
       } else {
-        setError("Failed to create department");
+        setError(t("부서 생성에 실패했습니다.", "Failed to create department."));
       }
     }
   }
@@ -101,21 +104,21 @@ export default function DepartmentsPage() {
     <main className="container with-shell">
       <DashboardNav />
       <section className="app-shell-content">
-      <h1>Departments</h1>
-      <p>Flat list and tree view for Korean org structures.</p>
+      <h1>{t("부서", "Departments")}</h1>
+      <p>{t("한국형 조직 구조를 위한 평면 목록과 트리 뷰입니다.", "Flat list and tree view for Korean org structures.")}</p>
 
       <form className="form-grid" onSubmit={onCreateDepartment}>
-        <h2>Create Department</h2>
+        <h2>{t("부서 생성", "Create Department")}</h2>
 
-        <label htmlFor="department-code">Code</label>
+        <label htmlFor="department-code">{t("코드", "Code")}</label>
         <input id="department-code" value={code} onChange={(event) => setCode(event.target.value)} required />
 
-        <label htmlFor="department-name">Name</label>
+        <label htmlFor="department-name">{t("이름", "Name")}</label>
         <input id="department-name" value={name} onChange={(event) => setName(event.target.value)} required />
 
-        <label htmlFor="department-parent">Parent</label>
+        <label htmlFor="department-parent">{t("상위 부서", "Parent")}</label>
         <select id="department-parent" value={parentId} onChange={(event) => setParentId(event.target.value)}>
-          <option value="">(none)</option>
+          <option value="">{t("(없음)", "(none)")}</option>
           {departments.map((department) => (
             <option key={department.id} value={department.id}>
               {department.code} - {department.name}
@@ -123,12 +126,12 @@ export default function DepartmentsPage() {
           ))}
         </select>
 
-        <button type="submit">Create</button>
+        <button type="submit">{t("생성", "Create")}</button>
       </form>
 
       {error ? <p className="error-text">{error}</p> : null}
 
-      <h2>Department Tree</h2>
+      <h2>{t("부서 트리", "Department Tree")}</h2>
       <ul>{tree.map(renderNode)}</ul>
       </section>
     </main>

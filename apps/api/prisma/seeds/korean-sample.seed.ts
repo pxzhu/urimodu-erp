@@ -1,4 +1,14 @@
-import { AccountType, LeaveUnit, PrismaClient } from "@prisma/client";
+import {
+  AccountType,
+  AttendanceEventType,
+  AttendanceIngestionSource,
+  AttendanceLedgerStatus,
+  CorrectionStatus,
+  IntegrationType,
+  LeaveRequestStatus,
+  LeaveUnit,
+  PrismaClient
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -396,7 +406,385 @@ async function main() {
     }
   });
 
-  console.log("Seeded Korean sample templates/policies/attendance mappings/accounts/finance masters.");
+  const sampleEmployee =
+    employees.find((employee) => employee.employeeNumber === "10000004") ??
+    employees[0];
+  const annualLeavePolicy = await prisma.leavePolicy.findUnique({
+    where: {
+      companyId_code: {
+        companyId: company.id,
+        code: "ANNUAL"
+      }
+    }
+  });
+
+  if (sampleEmployee && shiftPolicy) {
+    const workDate = new Date("2026-03-14");
+    const checkInAt = new Date("2026-03-14T08:58:00+09:00");
+    const checkOutAt = new Date("2026-03-14T18:12:00+09:00");
+    const overnightWorkDate = new Date("2026-03-15");
+    const overnightCheckInAt = new Date("2026-03-15T22:03:00+09:00");
+    const overnightCheckOutAt = new Date("2026-03-16T06:18:00+09:00");
+
+    const inEvent = await prisma.attendanceRawEvent.upsert({
+      where: {
+        companyId_dedupeHash: {
+          companyId: company.id,
+          dedupeHash: `seed-${sampleEmployee.employeeNumber}-20260314-in`
+        }
+      },
+      update: {
+        employeeId: sampleEmployee.id,
+        eventType: AttendanceEventType.IN,
+        eventTimestamp: checkInAt,
+        rawPayload: {
+          source: "seed",
+          employeeNumber: sampleEmployee.employeeNumber,
+          eventType: "IN"
+        },
+        normalized: true
+      },
+      create: {
+        companyId: company.id,
+        employeeId: sampleEmployee.id,
+        provider: IntegrationType.GENERIC,
+        source: AttendanceIngestionSource.CSV,
+        externalUserId: `ADT-EMP-${sampleEmployee.employeeNumber}`,
+        eventType: AttendanceEventType.IN,
+        eventTimestamp: checkInAt,
+        deviceId: "SEED-GATE-1",
+        siteCode: "SEOUL-HQ",
+        dedupeHash: `seed-${sampleEmployee.employeeNumber}-20260314-in`,
+        rawPayload: {
+          source: "seed",
+          employeeNumber: sampleEmployee.employeeNumber,
+          eventType: "IN"
+        },
+        normalized: true
+      }
+    });
+
+    const outEvent = await prisma.attendanceRawEvent.upsert({
+      where: {
+        companyId_dedupeHash: {
+          companyId: company.id,
+          dedupeHash: `seed-${sampleEmployee.employeeNumber}-20260314-out`
+        }
+      },
+      update: {
+        employeeId: sampleEmployee.id,
+        eventType: AttendanceEventType.OUT,
+        eventTimestamp: checkOutAt,
+        rawPayload: {
+          source: "seed",
+          employeeNumber: sampleEmployee.employeeNumber,
+          eventType: "OUT"
+        },
+        normalized: true
+      },
+      create: {
+        companyId: company.id,
+        employeeId: sampleEmployee.id,
+        provider: IntegrationType.GENERIC,
+        source: AttendanceIngestionSource.CSV,
+        externalUserId: `ADT-EMP-${sampleEmployee.employeeNumber}`,
+        eventType: AttendanceEventType.OUT,
+        eventTimestamp: checkOutAt,
+        deviceId: "SEED-GATE-1",
+        siteCode: "SEOUL-HQ",
+        dedupeHash: `seed-${sampleEmployee.employeeNumber}-20260314-out`,
+        rawPayload: {
+          source: "seed",
+          employeeNumber: sampleEmployee.employeeNumber,
+          eventType: "OUT"
+        },
+        normalized: true
+      }
+    });
+
+    const overnightInEvent = await prisma.attendanceRawEvent.upsert({
+      where: {
+        companyId_dedupeHash: {
+          companyId: company.id,
+          dedupeHash: `seed-${sampleEmployee.employeeNumber}-20260315-in`
+        }
+      },
+      update: {
+        employeeId: sampleEmployee.id,
+        eventType: AttendanceEventType.IN,
+        eventTimestamp: overnightCheckInAt,
+        rawPayload: {
+          source: "seed",
+          employeeNumber: sampleEmployee.employeeNumber,
+          eventType: "IN_OVERNIGHT"
+        },
+        normalized: true
+      },
+      create: {
+        companyId: company.id,
+        employeeId: sampleEmployee.id,
+        provider: IntegrationType.GENERIC,
+        source: AttendanceIngestionSource.AGENT_CSV,
+        externalUserId: `ADT-EMP-${sampleEmployee.employeeNumber}`,
+        eventType: AttendanceEventType.IN,
+        eventTimestamp: overnightCheckInAt,
+        deviceId: "SEED-GATE-2",
+        siteCode: "SEOUL-HQ",
+        dedupeHash: `seed-${sampleEmployee.employeeNumber}-20260315-in`,
+        rawPayload: {
+          source: "seed",
+          employeeNumber: sampleEmployee.employeeNumber,
+          eventType: "IN_OVERNIGHT"
+        },
+        normalized: true
+      }
+    });
+
+    const overnightOutEvent = await prisma.attendanceRawEvent.upsert({
+      where: {
+        companyId_dedupeHash: {
+          companyId: company.id,
+          dedupeHash: `seed-${sampleEmployee.employeeNumber}-20260316-out`
+        }
+      },
+      update: {
+        employeeId: sampleEmployee.id,
+        eventType: AttendanceEventType.OUT,
+        eventTimestamp: overnightCheckOutAt,
+        rawPayload: {
+          source: "seed",
+          employeeNumber: sampleEmployee.employeeNumber,
+          eventType: "OUT_OVERNIGHT"
+        },
+        normalized: true
+      },
+      create: {
+        companyId: company.id,
+        employeeId: sampleEmployee.id,
+        provider: IntegrationType.GENERIC,
+        source: AttendanceIngestionSource.AGENT_CSV,
+        externalUserId: `ADT-EMP-${sampleEmployee.employeeNumber}`,
+        eventType: AttendanceEventType.OUT,
+        eventTimestamp: overnightCheckOutAt,
+        deviceId: "SEED-GATE-2",
+        siteCode: "SEOUL-HQ",
+        dedupeHash: `seed-${sampleEmployee.employeeNumber}-20260316-out`,
+        rawPayload: {
+          source: "seed",
+          employeeNumber: sampleEmployee.employeeNumber,
+          eventType: "OUT_OVERNIGHT"
+        },
+        normalized: true
+      }
+    });
+
+    const daytimeLedger = await prisma.attendanceLedger.upsert({
+      where: {
+        companyId_employeeId_workDate: {
+          companyId: company.id,
+          employeeId: sampleEmployee.id,
+          workDate
+        }
+      },
+      update: {
+        shiftPolicyId: shiftPolicy.id,
+        status: AttendanceLedgerStatus.NORMAL,
+        checkInAt,
+        checkOutAt,
+        breakMinutes: 60,
+        workedMinutes: 494,
+        overtimeMinutes: 14,
+        nightMinutes: 0,
+        holidayMinutes: 0,
+        policyVersion: shiftPolicy.version,
+        needsReview: false,
+        notes: "시드 샘플: 기본 주간 근무"
+      },
+      create: {
+        companyId: company.id,
+        employeeId: sampleEmployee.id,
+        shiftPolicyId: shiftPolicy.id,
+        workDate,
+        status: AttendanceLedgerStatus.NORMAL,
+        checkInAt,
+        checkOutAt,
+        breakMinutes: 60,
+        workedMinutes: 494,
+        overtimeMinutes: 14,
+        nightMinutes: 0,
+        holidayMinutes: 0,
+        policyVersion: shiftPolicy.version,
+        needsReview: false,
+        notes: "시드 샘플: 기본 주간 근무"
+      }
+    });
+
+    const overnightLedger = await prisma.attendanceLedger.upsert({
+      where: {
+        companyId_employeeId_workDate: {
+          companyId: company.id,
+          employeeId: sampleEmployee.id,
+          workDate: overnightWorkDate
+        }
+      },
+      update: {
+        shiftPolicyId: shiftPolicy.id,
+        status: AttendanceLedgerStatus.NORMAL,
+        checkInAt: overnightCheckInAt,
+        checkOutAt: overnightCheckOutAt,
+        breakMinutes: 30,
+        workedMinutes: 465,
+        overtimeMinutes: 45,
+        nightMinutes: 258,
+        holidayMinutes: 0,
+        policyVersion: shiftPolicy.version,
+        needsReview: false,
+        notes: "시드 샘플: 야간/교대 근무"
+      },
+      create: {
+        companyId: company.id,
+        employeeId: sampleEmployee.id,
+        shiftPolicyId: shiftPolicy.id,
+        workDate: overnightWorkDate,
+        status: AttendanceLedgerStatus.NORMAL,
+        checkInAt: overnightCheckInAt,
+        checkOutAt: overnightCheckOutAt,
+        breakMinutes: 30,
+        workedMinutes: 465,
+        overtimeMinutes: 45,
+        nightMinutes: 258,
+        holidayMinutes: 0,
+        policyVersion: shiftPolicy.version,
+        needsReview: false,
+        notes: "시드 샘플: 야간/교대 근무"
+      }
+    });
+
+    await prisma.attendanceLedgerSource.upsert({
+      where: {
+        attendanceLedgerId_rawEventId: {
+          attendanceLedgerId: daytimeLedger.id,
+          rawEventId: inEvent.id
+        }
+      },
+      update: {},
+      create: {
+        attendanceLedgerId: daytimeLedger.id,
+        rawEventId: inEvent.id
+      }
+    });
+
+    await prisma.attendanceLedgerSource.upsert({
+      where: {
+        attendanceLedgerId_rawEventId: {
+          attendanceLedgerId: daytimeLedger.id,
+          rawEventId: outEvent.id
+        }
+      },
+      update: {},
+      create: {
+        attendanceLedgerId: daytimeLedger.id,
+        rawEventId: outEvent.id
+      }
+    });
+
+    await prisma.attendanceLedgerSource.upsert({
+      where: {
+        attendanceLedgerId_rawEventId: {
+          attendanceLedgerId: overnightLedger.id,
+          rawEventId: overnightInEvent.id
+        }
+      },
+      update: {},
+      create: {
+        attendanceLedgerId: overnightLedger.id,
+        rawEventId: overnightInEvent.id
+      }
+    });
+
+    await prisma.attendanceLedgerSource.upsert({
+      where: {
+        attendanceLedgerId_rawEventId: {
+          attendanceLedgerId: overnightLedger.id,
+          rawEventId: overnightOutEvent.id
+        }
+      },
+      update: {},
+      create: {
+        attendanceLedgerId: overnightLedger.id,
+        rawEventId: overnightOutEvent.id
+      }
+    });
+  }
+
+  if (sampleEmployee && annualLeavePolicy) {
+    const leaveStart = new Date("2026-03-20");
+    const leaveEnd = new Date("2026-03-20");
+    const leaveReason = "시드 샘플: 병원 진료(연차)";
+
+    const existingLeave = await prisma.leaveRequest.findFirst({
+      where: {
+        companyId: company.id,
+        employeeId: sampleEmployee.id,
+        leavePolicyId: annualLeavePolicy.id,
+        startDate: leaveStart,
+        endDate: leaveEnd
+      }
+    });
+
+    if (!existingLeave) {
+      await prisma.leaveRequest.create({
+        data: {
+          companyId: company.id,
+          employeeId: sampleEmployee.id,
+          leavePolicyId: annualLeavePolicy.id,
+          status: LeaveRequestStatus.REQUESTED,
+          startDate: leaveStart,
+          endDate: leaveEnd,
+          unit: LeaveUnit.DAY,
+          quantity: 1,
+          reason: leaveReason
+        }
+      });
+    }
+
+    const correctionWorkDate = new Date("2026-03-14");
+    const existingCorrection = await prisma.attendanceCorrection.findFirst({
+      where: {
+        companyId: company.id,
+        employeeId: sampleEmployee.id,
+        workDate: correctionWorkDate,
+        reason: "시드 샘플: 출근시간 정정 요청"
+      }
+    });
+
+    if (!existingCorrection) {
+      const linkedLedger = await prisma.attendanceLedger.findUnique({
+        where: {
+          companyId_employeeId_workDate: {
+            companyId: company.id,
+            employeeId: sampleEmployee.id,
+            workDate: correctionWorkDate
+          }
+        }
+      });
+
+      await prisma.attendanceCorrection.create({
+        data: {
+          companyId: company.id,
+          employeeId: sampleEmployee.id,
+          attendanceLedgerId: linkedLedger?.id,
+          status: CorrectionStatus.REQUESTED,
+          workDate: correctionWorkDate,
+          requestedCheckInAt: new Date("2026-03-14T08:50:00+09:00"),
+          requestedCheckOutAt: new Date("2026-03-14T18:15:00+09:00"),
+          reason: "시드 샘플: 출근시간 정정 요청"
+        }
+      });
+    }
+  }
+
+  console.log("Seeded Korean sample templates/policies/attendance/leave/finance demo data.");
 }
 
 main()

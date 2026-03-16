@@ -5,8 +5,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../../../components/dashboard-nav";
+import { useLocaleText } from "../../../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../../../lib/api";
 import { loadSession } from "../../../../lib/auth";
+import { translateStatus } from "../../../../lib/status-label";
 
 interface JournalEntryDetail {
   id: string;
@@ -48,6 +50,7 @@ interface JournalEntryDetail {
 
 export default function JournalEntryDetailPage() {
   const router = useRouter();
+  const t = useLocaleText();
   const params = useParams<{ id: string }>();
   const journalEntryId = params.id;
   const [entry, setEntry] = useState<JournalEntryDetail | null>(null);
@@ -71,19 +74,19 @@ export default function JournalEntryDetailPage() {
         if (fetchError instanceof ApiError) {
           setError(fetchError.message);
         } else {
-          setError("Failed to load journal entry detail");
+          setError(t("분개 상세를 불러오지 못했습니다.", "Failed to load journal entry detail"));
         }
       }
     }
 
     void run();
-  }, [journalEntryId, router]);
+  }, [journalEntryId, router, t]);
 
   return (
     <main className="container with-shell">
       <DashboardNav />
       <section className="app-shell-content">
-      <h1>Journal Entry Detail</h1>
+      <h1>{t("분개 상세", "Journal Entry Detail")}</h1>
 
       {error ? <p className="error-text">{error}</p> : null}
 
@@ -93,27 +96,28 @@ export default function JournalEntryDetailPage() {
             <strong>{entry.number}</strong> (<code>{entry.id}</code>)
           </p>
           <p>
-            Date: {new Date(entry.entryDate).toLocaleDateString()} | Status: {entry.status}
+            {t("전표일", "Date")}: {new Date(entry.entryDate).toLocaleDateString()} | {t("상태", "Status")}:{" "}
+            {translateStatus(entry.status, t)}
           </p>
           <p>
-            Created by: {entry.createdBy.name} ({entry.createdBy.email})
+            {t("생성자", "Created by")}: {entry.createdBy.name} ({entry.createdBy.email})
           </p>
           <p>
-            Debit / Credit: {entry.totalDebit} / {entry.totalCredit}
+            {t("차변 / 대변", "Debit / Credit")}: {entry.totalDebit} / {entry.totalCredit}
           </p>
-          <p>Description: {entry.description ?? "-"}</p>
+          <p>{t("설명", "Description")}: {entry.description ?? "-"}</p>
 
           <table className="data-table">
             <thead>
               <tr>
-                <th>No</th>
-                <th>Account</th>
-                <th>Debit</th>
-                <th>Credit</th>
-                <th>Vendor</th>
-                <th>Cost Center</th>
-                <th>Project</th>
-                <th>Description</th>
+                <th>{t("번호", "No")}</th>
+                <th>{t("계정과목", "Account")}</th>
+                <th>{t("차변", "Debit")}</th>
+                <th>{t("대변", "Credit")}</th>
+                <th>{t("거래처", "Vendor")}</th>
+                <th>{t("코스트센터", "Cost Center")}</th>
+                <th>{t("프로젝트", "Project")}</th>
+                <th>{t("설명", "Description")}</th>
               </tr>
             </thead>
             <tbody>
@@ -133,18 +137,18 @@ export default function JournalEntryDetailPage() {
               ))}
               {entry.lines.length === 0 ? (
                 <tr>
-                  <td colSpan={8}>No lines found.</td>
+                  <td colSpan={8}>{t("라인이 없습니다.", "No lines found.")}</td>
                 </tr>
               ) : null}
             </tbody>
           </table>
 
           <p>
-            <Link href="/accounting/journal-entries">Back to journal entries</Link>
+            <Link href="/accounting/journal-entries">{t("분개 목록으로", "Back to journal entries")}</Link>
           </p>
         </>
       ) : (
-        <p>Loading...</p>
+        <p>{t("로딩 중...", "Loading...")}</p>
       )}
       </section>
     </main>

@@ -5,8 +5,10 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../../components/dashboard-nav";
+import { useLocaleText } from "../../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../../lib/api";
 import { loadSession, type LoginSession } from "../../../lib/auth";
+import { translateStatus } from "../../../lib/status-label";
 
 interface ExpenseClaimDetail {
   id: string;
@@ -57,6 +59,7 @@ interface ExpenseClaimDetail {
 
 export default function ExpenseClaimDetailPage() {
   const router = useRouter();
+  const t = useLocaleText();
   const params = useParams<{ id: string }>();
   const claimId = params.id;
   const [session, setSession] = useState<LoginSession | null>(null);
@@ -79,11 +82,12 @@ export default function ExpenseClaimDetailPage() {
           companyId: requireCompanyId(loaded)
         });
         setClaim(data);
+        setError(null);
       } catch (fetchError) {
         if (fetchError instanceof ApiError) {
           setError(fetchError.message);
         } else {
-          setError("Failed to load expense claim detail");
+          setError(t("경비 청구 상세를 불러오지 못했습니다.", "Failed to load expense claim detail."));
         }
       }
     }
@@ -116,7 +120,7 @@ export default function ExpenseClaimDetailPage() {
     <main className="container with-shell">
       <DashboardNav />
       <section className="app-shell-content">
-      <h1>Expense Claim Detail</h1>
+      <h1>{t("경비 청구 상세", "Expense Claim Detail")}</h1>
 
       {error ? <p className="error-text">{error}</p> : null}
 
@@ -126,30 +130,30 @@ export default function ExpenseClaimDetailPage() {
             <strong>{claim.title}</strong> (<code>{claim.id}</code>)
           </p>
           <p>
-            Employee: {claim.employee.employeeNumber} {claim.employee.nameKr}
+            {t("직원", "Employee")}: {claim.employee.employeeNumber} {claim.employee.nameKr}
           </p>
           <p>
-            Status: {claim.status} | Total: {claim.totalAmount} {claim.currency}
+            {t("상태", "Status")}: {translateStatus(claim.status, t)} | {t("총액", "Total")}: {claim.totalAmount} {claim.currency}
           </p>
           <p>
-            Cost Center / Project: {claim.costCenter?.code ?? "-"} / {claim.project?.code ?? "-"}
+            {t("코스트센터 / 프로젝트", "Cost Center / Project")}: {claim.costCenter?.code ?? "-"} / {claim.project?.code ?? "-"}
           </p>
-          <p>Created: {new Date(claim.createdAt).toLocaleString()}</p>
+          <p>{t("생성일", "Created")}: {new Date(claim.createdAt).toLocaleString()}</p>
           <p>
-            Document: {claim.document ? <Link href={`/documents`}>{claim.document.title}</Link> : "-"}
+            {t("연결 문서", "Document")}: {claim.document ? <Link href={`/documents`}>{claim.document.title}</Link> : "-"}
           </p>
 
-          <h2>Items</h2>
+          <h2>{t("항목", "Items")}</h2>
           <table className="data-table">
             <thead>
               <tr>
-                <th>Date</th>
-                <th>Category</th>
-                <th>Vendor</th>
-                <th>Amount</th>
+                <th>{t("사용일", "Date")}</th>
+                <th>{t("카테고리", "Category")}</th>
+                <th>{t("거래처", "Vendor")}</th>
+                <th>{t("금액", "Amount")}</th>
                 <th>VAT</th>
-                <th>Description</th>
-                <th>Receipt</th>
+                <th>{t("설명", "Description")}</th>
+                <th>{t("영수증", "Receipt")}</th>
               </tr>
             </thead>
             <tbody>
@@ -164,7 +168,7 @@ export default function ExpenseClaimDetailPage() {
                   <td>
                     {item.receiptFile ? (
                       <button type="button" onClick={() => void downloadReceipt(item.receiptFile!.id, item.receiptFile!.originalName)}>
-                        Download
+                        {t("다운로드", "Download")}
                       </button>
                     ) : (
                       "-"
@@ -174,28 +178,28 @@ export default function ExpenseClaimDetailPage() {
               ))}
               {claim.items.length === 0 ? (
                 <tr>
-                  <td colSpan={7}>No items.</td>
+                  <td colSpan={7}>{t("항목이 없습니다.", "No items.")}</td>
                 </tr>
               ) : null}
             </tbody>
           </table>
 
-          <h2>Linked Journal Entries</h2>
+          <h2>{t("연결된 분개", "Linked Journal Entries")}</h2>
           <ul>
             {claim.journalEntries.map((entry) => (
               <li key={entry.id}>
-                <Link href={`/accounting/journal-entries/${entry.id}`}>{entry.number}</Link> ({entry.status})
+                <Link href={`/accounting/journal-entries/${entry.id}`}>{entry.number}</Link> ({translateStatus(entry.status, t)})
               </li>
             ))}
-            {claim.journalEntries.length === 0 ? <li>No journal entries linked.</li> : null}
+            {claim.journalEntries.length === 0 ? <li>{t("연결된 분개가 없습니다.", "No journal entries linked.")}</li> : null}
           </ul>
 
           <p>
-            <Link href="/expenses">Back to expense claims</Link>
+            <Link href="/expenses">{t("경비 청구 목록으로", "Back to expense claims")}</Link>
           </p>
         </>
       ) : (
-        <p>Loading...</p>
+        <p>{t("로딩 중...", "Loading...")}</p>
       )}
       </section>
     </main>

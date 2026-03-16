@@ -80,6 +80,8 @@ main.container.with-shell {
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   gap: 0;
   background: transparent;
+  position: relative;
+  overflow-x: hidden;
 }
 
 main.container.with-shell > .app-shell-nav {
@@ -91,6 +93,10 @@ main.container.with-shell > .app-shell-content {
   grid-column: 2;
   grid-row: 1;
   padding: 1.25rem 1.5rem;
+  min-width: 0;
+  overflow-x: auto;
+  position: relative;
+  z-index: 1;
 }
 
 h1,
@@ -117,6 +123,7 @@ code {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  z-index: 20;
 }
 
 .app-shell-nav__brand-row {

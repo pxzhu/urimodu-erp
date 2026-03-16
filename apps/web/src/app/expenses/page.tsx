@@ -8,6 +8,7 @@ import { DashboardNav } from "../../components/dashboard-nav";
 import { useLocaleText } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
+import { translateStatus } from "../../lib/status-label";
 
 interface ExpenseClaimListItem {
   id: string;
@@ -474,7 +475,7 @@ export default function ExpensesPage() {
               <td>
                 {claim.employee.employeeNumber} {claim.employee.nameKr}
               </td>
-              <td>{claim.status}</td>
+              <td>{translateStatus(claim.status, t)}</td>
               <td>
                 {claim.totalAmount} {claim.currency}
               </td>

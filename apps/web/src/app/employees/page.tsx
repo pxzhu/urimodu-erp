@@ -21,6 +21,20 @@ interface EmployeeItem {
   jobTitle?: { id: string; name: string } | null;
 }
 
+function translateEmploymentStatus(status: string, t: (ko: string, en: string) => string): string {
+  const normalized = status.toUpperCase();
+  if (normalized === "ACTIVE") {
+    return t("재직", "ACTIVE");
+  }
+  if (normalized === "ON_LEAVE") {
+    return t("휴직", "ON_LEAVE");
+  }
+  if (normalized === "TERMINATED") {
+    return t("비활성", "Inactive");
+  }
+  return status;
+}
+
 export default function EmployeesPage() {
   const router = useRouter();
   const t = useLocaleText();
@@ -40,6 +54,7 @@ export default function EmployeesPage() {
     });
 
     setEmployees(data);
+    setError(null);
   }
 
   useEffect(() => {
@@ -165,7 +180,7 @@ export default function EmployeesPage() {
                 <td>{employee.position?.name ?? "-"}</td>
                 <td>{employee.jobTitle?.name ?? "-"}</td>
                 <td>{employee.workEmail ?? "-"}</td>
-                <td>{isInactive ? t("비활성", "Inactive") : employee.employmentStatus}</td>
+                <td>{translateEmploymentStatus(employee.employmentStatus, t)}</td>
                 <td>
                   <div className="inline-actions">
                     <Link href={`/employees/${employee.id}`}>{t("상세", "Detail")}</Link>

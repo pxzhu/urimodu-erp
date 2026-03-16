@@ -8,6 +8,7 @@ import { SearchableEmployeeSelector } from "../../../components/searchable-emplo
 import { useLocaleText, useUiShell } from "../../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../../lib/api";
 import { loadSession, type LoginSession } from "../../../lib/auth";
+import { translateStatus } from "../../../lib/status-label";
 
 interface AttendanceCorrectionItem {
   id: string;
@@ -241,8 +242,8 @@ export default function AttendanceCorrectionsPage() {
                 {row.requestedCheckInAt ? new Date(row.requestedCheckInAt).toLocaleString() : "-"} /{" "}
                 {row.requestedCheckOutAt ? new Date(row.requestedCheckOutAt).toLocaleString() : "-"}
               </td>
-              <td>{row.status}</td>
-              <td>{row.document ? `${row.document.title} (${row.document.status})` : "-"}</td>
+              <td>{translateStatus(row.status, t)}</td>
+              <td>{row.document ? `${row.document.title} (${translateStatus(row.document.status, t)})` : "-"}</td>
             </tr>
           ))}
           {rows.length === 0 ? (

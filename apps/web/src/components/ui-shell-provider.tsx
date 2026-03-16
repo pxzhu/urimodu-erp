@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -139,5 +140,8 @@ export function useUiShell(): UiShellContextValue {
 
 export function useLocaleText() {
   const { locale } = useUiShell();
-  return (koreanText: string, englishText: string) => (locale === "ko" ? koreanText : englishText);
+  return useCallback(
+    (koreanText: string, englishText: string) => (locale === "ko" ? koreanText : englishText),
+    [locale]
+  );
 }

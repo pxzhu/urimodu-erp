@@ -8,6 +8,7 @@ import { KeyValueTableEditor, type KeyValueRow } from "../../components/key-valu
 import { useLocaleText, useUiShell } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
+import { translateStatus } from "../../lib/status-label";
 
 interface UploadedFile {
   id: string;
@@ -249,7 +250,7 @@ export default function ImportsPage() {
                 </div>
               </td>
               <td>{job.type}</td>
-              <td>{job.status}</td>
+              <td>{translateStatus(job.status, t)}</td>
               <td>{job.sourceFile?.originalName ?? "-"}</td>
               <td>{job._count.rows}</td>
               <td>{job.finishedAt ? new Date(job.finishedAt).toLocaleString() : "-"}</td>
@@ -268,7 +269,7 @@ export default function ImportsPage() {
         <>
           <h2>{t("선택된 작업 상세", "Selected Job Detail")}</h2>
           <p>
-            <code>{selectedJob.id}</code> / {selectedJob.status}
+            <code>{selectedJob.id}</code> / {translateStatus(selectedJob.status, t)}
           </p>
           <p>
             {t("요약", "Summary")}: {selectedJob.summaryJson ? JSON.stringify(selectedJob.summaryJson) : "-"}
@@ -287,7 +288,7 @@ export default function ImportsPage() {
               {selectedJob.rows.map((row) => (
                 <tr key={row.id}>
                   <td>{row.rowNo}</td>
-                  <td>{row.status}</td>
+                  <td>{translateStatus(row.status, t)}</td>
                   <td>{row.errorMessage ?? "-"}</td>
                   <td>
                     <code>{JSON.stringify(row.rawData)}</code>

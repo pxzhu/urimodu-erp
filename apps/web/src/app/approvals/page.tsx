@@ -8,6 +8,7 @@ import { DashboardNav } from "../../components/dashboard-nav";
 import { useLocaleText, useUiShell } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
+import { translateApprovalStepType, translateStatus } from "../../lib/status-label";
 
 interface ApprovalInboxLine {
   id: string;
@@ -142,11 +143,11 @@ export default function ApprovalsPage() {
                     <code>{line.document.id}</code>
                   </div>
                 </td>
-                <td>{line.status}</td>
+                <td>{translateStatus(line.status, t)}</td>
                 <td>
                   {currentStep ? (
                     <>
-                      #{currentStep.orderNo} {currentStep.type}
+                      #{currentStep.orderNo} {translateApprovalStepType(currentStep.type, t)}
                     </>
                   ) : (
                     "-"
