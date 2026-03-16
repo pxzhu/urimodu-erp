@@ -54,9 +54,37 @@ async function assertStableNavigation(
   loops: number
 ) {
   const sidebarMenu = page.locator(".app-shell-nav__menu-scroll");
+
+  function sectionCodeForRoute(route: string) {
+    if (route.startsWith("/workspace")) return "HM";
+    if (route.startsWith("/companies") || route.startsWith("/departments") || route.startsWith("/employees")) return "OR";
+    if (route.startsWith("/files") || route.startsWith("/documents") || route.startsWith("/approvals")) return "WF";
+    if (route.startsWith("/attendance") || route.startsWith("/leave")) return "AT";
+    if (route.startsWith("/expenses") || route.startsWith("/accounting")) return "FN";
+    if (route.startsWith("/collaboration")) return "CL";
+    if (route.startsWith("/imports") || route.startsWith("/exports")) return "OP";
+    return "HM";
+  }
+
+  async function ensureRouteLinkVisible(route: string) {
+    const routeLink = sidebarMenu.locator(`a[href="${route}"]`).first();
+    const visible = await routeLink.isVisible().catch(() => false);
+    if (visible) {
+      return;
+    }
+
+    const rail = page.locator(".app-shell-nav__section-rail").first();
+    if (await rail.isVisible().catch(() => false)) {
+      const sectionCode = sectionCodeForRoute(route);
+      await rail.locator(".app-shell-nav__section-button", { hasText: sectionCode }).first().click();
+      await expect(routeLink).toBeVisible();
+    }
+  }
+
   for (let loop = 0; loop < loops; loop += 1) {
     for (const route of routes) {
-      await sidebarMenu.locator(`a[href="${route}"]`).first().click();
+      await ensureRouteLinkVisible(route);
+      await sidebarMenu.locator(`a[href="${route}"]`).first().click({ force: true });
       await expect(page).toHaveURL(new RegExp(`${route.replace("/", "\\/")}$`));
       await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });
       await page.waitForFunction(

@@ -16,6 +16,8 @@ interface MenuItem {
   adminOnly?: boolean;
 }
 
+type NavSection = MenuItem["section"];
+
 const menuItems: MenuItem[] = [
   { href: "/workspace", ko: "업무 홈", en: "Workspace", section: "home" },
   { href: "/companies", ko: "회사", en: "Companies", section: "org", adminOnly: true },
@@ -45,7 +47,7 @@ function isActivePath(pathname: string, targetPath: string): boolean {
   return pathname === targetPath || pathname.startsWith(`${targetPath}/`);
 }
 
-const orderedSections: Array<MenuItem["section"]> = [
+const orderedSections: NavSection[] = [
   "home",
   "org",
   "workflow",
@@ -68,6 +70,7 @@ export function DashboardNav() {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
+  const [selectedSection, setSelectedSection] = useState<NavSection>("home");
   const {
     locale,
     toggleLocale,
@@ -106,6 +109,22 @@ export function DashboardNav() {
         .filter((entry) => entry.items.length > 0),
     [filteredMenuItems]
   );
+
+  useEffect(() => {
+    const activeSection = sectionedMenuItems.find((entry) =>
+      entry.items.some((item) => isActivePath(pathname, item.href))
+    )?.section;
+
+    if (activeSection && activeSection !== selectedSection) {
+      setSelectedSection(activeSection);
+      return;
+    }
+
+    const selectedExists = sectionedMenuItems.some((entry) => entry.section === selectedSection);
+    if (!selectedExists && sectionedMenuItems[0]?.section) {
+      setSelectedSection(sectionedMenuItems[0].section);
+    }
+  }, [pathname, sectionedMenuItems, selectedSection]);
 
   useEffect(() => {
     function syncViewportState() {
@@ -164,7 +183,7 @@ export function DashboardNav() {
     router.push("/login");
   }
 
-  function sectionLabel(section: MenuItem["section"]) {
+  function sectionLabel(section: NavSection) {
     if (section === "home") {
       return t("홈", "Home");
     }
@@ -187,7 +206,7 @@ export function DashboardNav() {
     return t("운영", "Operations");
   }
 
-  function sectionBadge(section: MenuItem["section"]) {
+  function sectionBadge(section: NavSection) {
     if (section === "home") {
       return "HM";
     }
@@ -209,11 +228,36 @@ export function DashboardNav() {
     return "OP";
   }
 
+  function sectionHint(section: NavSection) {
+    if (section === "home") {
+      return t("오늘 필요한 기능을 빠르게 시작", "Quick launch for today's tasks");
+    }
+    if (section === "org") {
+      return t("회사/부서/직원 운영", "Company, department, employee ops");
+    }
+    if (section === "workflow") {
+      return t("문서 작성과 결재 흐름", "Document and approval flow");
+    }
+    if (section === "attendance") {
+      return t("근태/휴가/정정 관리", "Attendance, leave, corrections");
+    }
+    if (section === "finance") {
+      return t("경비/회계 처리", "Expense and accounting");
+    }
+    if (section === "collab") {
+      return t("메신저/회의/드라이브", "Messenger, meetings, drive");
+    }
+    return t("가져오기/내보내기 운영", "Import/export operations");
+  }
+
   const roleLabel = isAdminView
     ? t("관리자", "Administrator")
     : t("사용자", "User");
   const normalizedUserName = userName.trim().length > 0 ? userName : "Guest";
   const showMobileMenu = isMobileView && mobileMenuOpen;
+  const selectedEntry =
+    sectionedMenuItems.find((entry) => entry.section === selectedSection) ?? sectionedMenuItems[0];
+  const sectionEntriesToRender = isMobileView ? sectionedMenuItems : selectedEntry ? [selectedEntry] : [];
 
   return (
     <>
@@ -269,51 +313,82 @@ export function DashboardNav() {
           ) : null}
         </div>
 
-        <div className="app-shell-nav__menu-scroll">
-          <div className="app-shell-nav__search">
-            <input
-              value={menuQuery}
-              onChange={(event) => setMenuQuery(event.target.value)}
-              placeholder={t("메뉴 검색 (예: 근태, 결재, 경비)", "Search menu (e.g., attendance, approvals)")}
-              aria-label={t("메뉴 검색", "Search menu")}
-            />
-            {menuQuery ? (
-              <small>{t(`${filteredMenuItems.length}건 검색`, `${filteredMenuItems.length} results`)}</small>
-            ) : null}
-          </div>
-          {sectionedMenuItems.map((entry) => (
-            <section className="app-shell-nav__section" key={entry.section}>
-              <h2 className="app-shell-nav__section-title">
-                <span className="app-shell-nav__section-badge" aria-hidden>
-                  {sectionBadge(entry.section)}
-                </span>
-                <span>{!isMobileView && sidebarCollapsed ? "•" : sectionLabel(entry.section)}</span>
-              </h2>
-              <ul className="app-shell-nav__menu">
-                {entry.items.map((item) => {
-                  const active = isActivePath(pathname, item.href);
-                  const label = locale === "ko" ? item.ko : item.en;
+        <div className="app-shell-nav__workspace">
+          {!isMobileView ? (
+            <aside className="app-shell-nav__section-rail" aria-label={t("섹션 바로가기", "Section shortcuts")}>
+              {sectionedMenuItems.map((entry) => {
+                const active = entry.section === selectedSection;
+                return (
+                  <button
+                    key={entry.section}
+                    type="button"
+                    className={`app-shell-nav__section-button ${active ? "is-active" : ""}`}
+                    onClick={() => setSelectedSection(entry.section)}
+                    title={sectionLabel(entry.section)}
+                    aria-label={sectionLabel(entry.section)}
+                    aria-pressed={active}
+                  >
+                    {sectionBadge(entry.section)}
+                  </button>
+                );
+              })}
+            </aside>
+          ) : null}
 
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        prefetch={false}
-                        className={`app-shell-nav__link ${active ? "is-active" : ""}`}
-                        onClick={() => {
-                          if (isMobileView) {
-                            setMobileMenuOpen(false);
-                          }
-                        }}
-                      >
-                        <span className="app-shell-nav__link-text">{!isMobileView && sidebarCollapsed ? label.slice(0, 2) : label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          ))}
+          <div className="app-shell-nav__menu-scroll">
+            <div className="app-shell-nav__search">
+              <input
+                value={menuQuery}
+                onChange={(event) => setMenuQuery(event.target.value)}
+                placeholder={t("메뉴 검색 (예: 근태, 결재, 경비)", "Search menu (e.g., attendance, approvals)")}
+                aria-label={t("메뉴 검색", "Search menu")}
+              />
+              {menuQuery ? (
+                <small>{t(`${filteredMenuItems.length}건 검색`, `${filteredMenuItems.length} results`)}</small>
+              ) : null}
+            </div>
+            {!isMobileView && selectedEntry ? (
+              <div className="app-shell-nav__panel-meta">
+                <strong>{sectionLabel(selectedEntry.section)}</strong>
+                <p>{sectionHint(selectedEntry.section)}</p>
+              </div>
+            ) : null}
+            {sectionEntriesToRender.map((entry) => (
+              <section className="app-shell-nav__section" key={entry.section}>
+                <h2 className="app-shell-nav__section-title">
+                  <span className="app-shell-nav__section-badge" aria-hidden>
+                    {sectionBadge(entry.section)}
+                  </span>
+                  <span>{!isMobileView && sidebarCollapsed ? "•" : sectionLabel(entry.section)}</span>
+                </h2>
+                <ul className="app-shell-nav__menu">
+                  {entry.items.map((item) => {
+                    const active = isActivePath(pathname, item.href);
+                    const label = locale === "ko" ? item.ko : item.en;
+
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={item.href}
+                          prefetch={false}
+                          className={`app-shell-nav__link ${active ? "is-active" : ""}`}
+                          onClick={() => {
+                            if (isMobileView) {
+                              setMobileMenuOpen(false);
+                            } else {
+                              setSelectedSection(entry.section);
+                            }
+                          }}
+                        >
+                          <span className="app-shell-nav__link-text">{!isMobileView && sidebarCollapsed ? label.slice(0, 2) : label}</span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+          </div>
         </div>
       </nav>
       {settingsModalOpen ? (
