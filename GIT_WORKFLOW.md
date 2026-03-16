@@ -42,8 +42,8 @@
 
 명령
 
-git checkout main  
-git pull origin main  
+git switch main  
+git pull --ff-only  
 
 설명
 
@@ -56,16 +56,18 @@ git pull origin main
 
 작업은 반드시 새로운 브랜치에서 진행한다.
 
+이 저장소에서 Codex가 생성하는 브랜치는 `codex/` 접두사를 반드시 사용한다.
+
 명령
 
-git checkout -b <type>/<scope>-<summary>
+git switch -c codex/<type>-<scope>-<summary>
 
 예시
 
-feat/api-user-login  
-fix/worker-duplicate-event  
-docs/readme-install  
-refactor/web-validation  
+codex/feat-api-user-login  
+codex/fix-worker-duplicate-event  
+codex/docs-readme-install  
+codex/refactor-web-validation  
 
 ---
 
@@ -420,6 +422,7 @@ scroll 영역
 - 보안 점검 완료
 - 개인정보 노출 여부 확인
 - git diff 검토 완료
+- QA 아카이브 증적 저장 완료 (`docs/qa/runs/<run-id>/`)
 
 ---
 
@@ -459,16 +462,17 @@ PR 제목 규칙
 
 type(scope): summary
 
-본문 예
+PR 생성 명령 예시
 
-Summary  
-변경 목적 설명
+gh pr create --base main --head <branch-name> --title "type(scope): summary"
 
-Changes  
-변경 기능 목록
+본문 필수 항목
 
-Validation  
-수행한 QA 목록
+- Summary: 변경 목적
+- Changes: 주요 변경 목록
+- Validation: 수행 QA, 실행 명령, 결과
+- Security/Privacy: 민감정보/시크릿 검토 결과
+- QA Artifacts: `docs/qa/runs/<run-id>/` 경로
 
 ---
 
@@ -479,6 +483,7 @@ Validation
 - CI 통과
 - 리뷰 요청
 - 충돌 여부
+- 최종 diff 재검토 (README 언어/파일명, 불필요한 파일 삭제/이동 포함)
 
 필요시 수정
 
@@ -504,15 +509,26 @@ Squash merge
 
 명령
 
-git checkout main  
-git pull origin main  
+git switch main  
+git pull --ff-only  
 
 ---
 
 # 13. 브랜치 정리
 
-git branch -d <branch-name>  
-git push origin --delete <branch-name>  
+기본
+
+- PR merge 시 `--delete-branch` 옵션으로 원격 브랜치 자동 정리
+- 로컬 브랜치 정리: `git branch -d <branch-name>`
+
+Squash merge 후 예외
+
+- Squash merge는 로컬에서 "완전 병합"으로 인식되지 않을 수 있다
+- 이 경우 반드시 아래를 먼저 확인한다
+  1. PR이 `MERGED` 상태인지 확인
+  2. 대상 커밋이 `main`에 포함되었는지 확인
+  3. 원격 작업 브랜치가 정리되었는지 확인
+- 위 3가지 확인 후에만 로컬 브랜치를 `git branch -D <branch-name>`로 정리한다
 
 ---
 
