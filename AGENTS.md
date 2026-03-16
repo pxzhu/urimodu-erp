@@ -17,7 +17,7 @@
 - `AGENTS.md` enforces `GIT_WORKFLOW.md` as the required execution standard for all Codex runs
 - Git workflow checklist:
   0. Always start from `main` and sync latest first (`git switch main && git pull --ff-only`)
-  1. Create a task-specific branch from `main` (use `codex/<task-name>`)
+  1. Create a task-specific branch from `main` (use `codex/<type>-<scope>-<summary>`)
   2. Implement the task on that branch
   3. Run QA/validation before commit (`pnpm -r lint`, `pnpm -r typecheck`, `pnpm -r test`, `pnpm -r build`, plus Go tests when touched)
   4. Commit changes with clear messages
@@ -26,6 +26,7 @@
   7. Agent must create PR targeting `main` directly via CLI (`gh pr create`)
   8. Merge via PR after required checks pass (prefer squash merge)
   9. After merge, switch back to `main` and sync local state (`git switch main && git pull --ff-only`)
+  10. Clean up branch (`git branch -d <branch>`; if squash-merge not recognized locally, verify merged state then use `git branch -D <branch>`)
 - If PR creation fails due token scope, refresh GitHub auth/token first and retry PR creation before asking for manual action
 - Use branch prefix `codex/` for agent-created branches
 - Repository default branch is `main`; CI/Dependabot targets must stay aligned to `main`
