@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
-import { createReadStream } from "node:fs";
+import { createReadStream, existsSync } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { join, resolve, sep } from "node:path";
 
@@ -17,7 +17,18 @@ export interface DocsServiceServerOptions {
 }
 
 function getTemplatesDir(input?: string): string {
-  return input ? resolve(input) : resolve(join(__dirname, "templates"));
+  if (input) {
+    return resolve(input);
+  }
+
+  const candidates = [
+    resolve(join(__dirname, "templates")),
+    resolve(process.cwd(), "apps/docs-service/src/templates"),
+    resolve(process.cwd(), "src/templates")
+  ];
+  const defaultTemplatesDir = resolve(join(__dirname, "templates"));
+
+  return candidates.find((candidate) => existsSync(candidate)) ?? defaultTemplatesDir;
 }
 
 function htmlToPlainText(html: string): string {

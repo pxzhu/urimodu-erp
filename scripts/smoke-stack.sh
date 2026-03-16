@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-API_BASE_URL="${API_BASE_URL:-http://localhost:4000}"
-WEB_BASE_URL="${WEB_BASE_URL:-http://localhost:3000}"
-WORKER_BASE_URL="${WORKER_BASE_URL:-http://localhost:4100}"
-GATEWAY_BASE_URL="${GATEWAY_BASE_URL:-http://localhost:4200}"
-DOCS_BASE_URL="${DOCS_BASE_URL:-http://localhost:4300}"
+API_BASE_URL="${API_BASE_URL:-http://127.0.0.1:4000}"
+WEB_BASE_URL="${WEB_BASE_URL:-http://127.0.0.1:3000}"
+WORKER_BASE_URL="${WORKER_BASE_URL:-http://127.0.0.1:4100}"
+GATEWAY_BASE_URL="${GATEWAY_BASE_URL:-http://127.0.0.1:4200}"
+DOCS_BASE_URL="${DOCS_BASE_URL:-http://127.0.0.1:4300}"
 SMOKE_LOGIN_EMAIL="${SMOKE_LOGIN_EMAIL:-admin@acme.local}"
 SMOKE_LOGIN_PASSWORD="${SMOKE_LOGIN_PASSWORD:-ChangeMe123!}"
 
