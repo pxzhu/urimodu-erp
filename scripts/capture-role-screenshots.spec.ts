@@ -22,29 +22,35 @@ const roles = [
 
 const pages = [
   {
+    route: "/",
+    file: "00-ai-native-landing.png",
+    shellSelector: "main.container",
+    readySelector: "main.container h1"
+  },
+  {
     route: "/employees",
     file: "01-employees-directory.png",
-    readySelector: "table.data-table tbody tr"
+    readySelector: "section.app-shell-content h1"
   },
   {
     route: "/documents",
     file: "02-documents-and-templates.png",
-    readySelector: "table.data-table tbody tr"
+    readySelector: "section.app-shell-content h1"
   },
   {
     route: "/approvals",
     file: "03-approvals-inbox.png",
-    readySelector: "table.data-table tbody tr"
+    readySelector: "section.app-shell-content h1"
   },
   {
     route: "/attendance/ledger",
     file: "04-attendance-ledger.png",
-    readySelector: "table.data-table tbody tr"
+    readySelector: "section.app-shell-content h1"
   },
   {
     route: "/expenses",
     file: "05-expense-claims.png",
-    readySelector: "table.data-table tbody tr"
+    readySelector: "section.app-shell-content h1"
   }
 ] as const;
 
@@ -94,13 +100,14 @@ test("capture admin/user README screenshots", async ({ browser }) => {
     await page.evaluate((sessionPayload) => {
       window.localStorage.setItem("korean_erp_auth_session", JSON.stringify(sessionPayload));
     }, session);
-    await page.goto(`${baseUrl}/companies`, { waitUntil: "domcontentloaded" });
-
-    await expect.poll(() => page.url(), { timeout: 20_000 }).toContain("/companies");
+    await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
+    await expect.poll(() => page.url(), { timeout: 20_000 }).not.toContain("/login");
 
     for (const target of pages) {
       await page.goto(`${baseUrl}${target.route}`, { waitUntil: "domcontentloaded" });
-      await page.locator("main.container.with-shell").waitFor({ state: "visible", timeout: 20_000 });
+      await page
+        .locator("shellSelector" in target ? target.shellSelector : "main.container.with-shell")
+        .waitFor({ state: "visible", timeout: 20_000 });
       await page.locator(target.readySelector).first().waitFor({ state: "visible", timeout: 20_000 });
       await page.waitForFunction(
         () => {

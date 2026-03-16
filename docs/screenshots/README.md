@@ -11,6 +11,7 @@ For full PR/release QA evidence across all pages/features, use `docs/qa/README.m
 
 | File | Route | Description |
 | --- | --- | --- |
+| `docs/screenshots/admin-00-ai-native-landing.png` | `/` | 2026 AI-native ERP landing with hero/story/parallax/cards/CTA flow |
 | `docs/screenshots/admin-01-employees-directory.png` | `/employees` | Employee directory with admin actions (create/edit/deactivate) |
 | `docs/screenshots/admin-02-documents-and-templates.png` | `/documents` | Template-field table based document flow |
 | `docs/screenshots/admin-03-approvals-inbox.png` | `/approvals` | Approval inbox with action controls |
@@ -21,6 +22,7 @@ For full PR/release QA evidence across all pages/features, use `docs/qa/README.m
 
 | File | Route | Description |
 | --- | --- | --- |
+| `docs/screenshots/user-00-ai-native-landing.png` | `/` | 2026 AI-native ERP landing in user session |
 | `docs/screenshots/user-01-employees-directory.png` | `/employees` | Employee directory in user view (restricted actions) |
 | `docs/screenshots/user-02-documents-and-templates.png` | `/documents` | Document flow in user view |
 | `docs/screenshots/user-03-approvals-inbox.png` | `/approvals` | Personal approvals inbox view |
@@ -29,7 +31,7 @@ For full PR/release QA evidence across all pages/features, use `docs/qa/README.m
 
 ## Capture Method Used
 
-- Capture date: 2026-03-15 (Asia/Seoul)
+- Capture date: 2026-03-16 (Asia/Seoul)
 - Viewport: desktop, `1512x982`
 - Browser automation: Playwright (`@playwright/test` via `pnpm dlx`)
 - Mode: headed (`--headed`) to visually verify UI before capture
