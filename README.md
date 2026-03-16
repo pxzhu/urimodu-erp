@@ -52,6 +52,10 @@
 
 ### 관리자 화면
 
+#### AI-Native ERP 랜딩 (`/`)
+
+![관리자 AI-Native ERP 랜딩](./docs/screenshots/admin-00-ai-native-landing.png)
+
 #### 직원 디렉터리 (`/employees`)
 
 ![관리자 직원 디렉터리](./docs/screenshots/admin-01-employees-directory.png)
@@ -73,6 +77,10 @@
 ![관리자 경비청구](./docs/screenshots/admin-05-expense-claims.png)
 
 ### 사용자 화면
+
+#### AI-Native ERP 랜딩 (`/`)
+
+![사용자 AI-Native ERP 랜딩](./docs/screenshots/user-00-ai-native-landing.png)
 
 #### 직원 디렉터리 (`/employees`)
 

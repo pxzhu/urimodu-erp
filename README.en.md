@@ -52,6 +52,10 @@ Capture inventory and recapture guide: [docs/screenshots/README.md](./docs/scree
 
 ### Admin View
 
+#### AI-Native ERP Landing (`/`)
+
+![Admin AI-native ERP landing](./docs/screenshots/admin-00-ai-native-landing.png)
+
 #### Employees Directory (`/employees`)
 
 ![Admin employees directory](./docs/screenshots/admin-01-employees-directory.png)
@@ -73,6 +77,10 @@ Capture inventory and recapture guide: [docs/screenshots/README.md](./docs/scree
 ![Admin expense claims](./docs/screenshots/admin-05-expense-claims.png)
 
 ### User View
+
+#### AI-Native ERP Landing (`/`)
+
+![User AI-native ERP landing](./docs/screenshots/user-00-ai-native-landing.png)
 
 #### Employees Directory (`/employees`)
 
