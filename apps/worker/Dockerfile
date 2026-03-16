@@ -11,6 +11,7 @@ COPY apps ./apps
 COPY packages ./packages
 
 RUN pnpm install --frozen-lockfile=false
+RUN pnpm --filter @korean-erp/api prisma:generate
 RUN pnpm --filter @korean-erp/worker build
 
 FROM node:20-alpine AS runner
