@@ -78,8 +78,18 @@ export function DashboardNav() {
   );
 
   useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
+    function syncMobileMenuByViewport() {
+      if (window.innerWidth <= 1080) {
+        setMobileMenuOpen(true);
+      }
+    }
+
+    syncMobileMenuByViewport();
+    window.addEventListener("resize", syncMobileMenuByViewport);
+    return () => {
+      window.removeEventListener("resize", syncMobileMenuByViewport);
+    };
+  }, []);
 
   useEffect(() => {
     function onEscape(event: KeyboardEvent) {
@@ -202,7 +212,6 @@ export function DashboardNav() {
                         href={item.href}
                         prefetch={false}
                         className={`app-shell-nav__link ${active ? "is-active" : ""}`}
-                        onClick={() => setMobileMenuOpen(false)}
                       >
                         <span className="app-shell-nav__link-text">{sidebarCollapsed ? label.slice(0, 2) : label}</span>
                       </Link>

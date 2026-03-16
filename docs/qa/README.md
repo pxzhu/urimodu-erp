@@ -50,6 +50,10 @@ docs/qa/runs/<run-id>/
   QA 런 폴더/기본 템플릿/페이지 체크리스트 생성
 - `pnpm qa:validate`  
   기본 검증(lint/typecheck/test/build/smoke) 실행 로그 저장
+- `pnpm qa:navigation`  
+  관리자/HR/사원 시점 데스크톱+모바일 반복 네비게이션 회귀 검증
+- `pnpm qa:navigation:headed`  
+  동일 회귀 검증을 헤디드(가시화) 모드로 실행
 - `pnpm qa:screenshots`  
   역할별 주요 페이지 캡처(헤디드 모드)
 
