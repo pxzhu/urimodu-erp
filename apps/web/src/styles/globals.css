@@ -246,6 +246,7 @@ code {
 .app-shell-nav__search {
   display: grid;
   gap: 0.3rem;
+  align-content: start;
 }
 
 .app-shell-nav__search input {
@@ -269,8 +270,12 @@ code {
   background: linear-gradient(170deg, #2450aa, #2b5fc2);
   padding: 0.58rem 0.62rem;
   color: #f1f6ff;
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 0.22rem;
+  min-height: 0;
+  height: auto;
 }
 
 .app-shell-nav__panel-meta strong {

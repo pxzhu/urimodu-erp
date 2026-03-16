@@ -46,12 +46,15 @@
 }
 
 .tabs {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
   gap: 0.4rem;
 }
 
 .tabButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 10px;
   border: 1px solid var(--line);
   background: var(--surface-2);
@@ -59,6 +62,8 @@
   padding: 0.42rem 0.7rem;
   font-size: 0.86rem;
   font-weight: 700;
+  min-height: 2.5rem;
+  white-space: nowrap;
 }
 
 .tabButtonActive {

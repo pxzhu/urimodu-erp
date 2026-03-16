@@ -257,7 +257,7 @@ export function DashboardNav() {
   const showMobileMenu = isMobileView && mobileMenuOpen;
   const selectedEntry =
     sectionedMenuItems.find((entry) => entry.section === selectedSection) ?? sectionedMenuItems[0];
-  const sectionEntriesToRender = isMobileView ? sectionedMenuItems : selectedEntry ? [selectedEntry] : [];
+  const sectionEntriesToRender = sectionedMenuItems;
 
   return (
     <>
@@ -371,14 +371,14 @@ export function DashboardNav() {
                         <Link
                           href={item.href}
                           prefetch={false}
-                          className={`app-shell-nav__link ${active ? "is-active" : ""}`}
-                          onClick={() => {
-                            if (isMobileView) {
-                              setMobileMenuOpen(false);
-                            } else {
-                              setSelectedSection(entry.section);
-                            }
-                          }}
+                        className={`app-shell-nav__link ${active ? "is-active" : ""}`}
+                        onClick={() => {
+                          if (isMobileView) {
+                            setMobileMenuOpen(false);
+                          } else {
+                            setSelectedSection(entry.section);
+                          }
+                        }}
                         >
                           <span className="app-shell-nav__link-text">{!isMobileView && sidebarCollapsed ? label.slice(0, 2) : label}</span>
                         </Link>
