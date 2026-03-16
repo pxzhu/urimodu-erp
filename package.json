@@ -14,6 +14,7 @@
     "qa:validate": "./scripts/qa-validate.sh",
     "qa:screenshots": "corepack pnpm dlx @playwright/test test scripts/capture-role-screenshots.spec.ts --headed --reporter=line --workers=1",
     "qa:navigation": "corepack pnpm dlx @playwright/test test scripts/qa-navigation-i18n-regression.spec.ts --reporter=line --workers=1",
+    "qa:navigation:headed": "corepack pnpm dlx @playwright/test test scripts/qa-navigation-i18n-regression.spec.ts --headed --reporter=line --workers=1",
     "clean": "turbo run clean && rm -rf node_modules"
   },
   "devDependencies": {

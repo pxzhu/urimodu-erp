@@ -161,10 +161,13 @@ The Helm wrapper (`scripts/helmw.sh`) uses local `helm` when available and falls
 ```bash
 pnpm qa:init
 pnpm qa:validate
+pnpm qa:navigation
+pnpm qa:navigation:headed
 pnpm qa:screenshots
 ```
 
 Complete the generated checklist files under `docs/qa/runs/<run-id>/` for API/page/feature-level evidence.
+`qa:navigation` validates repeated desktop/mobile navigation flows for admin, HR manager, and employee roles.
 
 ## Roadmap / What Comes Next
 
