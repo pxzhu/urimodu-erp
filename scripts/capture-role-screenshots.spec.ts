@@ -51,6 +51,16 @@ const pages = [
     route: "/expenses",
     file: "05-expense-claims.png",
     readySelector: "section.app-shell-content h1"
+  },
+  {
+    route: "/workspace",
+    file: "06-workspace-hub.png",
+    readySelector: "section.app-shell-content h1"
+  },
+  {
+    route: "/collaboration",
+    file: "07-collaboration-hub.png",
+    readySelector: "section.app-shell-content h1"
   }
 ] as const;
 

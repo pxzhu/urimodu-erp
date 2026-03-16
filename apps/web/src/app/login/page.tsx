@@ -32,7 +32,7 @@ export default function LoginPage() {
       });
 
       saveSession(session);
-      router.push("/companies");
+      router.push("/workspace");
     } catch (submissionError) {
       if (submissionError instanceof ApiError) {
         setError(submissionError.message);

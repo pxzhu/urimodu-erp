@@ -1,0 +1,271 @@
+.workspaceContent {
+  display: grid;
+  gap: 1rem;
+}
+
+.hero {
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.5));
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.12), transparent 40%),
+    var(--surface);
+  padding: 1rem;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1.2fr 0.9fr;
+}
+
+.heroCopy {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.heroCopy h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.5vw, 2rem);
+}
+
+.heroCopy p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.eyebrow {
+  margin: 0;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--line));
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  color: color-mix(in srgb, var(--primary) 72%, var(--text));
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.24rem 0.56rem;
+}
+
+.ctaButton,
+.ctaButtonSecondary {
+  border-radius: 11px;
+  border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--line));
+  padding: 0.45rem 0.74rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.ctaButton {
+  background: linear-gradient(120deg, color-mix(in srgb, var(--primary) 90%, #1d3b80), #2b5abd);
+  color: #ffffff;
+}
+
+.ctaButtonSecondary {
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent);
+  color: color-mix(in srgb, var(--primary) 75%, var(--text));
+}
+
+.aiPanel {
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface-2) 92%, transparent);
+  padding: 0.8rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.aiPanel h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.aiPanel ul {
+  margin: 0;
+  padding-left: 1.05rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.aiPanel li {
+  color: var(--muted);
+  line-height: 1.45;
+  font-size: 0.86rem;
+}
+
+.kpiSection {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.kpiCard {
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 0.72rem;
+  display: grid;
+  gap: 0.16rem;
+}
+
+.kpiCard p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.kpiCard strong {
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+.kpiCard span {
+  color: color-mix(in srgb, var(--muted) 75%, var(--line));
+  font-size: 0.76rem;
+}
+
+.moduleSection {
+  border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.5));
+  border-radius: 18px;
+  background: var(--surface);
+  padding: 0.95rem;
+  display: grid;
+  gap: 0.95rem;
+}
+
+.moduleSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.moduleSectionHeader h2 {
+  margin: 0;
+}
+
+.searchWrap {
+  width: min(100%, 360px);
+}
+
+.searchWrap input {
+  width: 100%;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  padding: 0.5rem 0.62rem;
+}
+
+.moduleGroup {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.moduleGroup h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.moduleGrid {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.moduleCard {
+  border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.5));
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--surface), color-mix(in srgb, var(--surface-2) 70%, #ffffff));
+  padding: 0.75rem;
+  display: grid;
+  gap: 0.48rem;
+}
+
+.moduleCardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.moduleCardTop strong {
+  font-size: 0.98rem;
+}
+
+.moduleCardTop span {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 85%, rgba(255, 255, 255, 0.4));
+  background: var(--surface-2);
+  color: color-mix(in srgb, var(--primary) 72%, var(--text));
+  padding: 0.2rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.moduleCard p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+  font-size: 0.86rem;
+}
+
+.moduleLink {
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  color: color-mix(in srgb, var(--primary) 76%, var(--text));
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.58rem;
+  text-decoration: none;
+}
+
+.plannedTag {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.favoriteButton {
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8rem;
+  padding: 0.35rem 0.58rem;
+}
+
+.favoriteChip {
+  display: inline-flex;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--line));
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  color: color-mix(in srgb, var(--primary) 74%, var(--text));
+  padding: 0.25rem 0.52rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+@media (max-width: 1080px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .kpiSection {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .kpiSection {
+    grid-template-columns: 1fr;
+  }
+
+  .moduleSectionHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .searchWrap {
+    width: 100%;
+  }
+}

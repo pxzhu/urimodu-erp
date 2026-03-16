@@ -1,0 +1,243 @@
+.collabContent {
+  display: grid;
+  gap: 1rem;
+}
+
+.header {
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.5));
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.09), transparent 42%),
+    var(--surface);
+  padding: 0.95rem;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: 1.2fr 0.9fr;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.5vw, 1.9rem);
+}
+
+.header p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.headerBadge {
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.4));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--surface-2) 90%, transparent);
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.3rem;
+  align-content: center;
+}
+
+.headerBadge strong {
+  font-size: 0.92rem;
+}
+
+.headerBadge span {
+  color: var(--muted);
+  font-size: 0.83rem;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 0.4rem;
+}
+
+.tabButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--muted);
+  padding: 0.42rem 0.7rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  min-height: 2.5rem;
+  white-space: nowrap;
+}
+
+.tabButtonActive {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
+  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  color: color-mix(in srgb, var(--primary) 78%, var(--text));
+}
+
+.panel {
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
+  border-radius: 16px;
+  background: var(--surface);
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.panel h2 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.twoColumn {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+
+.subPanel {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  padding: 0.7rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.channelList {
+  display: grid;
+  gap: 0.32rem;
+}
+
+.channelButton {
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  text-align: left;
+  color: var(--text);
+  font-size: 0.84rem;
+  padding: 0.38rem 0.52rem;
+}
+
+.channelButtonActive {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  color: color-mix(in srgb, var(--primary) 75%, var(--text));
+}
+
+.messageList {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  min-height: 220px;
+  max-height: 300px;
+  overflow: auto;
+  padding: 0.52rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.messageItem {
+  border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.5));
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.18rem;
+}
+
+.messageItem strong {
+  font-size: 0.83rem;
+}
+
+.messageItem p {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.45;
+  font-size: 0.85rem;
+}
+
+.messageItem span {
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.inlineForm {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.inlineForm input {
+  flex: 1;
+}
+
+.formGrid {
+  display: grid;
+  gap: 0.62rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.formGrid label {
+  display: grid;
+  gap: 0.32rem;
+  font-size: 0.85rem;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.driveHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.driveHeader input {
+  width: min(100%, 320px);
+}
+
+.noteList {
+  display: grid;
+  gap: 0.52rem;
+}
+
+.noteCard {
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--surface-2) 85%, transparent);
+  padding: 0.62rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.noteCard strong {
+  font-size: 0.92rem;
+}
+
+.noteCard p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.85rem;
+}
+
+.noteCard span {
+  color: color-mix(in srgb, var(--muted) 72%, var(--line));
+  font-size: 0.74rem;
+}
+
+@media (max-width: 1080px) {
+  .header {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .twoColumn {
+    grid-template-columns: 1fr;
+  }
+}
