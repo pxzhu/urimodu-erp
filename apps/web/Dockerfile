@@ -12,7 +12,7 @@ COPY package.json pnpm-workspace.yaml turbo.json tsconfig.base.json ./
 COPY apps ./apps
 COPY packages ./packages
 
-RUN pnpm install --frozen-lockfile=false --filter @korean-erp/web... --network-concurrency=8 --child-concurrency=4
+RUN pnpm install --frozen-lockfile=false --filter @korean-erp/web... --network-concurrency=1 --child-concurrency=1
 RUN pnpm --filter @korean-erp/web build
 
 FROM node:20-alpine AS runner

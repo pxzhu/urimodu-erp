@@ -79,8 +79,8 @@ export function DashboardNav() {
 
   useEffect(() => {
     function syncMobileMenuByViewport() {
-      if (window.innerWidth <= 1080) {
-        setMobileMenuOpen(true);
+      if (window.innerWidth > 1080) {
+        setMobileMenuOpen(false);
       }
     }
 
@@ -223,13 +223,6 @@ export function DashboardNav() {
           ))}
         </div>
       </nav>
-      <button
-        type="button"
-        className={`app-shell-nav__backdrop ${mobileMenuOpen ? "is-open" : ""}`}
-        onClick={() => setMobileMenuOpen(false)}
-        aria-hidden={!mobileMenuOpen}
-        tabIndex={-1}
-      />
       {settingsModalOpen ? (
         <div className="app-modal-backdrop" role="presentation" onClick={() => setSettingsModalOpen(false)}>
           <section

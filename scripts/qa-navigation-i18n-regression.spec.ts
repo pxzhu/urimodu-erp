@@ -53,10 +53,11 @@ async function assertStableNavigation(
   routes: readonly string[],
   loops: number
 ) {
-  const sidebarMenu = page.locator(".app-shell-nav__menu-scroll");
   for (let loop = 0; loop < loops; loop += 1) {
     for (const route of routes) {
-      await sidebarMenu.locator(`a[href="${route}"]`).first().click();
+      const targetLink = page.locator(`.app-shell-nav a[href="${route}"]`).first();
+      await expect(targetLink).toBeVisible();
+      await targetLink.click();
       await expect(page).toHaveURL(new RegExp(`${route.replace("/", "\\/")}$`));
       await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });
       await page.waitForFunction(
@@ -69,6 +70,29 @@ async function assertStableNavigation(
       );
     }
   }
+}
+
+async function ensureMobileMenuVisible(page: Page) {
+  const menuLinkProbe = page.locator('.app-shell-nav a[href="/documents"]').first();
+  if (await menuLinkProbe.isVisible()) {
+    return;
+  }
+
+  const toggle = page
+    .getByRole("button", { name: /메뉴 열기|Open menu|메뉴 닫기|Close menu/ })
+    .first();
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    if (await menuLinkProbe.isVisible()) {
+      return;
+    }
+
+    await expect(toggle).toBeVisible();
+    await toggle.click();
+    await page.waitForTimeout(120);
+  }
+
+  await expect(menuLinkProbe).toBeVisible();
 }
 
 test("sidebar navigation and document tabs stay responsive for admin/hr/employee (desktop)", async ({ page }) => {
@@ -131,14 +155,9 @@ test("sidebar navigation stays responsive on mobile width with repeated open/clo
     await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });
 
     for (let i = 0; i < 3; i += 1) {
-      const menuScroll = page.locator(".app-shell-nav__menu-scroll").first();
-      if (!(await menuScroll.isVisible())) {
-        await page.getByRole("button", { name: /메뉴 열기|Open menu|메뉴 닫기|Close menu/ }).first().click();
-      }
-      await expect(menuScroll).toBeVisible();
-
       for (const route of scenario.routes.slice(0, 4)) {
-        await page.locator(`.app-shell-nav__menu a[href="${route}"]`).first().click();
+        await ensureMobileMenuVisible(page);
+        await page.locator(`.app-shell-nav a[href="${route}"]`).first().click();
         await expect(page).toHaveURL(new RegExp(`${route.replace("/", "\\/")}$`));
         await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });
       }
