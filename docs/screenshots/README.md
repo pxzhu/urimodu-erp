@@ -17,7 +17,7 @@ For full PR/release QA evidence across all pages/features, use `docs/qa/README.m
 | `docs/screenshots/admin-03-approvals-inbox.png` | `/approvals` | Approval inbox with action controls |
 | `docs/screenshots/admin-04-attendance-ledger.png` | `/attendance/ledger` | Normalized attendance ledger with seeded rows |
 | `docs/screenshots/admin-05-expense-claims.png` | `/expenses` | Expense claim list and receipt upload-friendly form |
-| `docs/screenshots/admin-06-workspace-hub.png` | `/workspace` | WEHAGO-inspired module launcher workspace with favorites/search |
+| `docs/screenshots/admin-06-workspace-hub.png` | `/workspace` | Module launcher workspace with favorites/search |
 | `docs/screenshots/admin-07-collaboration-hub.png` | `/collaboration` | Collaboration hub tabs (messenger/meeting/mail/drive/notes/board) |
 
 ### User View

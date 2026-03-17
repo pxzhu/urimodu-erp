@@ -344,8 +344,8 @@ export default function CollaborationPage() {
             <h1>{t("협업 허브", "Collaboration Hub")}</h1>
             <p>
               {t(
-                "WEHAGO 리플릿의 협업 영역(메신저, 회의, 메일, 드라이브, 노트, 게시판)을 ERP 내부 허브로 구성했습니다.",
-                "Built an in-product collaboration hub inspired by WEHAGO's messenger, meetings, mail, drive, notes, and board sections."
+                "협업 영역(메신저, 회의, 메일, 드라이브, 노트, 게시판)을 ERP 내부 허브로 구성했습니다.",
+                "Built an in-product collaboration hub with messenger, meetings, mail, drive, notes, and board sections."
               )}
             </p>
           </div>
