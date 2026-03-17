@@ -1,18 +1,21 @@
 .collabContent {
   display: grid;
-  gap: 1rem;
+  gap: 1.15rem;
 }
 
 .header {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.5));
-  border-radius: 16px;
+  border-radius: 20px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.09), transparent 42%),
+    radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.13), transparent 42%),
+    radial-gradient(circle at 0% 100%, rgba(32, 214, 199, 0.07), transparent 38%),
     var(--surface);
-  padding: 0.95rem;
+  padding: 1.2rem;
   display: grid;
-  gap: 0.8rem;
-  grid-template-columns: 1.2fr 0.9fr;
+  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  align-items: start;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
 }
 
 .header h1 {
@@ -28,12 +31,13 @@
 
 .headerBadge {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.4));
-  border-radius: 12px;
+  border-radius: 14px;
   background: color-mix(in srgb, var(--surface-2) 90%, transparent);
-  padding: 0.7rem;
+  padding: 0.8rem;
   display: grid;
   gap: 0.3rem;
-  align-content: center;
+  align-content: start;
+  min-height: 0;
 }
 
 .headerBadge strong {
@@ -48,17 +52,17 @@
 .tabs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 
 .tabButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid var(--line);
-  background: var(--surface-2);
-  color: var(--muted);
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  color: color-mix(in srgb, var(--muted) 90%, var(--text));
   padding: 0.42rem 0.7rem;
   font-size: 0.86rem;
   font-weight: 700;
@@ -68,17 +72,19 @@
 
 .tabButtonActive {
   border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
-  background: color-mix(in srgb, var(--primary) 12%, var(--surface));
-  color: color-mix(in srgb, var(--primary) 78%, var(--text));
+  background: color-mix(in srgb, var(--primary) 14%, #ffffff);
+  color: color-mix(in srgb, var(--primary) 88%, var(--text));
+  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary) 16%, transparent);
 }
 
 .panel {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
-  border-radius: 16px;
-  background: var(--surface);
-  padding: 0.9rem;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f9fbff);
+  padding: 1rem;
   display: grid;
-  gap: 0.75rem;
+  gap: 0.8rem;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
 }
 
 .panel h2 {
@@ -94,9 +100,9 @@
 
 .subPanel {
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface-2);
-  padding: 0.7rem;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 0.75rem;
   display: grid;
   gap: 0.5rem;
 }
@@ -107,7 +113,7 @@
 }
 
 .channelButton {
-  border-radius: 9px;
+  border-radius: 11px;
   border: 1px solid var(--line);
   background: var(--surface);
   text-align: left;
@@ -124,7 +130,7 @@
 
 .messageList {
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--surface);
   min-height: 220px;
   max-height: 300px;
@@ -136,7 +142,7 @@
 
 .messageItem {
   border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.5));
-  border-radius: 10px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--surface-2) 88%, transparent);
   padding: 0.5rem;
   display: grid;
@@ -207,7 +213,7 @@
 
 .noteCard {
   border: 1px solid var(--line);
-  border-radius: 11px;
+  border-radius: 13px;
   background: color-mix(in srgb, var(--surface-2) 85%, transparent);
   padding: 0.62rem;
   display: grid;
@@ -233,6 +239,8 @@
 @media (max-width: 1080px) {
   .header {
     grid-template-columns: 1fr;
+    border-radius: 16px;
+    padding: 1rem;
   }
 }
 

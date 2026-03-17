@@ -66,7 +66,7 @@ export function DashboardNav() {
   const pathname = usePathname();
   const session = loadSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isMobileView, setIsMobileView] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
@@ -76,8 +76,6 @@ export function DashboardNav() {
     toggleLocale,
     theme,
     toggleTheme,
-    sidebarCollapsed,
-    toggleSidebar,
     isAdminView,
     role,
     userName
@@ -127,26 +125,8 @@ export function DashboardNav() {
   }, [pathname, sectionedMenuItems, selectedSection]);
 
   useEffect(() => {
-    function syncViewportState() {
-      const mobile = window.innerWidth <= 1080;
-      setIsMobileView(mobile);
-      if (!mobile) {
-        setMobileMenuOpen(false);
-      }
-    }
-
-    syncViewportState();
-    window.addEventListener("resize", syncViewportState);
-    return () => {
-      window.removeEventListener("resize", syncViewportState);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isMobileView) {
-      setMobileMenuOpen(false);
-    }
-  }, [pathname, isMobileView]);
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     function onEscape(event: KeyboardEvent) {
@@ -155,7 +135,7 @@ export function DashboardNav() {
       }
       setSettingsModalOpen(false);
       setLogoutModalOpen(false);
-      if (isMobileView) {
+      if (mobileMenuOpen) {
         setMobileMenuOpen(false);
       }
     }
@@ -164,7 +144,7 @@ export function DashboardNav() {
     return () => {
       window.removeEventListener("keydown", onEscape);
     };
-  }, [isMobileView]);
+  }, [mobileMenuOpen]);
 
   async function performLogout() {
     if (session) {
@@ -206,28 +186,6 @@ export function DashboardNav() {
     return t("운영", "Operations");
   }
 
-  function sectionBadge(section: NavSection) {
-    if (section === "home") {
-      return "HM";
-    }
-    if (section === "org") {
-      return "OR";
-    }
-    if (section === "workflow") {
-      return "WF";
-    }
-    if (section === "attendance") {
-      return "AT";
-    }
-    if (section === "finance") {
-      return "FN";
-    }
-    if (section === "collab") {
-      return "CL";
-    }
-    return "OP";
-  }
-
   function sectionHint(section: NavSection) {
     if (section === "home") {
       return t("오늘 필요한 기능을 빠르게 시작", "Quick launch for today's tasks");
@@ -253,8 +211,13 @@ export function DashboardNav() {
   const roleLabel = isAdminView
     ? t("관리자", "Administrator")
     : t("사용자", "User");
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   const normalizedUserName = userName.trim().length > 0 ? userName : "Guest";
-  const showMobileMenu = isMobileView && mobileMenuOpen;
+  const showMobileMenu = mobileMenuOpen;
   const selectedEntry =
     sectionedMenuItems.find((entry) => entry.section === selectedSection) ?? sectionedMenuItems[0];
   const sectionEntriesToRender = sectionedMenuItems;
@@ -262,7 +225,7 @@ export function DashboardNav() {
   return (
     <>
       <nav
-        className={`app-shell-nav ${!isMobileView && sidebarCollapsed ? "is-collapsed" : ""} ${showMobileMenu ? "is-mobile-open" : ""}`}
+        className={`app-shell-nav ${showMobileMenu ? "is-mobile-open" : ""}`}
       >
         <div className="app-shell-nav__brand-row">
           <button
@@ -270,20 +233,22 @@ export function DashboardNav() {
             className="nav-icon-button nav-mobile-toggle"
             onClick={() => setMobileMenuOpen((current) => !current)}
             aria-expanded={mobileMenuOpen}
+            aria-controls="app-shell-nav-menu"
             aria-label={mobileMenuOpen ? t("메뉴 닫기", "Close menu") : t("메뉴 열기", "Open menu")}
+            disabled={!hydrated}
           >
             {mobileMenuOpen ? "✕" : "☰"}
           </button>
           <Link href="/workspace" prefetch={false} className="app-shell-nav__brand" title="Urimodu ERP">
-            {!isMobileView && sidebarCollapsed ? "우리" : "우리모두ERP"}
+            우리모두ERP
           </Link>
           <span className="app-shell-nav__brand-role">{roleLabel}</span>
         </div>
 
         <div className="app-shell-nav__meta">
-          <div className="app-shell-nav__user">{!isMobileView && sidebarCollapsed ? normalizedUserName.slice(0, 1) : normalizedUserName}</div>
+          <div className="app-shell-nav__user">{normalizedUserName}</div>
           <div className="app-shell-nav__role" title={role}>
-            {!isMobileView && sidebarCollapsed ? roleLabel.slice(0, 1) : `${t("모드", "Mode")}: ${roleLabel}`}
+            {`${t("모드", "Mode")}: ${roleLabel}`}
           </div>
         </div>
 
@@ -293,7 +258,7 @@ export function DashboardNav() {
             className="nav-chip nav-chip--ghost"
             onClick={() => setSettingsModalOpen(true)}
           >
-            {isMobileView ? t("설정", "Settings") : !isMobileView && sidebarCollapsed ? t("설정", "Settings") : t("표시 설정", "Display settings")}
+            {t("설정", "Settings")}
           </button>
           <button
             type="button"
@@ -302,41 +267,10 @@ export function DashboardNav() {
           >
             {t("로그아웃", "Logout")}
           </button>
-          {!isMobileView ? (
-            <button
-              type="button"
-              className="nav-icon-button nav-desktop-toggle"
-              onClick={toggleSidebar}
-              aria-label={sidebarCollapsed ? t("메뉴 넓히기", "Expand menu") : t("메뉴 줄이기", "Collapse menu")}
-            >
-              {sidebarCollapsed ? "⟫" : "⟪"}
-            </button>
-          ) : null}
         </div>
 
         <div className="app-shell-nav__workspace">
-          {!isMobileView ? (
-            <aside className="app-shell-nav__section-rail" aria-label={t("섹션 바로가기", "Section shortcuts")}>
-              {sectionedMenuItems.map((entry) => {
-                const active = entry.section === selectedSection;
-                return (
-                  <button
-                    key={entry.section}
-                    type="button"
-                    className={`app-shell-nav__section-button ${active ? "is-active" : ""}`}
-                    onClick={() => setSelectedSection(entry.section)}
-                    title={sectionLabel(entry.section)}
-                    aria-label={sectionLabel(entry.section)}
-                    aria-pressed={active}
-                  >
-                    {sectionBadge(entry.section)}
-                  </button>
-                );
-              })}
-            </aside>
-          ) : null}
-
-          <div className="app-shell-nav__menu-scroll">
+          <div id="app-shell-nav-menu" className="app-shell-nav__menu-scroll">
             <div className="app-shell-nav__search">
               <input
                 value={menuQuery}
@@ -348,7 +282,7 @@ export function DashboardNav() {
                 <small>{t(`${filteredMenuItems.length}건 검색`, `${filteredMenuItems.length} results`)}</small>
               ) : null}
             </div>
-            {!isMobileView && selectedEntry ? (
+            {selectedEntry ? (
               <div className="app-shell-nav__panel-meta">
                 <strong>{sectionLabel(selectedEntry.section)}</strong>
                 <p>{sectionHint(selectedEntry.section)}</p>
@@ -357,10 +291,7 @@ export function DashboardNav() {
             {sectionEntriesToRender.map((entry) => (
               <section className="app-shell-nav__section" key={entry.section}>
                 <h2 className="app-shell-nav__section-title">
-                  <span className="app-shell-nav__section-badge" aria-hidden>
-                    {sectionBadge(entry.section)}
-                  </span>
-                  <span>{!isMobileView && sidebarCollapsed ? "•" : sectionLabel(entry.section)}</span>
+                  <span>{sectionLabel(entry.section)}</span>
                 </h2>
                 <ul className="app-shell-nav__menu">
                   {entry.items.map((item) => {
@@ -374,9 +305,7 @@ export function DashboardNav() {
                           prefetch={false}
                         className={`app-shell-nav__link ${active ? "is-active" : ""}`}
                         onClick={() => {
-                          if (isMobileView) {
-                            setMobileMenuOpen(false);
-                          }
+                          setMobileMenuOpen(false);
                           setSelectedSection(entry.section);
                         }}
                         >
@@ -391,14 +320,6 @@ export function DashboardNav() {
           </div>
         </div>
       </nav>
-      {showMobileMenu ? (
-        <button
-          type="button"
-          className="app-shell-nav__mobile-backdrop"
-          aria-label={t("메뉴 닫기", "Close menu")}
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      ) : null}
       {settingsModalOpen ? (
         <div className="app-modal-backdrop" role="presentation" onClick={() => setSettingsModalOpen(false)}>
           <section
