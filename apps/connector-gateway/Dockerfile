@@ -10,7 +10,7 @@ COPY package.json pnpm-workspace.yaml turbo.json tsconfig.base.json ./
 COPY apps ./apps
 COPY packages ./packages
 
-RUN pnpm install --frozen-lockfile=false
+RUN pnpm install --frozen-lockfile=false --network-concurrency=4 --child-concurrency=1 --filter @korean-erp/connector-gateway...
 RUN pnpm --filter @korean-erp/connector-gateway build
 
 FROM node:20-alpine AS runner
