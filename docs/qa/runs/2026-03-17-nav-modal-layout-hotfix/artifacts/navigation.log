@@ -1,0 +1,3 @@
+2026-03-17
+command: SCREENSHOT_BASE_URL=http://127.0.0.1:3001 SCREENSHOT_API_BASE_URL=http://127.0.0.1:4000 corepack pnpm qa:navigation
+result: PASS (2 tests passed)

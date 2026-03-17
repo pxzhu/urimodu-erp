@@ -81,6 +81,7 @@ export function DashboardNav() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
   const [selectedSection, setSelectedSection] = useState<NavSection>("home");
+  const [expandedSection, setExpandedSection] = useState<NavSection>("home");
   const {
     locale,
     toggleLocale,
@@ -125,6 +126,7 @@ export function DashboardNav() {
 
     if (activeSection && activeSection !== selectedSection) {
       setSelectedSection(activeSection);
+      setExpandedSection(activeSection);
       return;
     }
 
@@ -135,6 +137,13 @@ export function DashboardNav() {
   }, [pathname, sectionedMenuItems, selectedSection]);
 
   useEffect(() => {
+    const hasExpandedSection = sectionedMenuItems.some((entry) => entry.section === expandedSection);
+    if (!hasExpandedSection && sectionedMenuItems[0]?.section) {
+      setExpandedSection(sectionedMenuItems[0].section);
+    }
+  }, [expandedSection, sectionedMenuItems]);
+
+  useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
@@ -142,11 +151,19 @@ export function DashboardNav() {
     if (!hydrated || typeof window === "undefined") {
       return;
     }
-
-    const shouldLockBody = window.innerWidth <= 1080 && mobileMenuOpen;
-    document.body.style.overflow = shouldLockBody ? "hidden" : "";
+    const syncLayoutByViewport = () => {
+      const isMobileViewport = window.innerWidth <= 1080;
+      const shouldLockBody = isMobileViewport && mobileMenuOpen;
+      document.body.style.overflow = shouldLockBody ? "hidden" : "";
+      if (!isMobileViewport && mobileMenuOpen) {
+        setMobileMenuOpen(false);
+      }
+    };
+    syncLayoutByViewport();
+    window.addEventListener("resize", syncLayoutByViewport);
 
     return () => {
+      window.removeEventListener("resize", syncLayoutByViewport);
       document.body.style.removeProperty("overflow");
     };
   }, [hydrated, mobileMenuOpen]);
@@ -244,6 +261,7 @@ export function DashboardNav() {
   const selectedEntry =
     sectionedMenuItems.find((entry) => entry.section === selectedSection) ?? sectionedMenuItems[0];
   const sectionEntriesToRender = sectionedMenuItems;
+  const hasSearchQuery = menuQuery.trim().length > 0;
 
   return (
     <>
@@ -316,11 +334,29 @@ export function DashboardNav() {
             ) : null}
             {sectionEntriesToRender.map((entry) => (
               <section className="app-shell-nav__section" key={entry.section}>
-                <h2 className="app-shell-nav__section-title">
-                  <span className="app-shell-nav__section-icon" aria-hidden>{sectionIcon(entry.section)}</span>
-                  <span>{sectionLabel(entry.section)}</span>
-                </h2>
-                <ul className="app-shell-nav__menu">
+                <button
+                  type="button"
+                  className={`app-shell-nav__section-button ${expandedSection === entry.section ? "is-expanded" : ""}`}
+                  onClick={() => {
+                    setSelectedSection(entry.section);
+                    setExpandedSection(entry.section);
+                  }}
+                  aria-expanded={hasSearchQuery || expandedSection === entry.section}
+                >
+                  <h2 className="app-shell-nav__section-title">
+                    <span className="app-shell-nav__section-icon" aria-hidden>{sectionIcon(entry.section)}</span>
+                    <span>{sectionLabel(entry.section)}</span>
+                  </h2>
+                  <span className="app-shell-nav__section-meta">
+                    <span className="app-shell-nav__section-count">{entry.items.length}</span>
+                    <span className="app-shell-nav__section-chevron" aria-hidden>
+                      {hasSearchQuery || expandedSection === entry.section ? "▾" : "▸"}
+                    </span>
+                  </span>
+                </button>
+                <ul
+                  className={`app-shell-nav__menu ${hasSearchQuery || expandedSection === entry.section ? "" : "is-hidden"}`}
+                >
                   {entry.items.map((item) => {
                     const active = isActivePath(pathname, item.href);
                     const label = locale === "ko" ? item.ko : item.en;
@@ -334,6 +370,7 @@ export function DashboardNav() {
                         onClick={() => {
                           setMobileMenuOpen(false);
                           setSelectedSection(entry.section);
+                          setExpandedSection(entry.section);
                         }}
                         >
                           <span className="app-shell-nav__link-text">{label}</span>

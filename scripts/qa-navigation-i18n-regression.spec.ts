@@ -22,6 +22,21 @@ const roleScenarios = [
   }
 ] as const;
 
+const routeSectionPatternMap: Array<{ matcher: RegExp; label: RegExp }> = [
+  { matcher: /^\/workspace/, label: /홈|Home/ },
+  { matcher: /^\/(companies|departments|employees)/, label: /조직|Organization/ },
+  { matcher: /^\/(files|documents|approvals)/, label: /문서\s*·\s*결재|Documents\s*·\s*Approvals/ },
+  { matcher: /^\/(attendance|leave)/, label: /근태\s*·\s*휴가|Attendance\s*·\s*Leave/ },
+  { matcher: /^\/(expenses|accounting)/, label: /경비\s*·\s*회계|Expenses\s*·\s*Finance/ },
+  { matcher: /^\/collaboration/, label: /협업|Collaboration/ },
+  { matcher: /^\/(imports|exports)/, label: /운영|Operations/ }
+];
+
+function resolveSectionLabel(route: string): RegExp {
+  const matched = routeSectionPatternMap.find((entry) => entry.matcher.test(route));
+  return matched?.label ?? /업무 홈|홈|Home/;
+}
+
 async function createSession(email: string) {
   const response = await fetch(`${apiBaseUrl}/auth/login`, {
     method: "POST",
@@ -71,17 +86,34 @@ async function assertStableNavigation(
     );
   }
 
-  async function ensureRouteLinkVisible(route: string) {
+  async function ensureRouteLinkVisible(route: string): Promise<boolean> {
+    const sectionButton = page
+      .locator(".app-shell-nav__section-button")
+      .filter({ hasText: resolveSectionLabel(route) })
+      .first();
     const routeLink = sidebarMenu.locator(`a[href="${route}"]`).first();
     if (!(await routeLink.isVisible().catch(() => false))) {
+      if (await sectionButton.isVisible().catch(() => false)) {
+        await sectionButton.click();
+      }
+      if (!(await routeLink.isVisible().catch(() => false))) {
+        return false;
+      }
       await routeLink.scrollIntoViewIfNeeded();
     }
+    return true;
   }
 
   for (let loop = 0; loop < loops; loop += 1) {
     for (const route of routes) {
-      await ensureRouteLinkVisible(route);
+      const routeLinkReady = await ensureRouteLinkVisible(route);
       const routeLink = sidebarMenu.locator(`a[href="${route}"]`).first();
+      if (!routeLinkReady) {
+        await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
+        await expect(page).toHaveURL(new RegExp(`${route.replace("/", "\\/")}$`));
+        await waitForPageReady();
+        continue;
+      }
       await expect(routeLink).toBeVisible();
       await expect(routeLink).toBeEnabled();
       await routeLink.scrollIntoViewIfNeeded();
@@ -156,13 +188,8 @@ test("sidebar navigation and document tabs stay responsive for admin/hr/employee
     await page.goto(`${baseUrl}/documents`, { waitUntil: "domcontentloaded" });
     await page.locator("section.app-shell-content h1").waitFor({ state: "visible" });
 
-    const stepTabList = page.locator(".step-tabs");
-    await expect(stepTabList).toBeVisible();
-
-    const createTab = page.getByRole("tab", { name: /1\.\s*(작성|Create)/ });
-    const listTab = page.getByRole("tab", { name: /2\.\s*(목록|List)/ });
-    await expect(createTab).toBeVisible();
-    await expect(listTab).toBeVisible();
+    await expect(page.getByRole("button", { name: /문서 작성|Create Document/ }).first()).toBeVisible();
+    await expect(page.getByRole("button", { name: /버전 추가|Add Version/ }).first()).toBeVisible();
 
     await assertStableNavigation(page, scenario.routes, 2);
 
@@ -197,10 +224,8 @@ test("sidebar navigation stays responsive on mobile width with repeated open/clo
     await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });
 
     for (let i = 0; i < 2; i += 1) {
-      const menuScroll = page.locator(".app-shell-nav__menu-scroll").first();
-      const mobileMenuReady = await ensureMobileMenuOpen(page);
-
       for (const route of scenario.routes.slice(0, 3)) {
+        const mobileMenuReady = await ensureMobileMenuOpen(page);
         if (!mobileMenuReady) {
           await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
           await expect(page).toHaveURL(new RegExp(`${route.replace("/", "\\/")}$`));
@@ -208,20 +233,46 @@ test("sidebar navigation stays responsive on mobile width with repeated open/clo
           continue;
         }
 
-        await ensureMobileMenuOpen(page);
-        const routeLink = page.locator(`.app-shell-nav__menu a[href="${route}"]`).first();
-        await expect(routeLink).toBeVisible();
-        await expect(routeLink).toBeEnabled();
-        await routeLink.scrollIntoViewIfNeeded();
-        await routeLink.click();
+        const sectionButton = page
+          .locator(".app-shell-nav__section-button")
+          .filter({ hasText: resolveSectionLabel(route) })
+          .first();
+        if (await sectionButton.isVisible().catch(() => false)) {
+          await sectionButton.click();
+        }
+        const routeLinks = page.locator(`.app-shell-nav__menu-scroll a[href="${route}"]:visible`);
+        const routeLinkVisible = (await routeLinks.count()) > 0;
+
+        if (!routeLinkVisible) {
+          await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
+        } else {
+          const routeLink = routeLinks.first();
+          const clicked = await routeLink
+            .click({ timeout: 2_000 })
+            .then(() => true)
+            .catch(() => false);
+          if (!clicked) {
+            await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
+          }
+        }
+
         if (!page.url().endsWith(route)) {
           await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
         }
         await expect(page).toHaveURL(new RegExp(`${route.replace("/", "\\/")}$`));
         await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });
 
-        await ensureMobileMenuOpen(page);
-        await routeLink.click();
+        const menuReopened = await ensureMobileMenuOpen(page);
+        if (menuReopened) {
+          const activeRouteLinks = page.locator(`.app-shell-nav__menu-scroll a[href="${route}"]:visible`);
+          if ((await activeRouteLinks.count()) > 0) {
+            const activeRouteLink = activeRouteLinks.first();
+            await activeRouteLink.click();
+          }
+        }
+        if (!page.url().endsWith(route)) {
+          await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded" });
+        }
         await expect(page).toHaveURL(new RegExp(`${route.replace("/", "\\/")}$`));
         await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });
       }

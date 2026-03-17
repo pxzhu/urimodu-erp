@@ -35,6 +35,7 @@ interface ApprovalInboxLine {
     };
   }>;
 }
+type ApprovalActionKind = "approve" | "reject";
 
 export default function ApprovalsPage() {
   const router = useRouter();
@@ -42,7 +43,8 @@ export default function ApprovalsPage() {
   const { isAdminView } = useUiShell();
   const [session, setSession] = useState<LoginSession | null>(null);
   const [inbox, setInbox] = useState<ApprovalInboxLine[]>([]);
-  const [comments, setComments] = useState<Record<string, string>>({});
+  const [actionModal, setActionModal] = useState<{ line: ApprovalInboxLine; action: ApprovalActionKind } | null>(null);
+  const [actionComment, setActionComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [workingLineId, setWorkingLineId] = useState<string | null>(null);
 
@@ -71,7 +73,7 @@ export default function ApprovalsPage() {
     void run();
   }, [router]);
 
-  async function handleAction(lineId: string, action: "approve" | "reject") {
+  async function handleAction(lineId: string, action: ApprovalActionKind, comment?: string) {
     if (!session) {
       return;
     }
@@ -84,10 +86,12 @@ export default function ApprovalsPage() {
         token: session.token,
         companyId,
         body: {
-          comment: comments[lineId] ?? ""
+          comment: comment ?? ""
         }
       });
       await refresh(session);
+      setActionComment("");
+      setActionModal(null);
     } catch (actionError) {
       if (actionError instanceof ApiError) {
         setError(actionError.message);
@@ -127,7 +131,6 @@ export default function ApprovalsPage() {
             <th>{t("결재선 상태", "Line Status")}</th>
             <th>{t("현재 단계", "Current Step")}</th>
             <th>{t("결재자", "Approver")}</th>
-            <th>{t("코멘트", "Comment")}</th>
             <th>{t("동작", "Actions")}</th>
           </tr>
         </thead>
@@ -159,30 +162,24 @@ export default function ApprovalsPage() {
                     : "-"}
                 </td>
                 <td>
-                  <input
-                    value={comments[line.id] ?? ""}
-                    onChange={(event) =>
-                      setComments((current) => ({
-                        ...current,
-                        [line.id]: event.target.value
-                      }))
-                    }
-                    placeholder={t("코멘트(선택)", "Comment (optional)")}
-                  />
-                </td>
-                <td>
                   <div className="inline-actions">
                     <button
                       type="button"
                       disabled={workingLineId === line.id}
-                      onClick={() => void handleAction(line.id, "approve")}
+                      onClick={() => {
+                        setActionComment("");
+                        setActionModal({ line, action: "approve" });
+                      }}
                     >
                       {t("승인", "Approve")}
                     </button>
                     <button
                       type="button"
                       disabled={workingLineId === line.id}
-                      onClick={() => void handleAction(line.id, "reject")}
+                      onClick={() => {
+                        setActionComment("");
+                        setActionModal({ line, action: "reject" });
+                      }}
                     >
                       {t("반려", "Reject")}
                     </button>
@@ -193,11 +190,48 @@ export default function ApprovalsPage() {
           })}
           {inbox.length === 0 ? (
             <tr>
-              <td colSpan={6}>{t("결재 대기 항목이 없습니다.", "No pending approvals in your inbox.")}</td>
+              <td colSpan={5}>{t("결재 대기 항목이 없습니다.", "No pending approvals in your inbox.")}</td>
             </tr>
           ) : null}
         </tbody>
       </table>
+
+      {actionModal ? (
+        <div className="app-modal-backdrop" role="presentation" onClick={() => setActionModal(null)}>
+          <section className="app-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
+            <h3>
+              {actionModal.action === "approve"
+                ? t("결재 승인", "Approve request")
+                : t("결재 반려", "Reject request")}
+            </h3>
+            <p className="empty-note">{actionModal.line.document.title}</p>
+            <label htmlFor="approval-comment">{t("코멘트 (선택)", "Comment (optional)")}</label>
+            <textarea
+              id="approval-comment"
+              rows={4}
+              value={actionComment}
+              onChange={(event) => setActionComment(event.target.value)}
+            />
+            <div className="app-modal__actions">
+              <button type="button" onClick={() => setActionModal(null)}>
+                {t("취소", "Cancel")}
+              </button>
+              <button
+                type="button"
+                className={actionModal.action === "approve" ? "" : "nav-chip nav-chip--danger"}
+                disabled={workingLineId === actionModal.line.id}
+                onClick={() => void handleAction(actionModal.line.id, actionModal.action, actionComment)}
+              >
+                {workingLineId === actionModal.line.id
+                  ? t("처리 중...", "Processing...")
+                  : actionModal.action === "approve"
+                    ? t("승인", "Approve")
+                    : t("반려", "Reject")}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
       </section>
     </main>
   );

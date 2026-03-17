@@ -1,0 +1,9 @@
+run_id=2026-03-17-nav-modal-layout-hotfix
+date=2026-03-17
+branch=codex/fix-nav-overlap-and-modal-doc-flow
+lint=PASS
+typecheck=PASS
+test=PASS
+build=PASS
+qa_navigation=PASS
+qa_screenshots=PASS

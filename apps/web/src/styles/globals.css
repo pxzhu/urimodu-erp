@@ -157,6 +157,7 @@ code {
   align-items: center;
   justify-content: flex-start;
   gap: 0.6rem;
+  min-width: 0;
 }
 
 .app-shell-nav__brand-mark {
@@ -180,6 +181,9 @@ code {
   font-weight: 900;
   color: #ffffff;
   white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   letter-spacing: -0.025em;
 }
 
@@ -243,6 +247,23 @@ code {
   gap: 0.3rem;
 }
 
+.app-shell-nav__section-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.3rem 0.35rem;
+  width: 100%;
+  text-align: left;
+}
+
+.app-shell-nav__section-button.is-expanded {
+  border-color: rgba(141, 176, 255, 0.62);
+  background: rgba(76, 111, 255, 0.14);
+}
+
 .app-shell-nav__section-title {
   margin: 0;
   display: flex;
@@ -253,7 +274,7 @@ code {
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 0 0.25rem;
+  padding: 0;
 }
 
 .app-shell-nav__section-icon {
@@ -268,6 +289,30 @@ code {
   color: #ffffff;
   font-size: 0.67rem;
   font-weight: 800;
+}
+
+.app-shell-nav__section-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.36rem;
+  color: var(--sidebar-muted);
+  font-size: 0.74rem;
+}
+
+.app-shell-nav__section-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.2rem;
+  padding: 0.05rem 0.28rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  font-weight: 700;
+}
+
+.app-shell-nav__section-chevron {
+  font-size: 0.8rem;
 }
 
 .app-shell-nav__search {
@@ -328,6 +373,10 @@ code {
   padding: 0;
   display: grid;
   gap: 0.18rem;
+}
+
+.app-shell-nav__menu.is-hidden {
+  display: none;
 }
 
 .app-shell-nav__menu li {
@@ -503,6 +552,12 @@ button:hover {
   padding: 1rem;
   display: grid;
   gap: 0.7rem;
+}
+
+.app-modal--wide {
+  width: min(100%, 980px);
+  max-height: min(92vh, 860px);
+  overflow: auto;
 }
 
 .app-modal h3 {
@@ -799,6 +854,10 @@ button:disabled {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    max-width: 5.3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .app-shell-nav__meta {
@@ -814,11 +873,8 @@ button:disabled {
   }
 
   .app-shell-nav__menu-scroll {
-    display: grid;
-    position: absolute;
-    left: 0.7rem;
-    right: 0.7rem;
-    top: calc(100% - 0.2rem);
+    display: none;
+    position: static;
     max-height: 0;
     border: 0 solid transparent;
     border-radius: 14px;
@@ -826,34 +882,28 @@ button:disabled {
     box-shadow: none;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-8px);
+    transform: translateY(0);
     padding: 0;
-    pointer-events: none;
-    transition: opacity 160ms ease, transform 180ms ease, max-height 180ms ease, padding 180ms ease, border-color 180ms ease;
-    z-index: 84;
+    pointer-events: auto;
+    transition: opacity 160ms ease, max-height 180ms ease, padding 180ms ease, border-color 180ms ease;
   }
 
   .app-shell-nav.is-mobile-open .app-shell-nav__menu-scroll {
+    display: grid;
     max-height: min(70vh, 560px);
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.2);
     box-shadow: 0 24px 44px rgba(8, 18, 37, 0.48);
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
     padding: 0.75rem;
     pointer-events: auto;
+    margin-top: 0.2rem;
+    overflow-y: auto;
   }
 
   .nav-mobile-backdrop {
-    display: block;
-    position: fixed;
-    inset: 0;
-    border: 0;
-    background: rgba(9, 18, 37, 0.45);
-    z-index: 81;
-    padding: 0;
-    margin: 0;
+    display: none;
   }
 
   .app-shell-nav__workspace {
