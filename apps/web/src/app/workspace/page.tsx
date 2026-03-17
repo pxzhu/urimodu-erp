@@ -51,12 +51,12 @@ interface WorkspaceModule {
 
 const FAVORITE_STORAGE_KEY = "korean_erp_workspace_favorites";
 
-const WEHAGO_INSPIRED_MODULES: WorkspaceModule[] = [
+const WORKSPACE_MODULES: WorkspaceModule[] = [
   {
-    id: "one-ai",
+    id: "ai-briefing",
     category: "core",
-    titleKo: "ONE AI 브리핑",
-    titleEn: "ONE AI Briefing",
+    titleKo: "AI 브리핑",
+    titleEn: "AI Briefing",
     descriptionKo: "인사/근태/결재 데이터를 요약해 다음 액션을 제안합니다.",
     descriptionEn: "Summarizes HR, attendance, and approvals with next-step suggestions.",
     badgeKo: "운영중",
@@ -64,10 +64,10 @@ const WEHAGO_INSPIRED_MODULES: WorkspaceModule[] = [
     href: "/workspace"
   },
   {
-    id: "smart-a-accounting",
+    id: "finance-accounting",
     category: "core",
-    titleKo: "Smart A 회계관리",
-    titleEn: "Smart A Accounting",
+    titleKo: "재무 회계",
+    titleEn: "Finance Accounting",
     descriptionKo: "계정과목/분개를 기반으로 재무 흐름을 관리합니다.",
     descriptionEn: "Manage accounting flow with accounts and journal entries.",
     badgeKo: "운영중",
@@ -121,8 +121,8 @@ const WEHAGO_INSPIRED_MODULES: WorkspaceModule[] = [
   {
     id: "crm",
     category: "growth",
-    titleKo: "WE CRM",
-    titleEn: "WE CRM",
+    titleKo: "CRM",
+    titleEn: "CRM",
     descriptionKo: "거래처 기반 파이프라인 관리 준비용 모듈입니다.",
     descriptionEn: "Starter module for account-centered sales pipeline management.",
     badgeKo: "준비중",
@@ -131,8 +131,8 @@ const WEHAGO_INSPIRED_MODULES: WorkspaceModule[] = [
   {
     id: "pms",
     category: "growth",
-    titleKo: "WE PMS",
-    titleEn: "WE PMS",
+    titleKo: "PMS",
+    titleEn: "PMS",
     descriptionKo: "프로젝트 기반 인력/일정 운영 준비용 모듈입니다.",
     descriptionEn: "Starter module for project-centric workforce planning.",
     badgeKo: "준비중",
@@ -310,10 +310,10 @@ export default function WorkspacePage() {
   const filteredModules = useMemo(() => {
     const normalizedQuery = normalizeText(search);
     if (!normalizedQuery) {
-      return WEHAGO_INSPIRED_MODULES;
+      return WORKSPACE_MODULES;
     }
 
-    return WEHAGO_INSPIRED_MODULES.filter((module) => {
+    return WORKSPACE_MODULES.filter((module) => {
       const searchable = `${module.titleKo} ${module.titleEn} ${module.descriptionKo} ${module.descriptionEn}`.toLowerCase();
       return searchable.includes(normalizedQuery);
     });
@@ -343,7 +343,7 @@ export default function WorkspacePage() {
       <section className={`app-shell-content ${styles.workspaceContent}`}>
         <header className={styles.hero}>
           <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>{t("업무 허브 워크스페이스", "WEHAGO-inspired Workspace")}</p>
+            <p className={styles.eyebrow}>{t("업무 허브 워크스페이스", "Operations Workspace")}</p>
             <h1>{t("업무 홈", "Workspace Home")}</h1>
             <p>
               {t(
@@ -439,7 +439,7 @@ export default function WorkspacePage() {
             <p className="empty-note">{t("아직 즐겨찾기한 모듈이 없습니다.", "No favorite modules yet.")}</p>
           ) : (
             <div className="inline-actions">
-              {WEHAGO_INSPIRED_MODULES.filter((module) => favoriteIds.includes(module.id)).map((module) => (
+              {WORKSPACE_MODULES.filter((module) => favoriteIds.includes(module.id)).map((module) => (
                 <span key={module.id} className={styles.favoriteChip}>
                   {t(module.titleKo, module.titleEn)}
                 </span>

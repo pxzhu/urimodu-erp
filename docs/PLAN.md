@@ -677,3 +677,40 @@ Ship a focused hardening release for post-alpha stabilization without expanding 
 | P1 | Planning/QA | Full-surface QA evidence pack with role split | Each run publishes API inventory, route checklist, feature notes, and admin/user screenshots after loading completion (no pre-load captures) | [`docs/qa/README.md`](../docs/qa/README.md), [`docs/qa/runs/README.md`](../docs/qa/runs/README.md), [`docs/testing/smoke-tests.md`](../docs/testing/smoke-tests.md) |
 | P2 | Design/Frontend | Enterprise UI polish pass (modals, spacing, component consistency) | CRUD-heavy pages use consistent modal/dialog patterns and spacing tokens; no overflow/clipping on 390/1024/1440 breakpoints | [`apps/web/src/app/employees/page.tsx`](../apps/web/src/app/employees/page.tsx), [`apps/web/src/app/expenses/page.tsx`](../apps/web/src/app/expenses/page.tsx), [`packages/ui`](../packages/ui) |
 | P2 | Ops/Planning | Local-only network exposure default for compose dev stack | Local dev services bind to `127.0.0.1` by default; docs and compose examples reflect secure local binding | [`deploy/compose/docker-compose.yml`](../deploy/compose/docker-compose.yml), [`docs/deploy/docker-compose.md`](../docs/deploy/docker-compose.md), [`docs/ops/security-checklist.md`](../docs/ops/security-checklist.md) |
+
+---
+
+# 2026-03-17 Nav/Modal Hotfix Plan
+
+## Goal
+
+- Resolve sidebar overlap/hang symptoms and improve long-menu scannability.
+- Convert document/approval actions to modal-first UX while keeping list/detail page context stable.
+- Produce QA evidence for admin/user viewpoints with reproducible artifacts.
+
+## Execution
+
+1. Inspect nav shell + document/approval pages and map failure points (subagent exploration).
+2. Apply nav shell hardening:
+   - section accordion in sidebar
+   - viewport-aware mobile menu/body-lock handling
+   - prevent brand/title clipping and mobile overlay overlap
+3. Apply modal-first action UX:
+   - `/documents`: create/version/approval/decision in modals
+   - `/approvals`: approve/reject action modal with optional comment
+4. Stabilize regression QA scripts for repeated desktop/mobile navigation.
+5. Run full gates:
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+   - `pnpm qa:navigation`
+   - `pnpm qa:screenshots`
+6. Record run artifacts under `docs/qa/runs/2026-03-17-nav-modal-layout-hotfix/`.
+
+## Result Snapshot
+
+- Sidebar section accordion + mobile behavior updates completed.
+- Documents/approvals action modals completed.
+- Navigation regression QA passed (desktop/mobile).
+- Role-based screenshots captured and linked in page checklist.

@@ -1,0 +1,4 @@
+2026-03-17
+command: corepack pnpm -r test
+result: PASS
+note: includes apps/api, apps/web, apps/worker and package tests.

@@ -100,7 +100,8 @@ export function UiShellProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarCollapsed));
-    document.documentElement.style.setProperty("--sidebar-width", sidebarCollapsed ? "84px" : "280px");
+    const isCompactViewport = typeof window !== "undefined" && window.innerWidth <= 1080;
+    document.documentElement.style.setProperty("--sidebar-width", isCompactViewport ? "100%" : "300px");
   }, [sidebarCollapsed]);
 
   useEffect(() => {
