@@ -125,3 +125,79 @@ test("ExpensesService createClaim stores items and writes audit log", async () =
   assert.equal((result as { id?: string }).id, "claim_1");
   assert.equal(auditLogs.some((entry) => entry.action === "EXPENSE_CLAIM_CREATE"), true);
 });
+
+test("ExpensesService createClaim rejects APPROVED status from non-admin client", async () => {
+  const prisma = {} as PrismaService;
+  const auditService = {
+    async log() {
+      return null;
+    }
+  } as unknown as AuditService;
+
+  const service = new ExpensesService(prisma, auditService);
+
+  await assert.rejects(
+    () =>
+      service.createClaim(
+        {
+          userId: "user_1",
+          sessionId: "session_1",
+          companyId: "company_1",
+          role: "EMPLOYEE",
+          memberships: [{ companyId: "company_1", role: "EMPLOYEE", companyName: "Acme Korea" }],
+          token: "token"
+        },
+        {
+          title: "종결 상태 우회 시도",
+          status: ExpenseStatus.APPROVED,
+          items: [
+            {
+              incurredOn: "2026-03-14",
+              category: "MEAL",
+              amount: 10000
+            }
+          ]
+        },
+        {}
+      ),
+    /server-managed/
+  );
+});
+
+test("ExpensesService createClaim rejects POSTED status from non-admin client", async () => {
+  const prisma = {} as PrismaService;
+  const auditService = {
+    async log() {
+      return null;
+    }
+  } as unknown as AuditService;
+
+  const service = new ExpensesService(prisma, auditService);
+
+  await assert.rejects(
+    () =>
+      service.createClaim(
+        {
+          userId: "user_1",
+          sessionId: "session_1",
+          companyId: "company_1",
+          role: "EMPLOYEE",
+          memberships: [{ companyId: "company_1", role: "EMPLOYEE", companyName: "Acme Korea" }],
+          token: "token"
+        },
+        {
+          title: "전표 상태 우회 시도",
+          status: ExpenseStatus.POSTED,
+          items: [
+            {
+              incurredOn: "2026-03-14",
+              category: "MEAL",
+              amount: 12000
+            }
+          ]
+        },
+        {}
+      ),
+    /server-managed/
+  );
+});
