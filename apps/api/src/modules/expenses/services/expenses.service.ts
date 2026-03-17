@@ -14,6 +14,7 @@ interface RequestMeta {
 }
 
 const ADMIN_ROLES: MembershipRole[] = ["SUPER_ADMIN", "ORG_ADMIN", "HR_MANAGER"];
+const TERMINAL_CREATE_BLOCKED_STATUSES: ExpenseStatus[] = [ExpenseStatus.APPROVED, ExpenseStatus.POSTED];
 
 function dateOnlyStart(value: string): Date {
   return new Date(`${value}T00:00:00.000Z`);
@@ -211,6 +212,18 @@ export class ExpensesService {
     }
   }
 
+  private resolveCreateStatus(requestedStatus?: ExpenseStatus): ExpenseStatus {
+    if (!requestedStatus) {
+      return ExpenseStatus.DRAFT;
+    }
+
+    if (TERMINAL_CREATE_BLOCKED_STATUSES.includes(requestedStatus)) {
+      throw new BadRequestException("Expense claim APPROVED/POSTED status is server-managed");
+    }
+
+    return requestedStatus;
+  }
+
   async listClaims(auth: AuthContext, query: ExpenseClaimQueryDto) {
     let employeeIdFilter = query.employeeId;
 
@@ -354,6 +367,7 @@ export class ExpensesService {
   }
 
   async createClaim(auth: AuthContext, dto: CreateExpenseClaimDto, requestMeta: RequestMeta) {
+    const initialStatus = this.resolveCreateStatus(dto.status);
     const claimEmployee = await this.resolveClaimEmployee(auth, dto.employeeId);
 
     await this.validateOptionalReference({
@@ -379,7 +393,7 @@ export class ExpensesService {
           costCenterId: dto.costCenterId,
           projectId: dto.projectId,
           title: dto.title.trim(),
-          status: dto.status ?? ExpenseStatus.DRAFT,
+          status: initialStatus,
           currency: normalizeCurrency(dto.currency),
           totalAmount
         }

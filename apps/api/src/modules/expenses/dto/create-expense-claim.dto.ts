@@ -86,7 +86,12 @@ export class CreateExpenseClaimDto {
   @IsString()
   currency?: string;
 
-  @ApiPropertyOptional({ enum: ExpenseStatus, description: "Initial claim status", default: ExpenseStatus.DRAFT })
+  @ApiPropertyOptional({
+    enum: ExpenseStatus,
+    description:
+      "Initial claim status (APPROVED/POSTED are server-managed and rejected on create)",
+    default: ExpenseStatus.DRAFT
+  })
   @IsOptional()
   @IsEnum(ExpenseStatus)
   status?: ExpenseStatus;
