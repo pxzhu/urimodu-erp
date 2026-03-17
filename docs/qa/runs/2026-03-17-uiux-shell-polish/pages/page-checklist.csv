@@ -1,0 +1,21 @@
+route,role,status,evidence,screenshot
+/,admin,pass,playwright capture,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/admin/admin-00-ai-native-landing.png
+/workspace,admin,pass,playwright capture,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/admin/admin-06-workspace-hub.png
+/collaboration,admin,pass,playwright capture,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/admin/admin-07-collaboration-hub.png
+/employees,admin,pass,playwright capture,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/admin/admin-01-employees-directory.png
+/documents,admin,pass,playwright capture + nav regression,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/admin/admin-02-documents-and-templates.png
+/approvals,admin,pass,playwright capture + nav regression,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/admin/admin-03-approvals-inbox.png
+/attendance/ledger,admin,pass,playwright capture + nav regression,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/admin/admin-04-attendance-ledger.png
+/leave,admin,pass,navigation regression,
+/expenses,admin,pass,playwright capture + nav regression,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/admin/admin-05-expense-claims.png
+/files,admin,pass,navigation regression,
+/attendance/raw,admin,pass,navigation regression,
+/,user,pass,playwright capture,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/user/user-00-ai-native-landing.png
+/workspace,user,pass,playwright capture,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/user/user-06-workspace-hub.png
+/collaboration,user,pass,playwright capture,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/user/user-07-collaboration-hub.png
+/employees,user,pass,playwright capture,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/user/user-01-employees-directory.png
+/documents,user,pass,playwright capture + nav regression,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/user/user-02-documents-and-templates.png
+/approvals,user,pass,playwright capture + nav regression,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/user/user-03-approvals-inbox.png
+/attendance/ledger,user,pass,playwright capture + nav regression,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/user/user-04-attendance-ledger.png
+/leave,user,pass,navigation regression,
+/expenses,user,pass,playwright capture + nav regression,docs/qa/runs/2026-03-17-uiux-shell-polish/screenshots/user/user-05-expense-claims.png

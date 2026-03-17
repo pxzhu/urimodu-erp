@@ -1,0 +1,6 @@
+PASS: corepack pnpm -r lint
+PASS: corepack pnpm -r typecheck
+PASS: corepack pnpm -r test
+PASS: corepack pnpm -r build
+PASS: qa:navigation (desktop/mobile)
+PASS: qa:screenshots (admin/user)

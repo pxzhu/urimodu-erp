@@ -343,7 +343,7 @@ export default function WorkspacePage() {
       <section className={`app-shell-content ${styles.workspaceContent}`}>
         <header className={styles.hero}>
           <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>WEHAGO-inspired Workspace</p>
+            <p className={styles.eyebrow}>{t("업무 허브 워크스페이스", "WEHAGO-inspired Workspace")}</p>
             <h1>{t("업무 홈", "Workspace Home")}</h1>
             <p>
               {t(
