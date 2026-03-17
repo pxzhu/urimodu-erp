@@ -141,7 +141,7 @@ export function UiShellProvider({ children }: { children: ReactNode }) {
       toggleSidebar: () => setSidebarCollapsed((current) => !current),
       role,
       isAdminView: ADMIN_ROLES.has(role),
-      userName: session?.user.name ?? "Guest"
+      userName: session?.user.name ?? ""
     }),
     [locale, theme, sidebarCollapsed, role, session?.user.name]
   );

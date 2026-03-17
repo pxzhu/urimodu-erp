@@ -694,7 +694,7 @@ export default function DocumentsPage() {
 
         <div className="step-tabs" role="tablist" aria-label={t("문서 단계", "Document flow steps")}>
           {flowSteps.map((step) => {
-            const disabled = Boolean(bootstrapping || (step.requiresDocument && !selectedDocumentId));
+            const disabled = Boolean(step.requiresDocument && !selectedDocumentId);
             return (
               <button
                 key={step.id}

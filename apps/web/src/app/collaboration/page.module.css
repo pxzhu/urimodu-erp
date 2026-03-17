@@ -5,17 +5,18 @@
 
 .header {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.5));
-  border-radius: 20px;
+  border-radius: 22px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.13), transparent 42%),
-    radial-gradient(circle at 0% 100%, rgba(32, 214, 199, 0.07), transparent 38%),
+    linear-gradient(140deg, rgba(76, 111, 255, 0.12), transparent 54%),
+    radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.2), transparent 42%),
+    radial-gradient(circle at 0% 100%, rgba(32, 214, 199, 0.12), transparent 40%),
     var(--surface);
-  padding: 1.2rem;
+  padding: 1.3rem;
   display: grid;
   gap: 1rem;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
   align-items: start;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--card-shadow-strong);
 }
 
 .header h1 {
@@ -31,13 +32,14 @@
 
 .headerBadge {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.4));
-  border-radius: 14px;
+  border-radius: 16px;
   background: color-mix(in srgb, var(--surface-2) 90%, transparent);
-  padding: 0.8rem;
+  padding: 0.9rem;
   display: grid;
   gap: 0.3rem;
   align-content: start;
   min-height: 0;
+  box-shadow: var(--card-shadow);
 }
 
 .headerBadge strong {
@@ -59,32 +61,33 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid var(--line);
   background: linear-gradient(180deg, #ffffff, #f8fbff);
   color: color-mix(in srgb, var(--muted) 90%, var(--text));
   padding: 0.42rem 0.7rem;
   font-size: 0.86rem;
   font-weight: 700;
-  min-height: 2.5rem;
+  min-height: 2.6rem;
   white-space: nowrap;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04);
 }
 
 .tabButtonActive {
   border-color: color-mix(in srgb, var(--primary) 42%, var(--line));
   background: color-mix(in srgb, var(--primary) 14%, #ffffff);
   color: color-mix(in srgb, var(--primary) 88%, var(--text));
-  box-shadow: 0 6px 14px color-mix(in srgb, var(--primary) 16%, transparent);
+  box-shadow: 0 10px 18px color-mix(in srgb, var(--primary) 22%, transparent);
 }
 
 .panel {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
-  border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff, #f9fbff);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
   padding: 1rem;
   display: grid;
   gap: 0.8rem;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--card-shadow);
 }
 
 .panel h2 {
@@ -100,11 +103,12 @@
 
 .subPanel {
   border: 1px solid var(--line);
-  border-radius: 14px;
-  background: #ffffff;
-  padding: 0.75rem;
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff, #f9fbff);
+  padding: 0.8rem;
   display: grid;
   gap: 0.5rem;
+  box-shadow: 0 8px 14px rgba(15, 23, 42, 0.04);
 }
 
 .channelList {
@@ -113,13 +117,13 @@
 }
 
 .channelButton {
-  border-radius: 11px;
+  border-radius: 12px;
   border: 1px solid var(--line);
-  background: var(--surface);
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
   text-align: left;
   color: var(--text);
   font-size: 0.84rem;
-  padding: 0.38rem 0.52rem;
+  padding: 0.42rem 0.56rem;
 }
 
 .channelButtonActive {
@@ -132,7 +136,7 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
-  min-height: 220px;
+  min-height: 236px;
   max-height: 300px;
   overflow: auto;
   padding: 0.52rem;
@@ -142,9 +146,9 @@
 
 .messageItem {
   border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.5));
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--surface-2) 88%, transparent);
-  padding: 0.5rem;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface-2) 90%, #fff);
+  padding: 0.56rem;
   display: grid;
   gap: 0.18rem;
 }
@@ -213,9 +217,9 @@
 
 .noteCard {
   border: 1px solid var(--line);
-  border-radius: 13px;
+  border-radius: 14px;
   background: color-mix(in srgb, var(--surface-2) 85%, transparent);
-  padding: 0.62rem;
+  padding: 0.66rem;
   display: grid;
   gap: 0.2rem;
 }
