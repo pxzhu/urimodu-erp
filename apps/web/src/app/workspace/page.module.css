@@ -4,17 +4,18 @@
 }
 
 .hero {
-  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.5));
-  border-radius: 20px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, rgba(255, 255, 255, 0.5));
+  border-radius: 22px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.14), transparent 42%),
-    radial-gradient(circle at 0% 100%, rgba(32, 214, 199, 0.08), transparent 38%),
+    linear-gradient(140deg, rgba(76, 111, 255, 0.14), transparent 48%),
+    radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.22), transparent 42%),
+    radial-gradient(circle at 0% 100%, rgba(32, 214, 199, 0.1), transparent 40%),
     var(--surface);
-  padding: 1.3rem;
+  padding: 1.4rem;
   display: grid;
   gap: 1rem;
   grid-template-columns: 1.2fr 0.9fr;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+  box-shadow: var(--card-shadow-strong);
 }
 
 .heroCopy {
@@ -30,7 +31,7 @@
 .heroCopy p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.7;
+  line-height: 1.74;
   max-width: 60ch;
 }
 
@@ -61,7 +62,7 @@
 .ctaButton {
   background: linear-gradient(120deg, color-mix(in srgb, var(--primary) 92%, #1d3b80), #2b5abd);
   color: #ffffff;
-  box-shadow: 0 8px 16px rgba(37, 86, 200, 0.22);
+  box-shadow: 0 10px 18px rgba(37, 86, 200, 0.24);
 }
 
 .ctaButtonSecondary {
@@ -71,11 +72,13 @@
 
 .aiPanel {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
-  border-radius: 16px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 94%, transparent), #ffffff);
-  padding: 0.9rem;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 94%, transparent), #ffffff);
+  padding: 1rem;
   display: grid;
-  gap: 0.65rem;
+  gap: 0.72rem;
+  box-shadow: var(--card-shadow);
 }
 
 .aiPanel h2 {
@@ -104,11 +107,23 @@
 
 .kpiCard {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
-  border-radius: 16px;
-  background: var(--surface);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
   padding: 0.8rem;
   display: grid;
   gap: 0.16rem;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.kpiCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, #4c6fff, #7a5cff, #20d6c7);
 }
 
 .kpiCard p {
@@ -129,12 +144,13 @@
 
 .moduleSection {
   border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.5));
-  border-radius: 20px;
-  background: var(--surface);
-  padding: 1.2rem;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  padding: 1.3rem;
   display: grid;
   gap: 1rem;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--card-shadow);
 }
 
 .moduleSectionHeader {
@@ -178,20 +194,36 @@
 }
 
 .moduleCard {
-  border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.5));
-  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, rgba(255, 255, 255, 0.5));
+  border-radius: 18px;
   background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--surface-2) 70%, #ffffff));
-  padding: 0.9rem;
+  padding: 0.95rem;
   display: grid;
-  gap: 0.48rem;
-  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.05);
+  gap: 0.52rem;
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  position: relative;
+  isolation: isolate;
 }
 
 .moduleCard:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   border-color: color-mix(in srgb, var(--primary) 34%, var(--line));
-  box-shadow: 0 14px 24px rgba(15, 23, 42, 0.1);
+  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+}
+
+.moduleCard::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(76, 111, 255, 0.52), rgba(32, 214, 199, 0.52));
+  opacity: 0.2;
+  transition: opacity 180ms ease;
+}
+
+.moduleCard:hover::after {
+  opacity: 1;
 }
 
 .moduleCardTop {
@@ -231,6 +263,8 @@
   font-weight: 700;
   padding: 0.35rem 0.58rem;
   text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 .plannedTag {

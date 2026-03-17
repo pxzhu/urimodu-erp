@@ -61,6 +61,16 @@ function normalizeText(value: string) {
   return value.trim().toLowerCase();
 }
 
+function sectionIcon(section: NavSection) {
+  if (section === "home") return "홈";
+  if (section === "org") return "조";
+  if (section === "workflow") return "문";
+  if (section === "attendance") return "근";
+  if (section === "finance") return "회";
+  if (section === "collab") return "협";
+  return "운";
+}
+
 export function DashboardNav() {
   const router = useRouter();
   const pathname = usePathname();
@@ -127,6 +137,19 @@ export function DashboardNav() {
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") {
+      return;
+    }
+
+    const shouldLockBody = window.innerWidth <= 1080 && mobileMenuOpen;
+    document.body.style.overflow = shouldLockBody ? "hidden" : "";
+
+    return () => {
+      document.body.style.removeProperty("overflow");
+    };
+  }, [hydrated, mobileMenuOpen]);
 
   useEffect(() => {
     function onEscape(event: KeyboardEvent) {
@@ -216,7 +239,7 @@ export function DashboardNav() {
     setHydrated(true);
   }, []);
 
-  const normalizedUserName = userName.trim().length > 0 ? userName : "Guest";
+  const normalizedUserName = userName.trim().length > 0 ? userName : t("게스트", "Guest");
   const showMobileMenu = mobileMenuOpen;
   const selectedEntry =
     sectionedMenuItems.find((entry) => entry.section === selectedSection) ?? sectionedMenuItems[0];
@@ -226,6 +249,7 @@ export function DashboardNav() {
     <>
       <nav
         className={`app-shell-nav ${showMobileMenu ? "is-mobile-open" : ""}`}
+        data-hydrated={hydrated ? "true" : "false"}
       >
         <div className="app-shell-nav__brand-row">
           <button
@@ -235,10 +259,12 @@ export function DashboardNav() {
             aria-expanded={mobileMenuOpen}
             aria-controls="app-shell-nav-menu"
             aria-label={mobileMenuOpen ? t("메뉴 닫기", "Close menu") : t("메뉴 열기", "Open menu")}
-            disabled={!hydrated}
           >
             {mobileMenuOpen ? "✕" : "☰"}
           </button>
+          <span className="app-shell-nav__brand-mark" aria-hidden>
+            UM
+          </span>
           <Link href="/workspace" prefetch={false} className="app-shell-nav__brand" title="Urimodu ERP">
             우리모두ERP
           </Link>
@@ -291,6 +317,7 @@ export function DashboardNav() {
             {sectionEntriesToRender.map((entry) => (
               <section className="app-shell-nav__section" key={entry.section}>
                 <h2 className="app-shell-nav__section-title">
+                  <span className="app-shell-nav__section-icon" aria-hidden>{sectionIcon(entry.section)}</span>
                   <span>{sectionLabel(entry.section)}</span>
                 </h2>
                 <ul className="app-shell-nav__menu">
@@ -320,6 +347,14 @@ export function DashboardNav() {
           </div>
         </div>
       </nav>
+      {mobileMenuOpen ? (
+        <button
+          type="button"
+          className="nav-mobile-backdrop"
+          aria-label={t("메뉴 닫기", "Close menu")}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      ) : null}
       {settingsModalOpen ? (
         <div className="app-modal-backdrop" role="presentation" onClick={() => setSettingsModalOpen(false)}>
           <section
