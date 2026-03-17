@@ -97,18 +97,21 @@ async function createSession(input: { email: string; password: string }) {
 
 test("capture admin/user README screenshots", async ({ browser }) => {
   await fs.mkdir(path.resolve(process.cwd(), "docs/screenshots"), { recursive: true });
+  const context = await browser.newContext({
+    viewport: { width: 1512, height: 982 },
+    locale: "ko-KR"
+  });
+  const page = await context.newPage();
 
   for (const role of roles) {
     const session = await createSession(role);
-    const context = await browser.newContext({
-      viewport: { width: 1512, height: 982 },
-      locale: "ko-KR"
-    });
-    const page = await context.newPage();
-
     await page.goto(`${baseUrl}/login`, { waitUntil: "domcontentloaded" });
     await page.evaluate((sessionPayload) => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
       window.localStorage.setItem("korean_erp_auth_session", JSON.stringify(sessionPayload));
+      window.localStorage.setItem("korean_erp_ui_locale", "ko");
+      window.localStorage.setItem("korean_erp_ui_theme", "light");
     }, session);
     await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
     await expect.poll(() => page.url(), { timeout: 20_000 }).not.toContain("/login");
@@ -133,7 +136,7 @@ test("capture admin/user README screenshots", async ({ browser }) => {
       await page.screenshot({ path: outputPath, fullPage: true });
       console.log(`captured: ${role.key}-${target.file}`);
     }
-
-    await context.close();
   }
+
+  await context.close();
 });
