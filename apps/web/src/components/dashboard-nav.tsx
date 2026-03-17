@@ -277,6 +277,7 @@ export function DashboardNav() {
           <Link href="/workspace" prefetch={false} className="app-shell-nav__brand" title="Urimodu ERP">
             {!isMobileView && sidebarCollapsed ? "우리" : "우리모두ERP"}
           </Link>
+          <span className="app-shell-nav__brand-role">{roleLabel}</span>
         </div>
 
         <div className="app-shell-nav__meta">
@@ -292,14 +293,14 @@ export function DashboardNav() {
             className="nav-chip nav-chip--ghost"
             onClick={() => setSettingsModalOpen(true)}
           >
-            {!isMobileView && sidebarCollapsed ? t("설정", "Prefs") : t("표시 설정", "Display settings")}
+            {isMobileView ? t("설정", "Settings") : !isMobileView && sidebarCollapsed ? t("설정", "Settings") : t("표시 설정", "Display settings")}
           </button>
           <button
             type="button"
             className="nav-chip nav-chip--danger"
             onClick={() => setLogoutModalOpen(true)}
           >
-            {!isMobileView && sidebarCollapsed ? t("로그", "Out") : t("로그아웃", "Logout")}
+            {t("로그아웃", "Logout")}
           </button>
           {!isMobileView ? (
             <button
@@ -375,9 +376,8 @@ export function DashboardNav() {
                         onClick={() => {
                           if (isMobileView) {
                             setMobileMenuOpen(false);
-                          } else {
-                            setSelectedSection(entry.section);
                           }
+                          setSelectedSection(entry.section);
                         }}
                         >
                           <span className="app-shell-nav__link-text">{label}</span>
@@ -391,6 +391,14 @@ export function DashboardNav() {
           </div>
         </div>
       </nav>
+      {showMobileMenu ? (
+        <button
+          type="button"
+          className="app-shell-nav__mobile-backdrop"
+          aria-label={t("메뉴 닫기", "Close menu")}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      ) : null}
       {settingsModalOpen ? (
         <div className="app-modal-backdrop" role="presentation" onClick={() => setSettingsModalOpen(false)}>
           <section

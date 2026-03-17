@@ -122,7 +122,11 @@ test("sidebar navigation and document tabs stay responsive for admin/hr/employee
     const session = await createSession(scenario.email);
     await page.goto(`${baseUrl}/login`, { waitUntil: "domcontentloaded" });
     await page.evaluate((payload) => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
       window.localStorage.setItem("korean_erp_auth_session", JSON.stringify(payload));
+      window.localStorage.setItem("korean_erp_ui_locale", "ko");
+      window.localStorage.setItem("korean_erp_ui_theme", "light");
     }, session);
 
     await page.goto(`${baseUrl}/documents`, { waitUntil: "domcontentloaded" });
@@ -153,18 +157,18 @@ test("sidebar navigation and document tabs stay responsive for admin/hr/employee
   expect(hardFailure, failedRequests.join("\n")).toBeUndefined();
 });
 
-test("sidebar navigation stays responsive on mobile width with repeated open/close", async ({ browser }) => {
-  const context = await browser.newContext({
-    viewport: { width: 430, height: 932 },
-    locale: "ko-KR"
-  });
-  const page = await context.newPage();
+test("sidebar navigation stays responsive on mobile width with repeated open/close", async ({ page }) => {
+  await page.setViewportSize({ width: 430, height: 932 });
 
   for (const scenario of roleScenarios) {
     const session = await createSession(scenario.email);
     await page.goto(`${baseUrl}/login`, { waitUntil: "domcontentloaded" });
     await page.evaluate((payload) => {
+      window.localStorage.clear();
+      window.sessionStorage.clear();
       window.localStorage.setItem("korean_erp_auth_session", JSON.stringify(payload));
+      window.localStorage.setItem("korean_erp_ui_locale", "ko");
+      window.localStorage.setItem("korean_erp_ui_theme", "light");
     }, session);
 
     await page.goto(`${baseUrl}/documents`, { waitUntil: "domcontentloaded" });
@@ -199,6 +203,4 @@ test("sidebar navigation stays responsive on mobile width with repeated open/clo
       }
     }
   }
-
-  await context.close();
 });

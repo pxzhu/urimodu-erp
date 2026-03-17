@@ -46,6 +46,7 @@
 - When setup/architecture changes, update both `README.md` and `README.en.md` together
 - Web UI baseline is Korean-first + light mode default, with in-app dark mode and English toggles
 - UI screenshot QA should wait until data rows are visible and loading text is gone before capture
+- Playwright QA should reuse a single browser session/context per run when practical (avoid repeated browser relaunch cycles)
 - QA gate for every task/PR:
   1. Validate all API surfaces (OpenAPI endpoint inventory + execution evidence)
   2. Validate all web pages/routes with screenshot evidence

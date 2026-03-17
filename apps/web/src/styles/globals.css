@@ -2,15 +2,15 @@
   color-scheme: light;
   font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
   --sidebar-width: 280px;
-  --bg: #eef2f7;
+  --bg: #f1f4f9;
   --surface: #ffffff;
-  --surface-2: #f8fafc;
-  --surface-3: #edf2f8;
-  --line: #d8e0eb;
-  --text: #17253a;
-  --muted: #57647c;
-  --primary: #2452b3;
-  --primary-strong: #1a3f90;
+  --surface-2: #f7f9fc;
+  --surface-3: #eef3f9;
+  --line: #d4dce8;
+  --text: #162235;
+  --muted: #59657b;
+  --primary: #2d59c7;
+  --primary-strong: #2449a8;
   --danger: #b4232d;
   --success: #0d7f55;
 }
@@ -41,7 +41,7 @@ body {
 
 body {
   margin: 0;
-  background: linear-gradient(180deg, #f9fbff 0%, var(--bg) 100%);
+  background: linear-gradient(180deg, #fbfcff 0%, var(--bg) 100%);
   color: var(--text);
 }
 
@@ -115,9 +115,7 @@ code {
   top: 0;
   height: 100vh;
   border-right: 1px solid var(--line);
-  background:
-    radial-gradient(circle at 0% -20%, rgba(36, 82, 179, 0.08), transparent 42%),
-    var(--surface);
+  background: linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%);
   padding: 0.9rem 0.8rem;
   display: flex;
   flex-direction: column;
@@ -141,10 +139,21 @@ code {
   letter-spacing: -0.025em;
 }
 
+.app-shell-nav__brand-role {
+  display: none;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 88%, #fff);
+  background: var(--surface-2);
+  color: var(--muted);
+  padding: 0.18rem 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 .app-shell-nav__meta {
   border: 1px solid color-mix(in srgb, var(--line) 88%, #ffffff);
   border-radius: 16px;
-  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  background: linear-gradient(180deg, #ffffff, var(--surface-2));
   padding: 0.7rem;
   display: grid;
   gap: 0.3rem;
@@ -183,9 +192,9 @@ code {
 }
 
 .app-shell-nav__section-rail {
-  border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--line) 90%, #fff);
   border-radius: 12px;
-  background: linear-gradient(180deg, #1e4697, #2558b7 58%, #2d63c5);
+  background: linear-gradient(180deg, #f8fbff, #f0f5fd 62%, #ecf2fb);
   display: grid;
   align-content: start;
   gap: 0.35rem;
@@ -193,10 +202,10 @@ code {
 }
 
 .app-shell-nav__section-button {
-  border: 1px solid rgba(232, 241, 255, 0.25);
+  border: 1px solid color-mix(in srgb, var(--line) 84%, #fff);
   border-radius: 10px;
-  background: rgba(9, 22, 52, 0.18);
-  color: rgba(239, 245, 255, 0.9);
+  background: #ffffff;
+  color: color-mix(in srgb, var(--primary) 62%, var(--text));
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -205,9 +214,9 @@ code {
 }
 
 .app-shell-nav__section-button.is-active {
-  border-color: rgba(236, 244, 255, 0.7);
-  background: rgba(247, 251, 255, 0.92);
-  color: #1f4aa2;
+  border-color: color-mix(in srgb, var(--primary) 48%, var(--line));
+  background: color-mix(in srgb, var(--primary) 14%, #ffffff);
+  color: color-mix(in srgb, var(--primary-strong) 86%, var(--text));
 }
 
 .app-shell-nav__section {
@@ -265,11 +274,11 @@ code {
 }
 
 .app-shell-nav__panel-meta {
-  border: 1px solid color-mix(in srgb, var(--primary) 36%, var(--line));
+  border: 1px solid color-mix(in srgb, var(--line) 90%, #fff);
   border-radius: 12px;
-  background: linear-gradient(170deg, #2450aa, #2b5fc2);
+  background: linear-gradient(170deg, #f8fbff, #edf3fb);
   padding: 0.58rem 0.62rem;
-  color: #f1f6ff;
+  color: var(--text);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -287,7 +296,7 @@ code {
   margin: 0;
   font-size: 0.79rem;
   line-height: 1.4;
-  color: rgba(230, 240, 255, 0.9);
+  color: var(--muted);
 }
 
 .app-shell-nav__menu {
@@ -296,6 +305,10 @@ code {
   padding: 0;
   display: grid;
   gap: 0.18rem;
+}
+
+.app-shell-nav__menu li {
+  list-style: none;
 }
 
 .app-shell-nav__link {
@@ -331,9 +344,9 @@ code {
 }
 
 .app-shell-nav__link.is-active {
-  color: #ffffff;
+  color: color-mix(in srgb, var(--primary-strong) 88%, var(--text));
   border-color: color-mix(in srgb, var(--primary) 56%, var(--line));
-  background: linear-gradient(120deg, color-mix(in srgb, var(--primary-strong) 84%, #1e3d82), #214995);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--primary) 16%, #ffffff), color-mix(in srgb, var(--primary) 8%, #ffffff));
 }
 
 .nav-icon-button,
@@ -410,6 +423,17 @@ button:hover {
 .app-shell-nav.is-collapsed .app-shell-nav__section-button {
   font-size: 0.66rem;
   min-height: 1.75rem;
+}
+
+.app-shell-nav__mobile-backdrop {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 64;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(15, 23, 42, 0.24);
 }
 
 .app-modal-backdrop {
@@ -679,11 +703,13 @@ button:disabled {
   }
 
   main.container.with-shell > .app-shell-nav {
-    position: static;
+    position: sticky;
+    top: 0;
     height: auto;
     border-right: 0;
     border-bottom: 1px solid var(--line);
-    z-index: 45;
+    z-index: 70;
+    background: linear-gradient(180deg, #ffffff 0%, #f7f9fd 100%);
   }
 
   main.container.with-shell > .app-shell-content {
@@ -702,11 +728,37 @@ button:disabled {
     display: none;
   }
 
+  .app-shell-nav__brand-role {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app-shell-nav__meta {
+    display: none;
+  }
+
+  .app-shell-nav.is-mobile-open .app-shell-nav__meta {
+    display: grid;
+  }
+
+  .app-shell-nav__controls {
+    justify-content: flex-start;
+  }
+
   .app-shell-nav__menu-scroll {
     display: none;
-    max-height: min(62vh, 460px);
-    border-top: 1px solid var(--line);
-    padding-top: 0.65rem;
+    position: absolute;
+    left: 0.7rem;
+    right: 0.7rem;
+    top: calc(100% - 0.2rem);
+    max-height: min(70vh, 560px);
+    border: 1px solid color-mix(in srgb, var(--line) 90%, #fff);
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    padding: 0.75rem;
+    z-index: 72;
   }
 
   .app-shell-nav.is-mobile-open .app-shell-nav__menu-scroll {
@@ -715,6 +767,8 @@ button:disabled {
 
   .app-shell-nav__workspace {
     grid-template-columns: 1fr;
+    position: relative;
+    overflow: visible;
   }
 
   .app-shell-nav__section-rail {

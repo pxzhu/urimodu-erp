@@ -58,6 +58,8 @@ pnpm qa:validate
 pnpm qa:screenshots
 ```
 
+`qa:navigation`/`qa:screenshots`는 기본적으로 단일 브라우저 세션을 재사용해 다중 역할/다중 라우트를 연속 검증합니다.
+
 Then complete the generated files under `docs/qa/runs/<run-id>/`:
 
 - `api/openapi-endpoints.csv`: endpoint-by-endpoint execution status
