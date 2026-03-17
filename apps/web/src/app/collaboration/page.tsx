@@ -172,8 +172,15 @@ export default function CollaborationPage() {
     if (typeof window === "undefined") {
       return;
     }
-    const params = new URLSearchParams(window.location.search);
-    setActiveTab(asTab(params.get("tab")));
+
+    function syncTabFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      setActiveTab(asTab(params.get("tab")));
+    }
+
+    syncTabFromUrl();
+    window.addEventListener("popstate", syncTabFromUrl);
+    return () => window.removeEventListener("popstate", syncTabFromUrl);
   }, []);
 
   useEffect(() => {
@@ -307,6 +314,18 @@ export default function CollaborationPage() {
     );
   }
 
+  function changeTab(tabId: CollaborationTab) {
+    if (tabId === activeTab) {
+      return;
+    }
+
+    setActiveTab(tabId);
+    const nextParams = new URLSearchParams(typeof window === "undefined" ? "" : window.location.search);
+    nextParams.set("tab", tabId);
+    const nextQuery = nextParams.toString();
+    router.replace(nextQuery ? `/collaboration?${nextQuery}` : "/collaboration", { scroll: false });
+  }
+
   const tabs: Array<{ id: CollaborationTab; labelKo: string; labelEn: string }> = [
     { id: "messenger", labelKo: "메신저", labelEn: "Messenger" },
     { id: "meeting", labelKo: "회의", labelEn: "Meetings" },
@@ -344,7 +363,7 @@ export default function CollaborationPage() {
               role="tab"
               aria-selected={activeTab === tab.id}
               className={`${styles.tabButton} ${activeTab === tab.id ? styles.tabButtonActive : ""}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => changeTab(tab.id)}
             >
               {t(tab.labelKo, tab.labelEn)}
             </button>

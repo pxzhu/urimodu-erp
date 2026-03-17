@@ -10,7 +10,7 @@ import {
   type ReactNode
 } from "react";
 
-import { loadSession, type LoginSession } from "../lib/auth";
+import { AUTH_SESSION_CHANGED_EVENT, loadSession, type LoginSession } from "../lib/auth";
 
 const LOCALE_STORAGE_KEY = "korean_erp_ui_locale";
 const THEME_STORAGE_KEY = "korean_erp_ui_theme";
@@ -115,9 +115,15 @@ export function UiShellProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    function onAuthSessionChanged() {
+      setSession(loadSession());
+    }
+
     window.addEventListener("storage", onStorage);
+    window.addEventListener(AUTH_SESSION_CHANGED_EVENT, onAuthSessionChanged);
     return () => {
       window.removeEventListener("storage", onStorage);
+      window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, onAuthSessionChanged);
     };
   }, []);
 

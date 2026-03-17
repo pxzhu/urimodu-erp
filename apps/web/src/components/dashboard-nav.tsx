@@ -380,7 +380,7 @@ export function DashboardNav() {
                           }
                         }}
                         >
-                          <span className="app-shell-nav__link-text">{!isMobileView && sidebarCollapsed ? label.slice(0, 2) : label}</span>
+                          <span className="app-shell-nav__link-text">{label}</span>
                         </Link>
                       </li>
                     );

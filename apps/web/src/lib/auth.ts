@@ -15,6 +15,13 @@ export interface LoginSession {
 }
 
 const AUTH_STORAGE_KEY = "korean_erp_auth_session";
+export const AUTH_SESSION_CHANGED_EVENT = "korean_erp_auth_session_changed";
+
+function notifyAuthSessionChanged() {
+  if (typeof window.dispatchEvent === "function") {
+    window.dispatchEvent(new CustomEvent(AUTH_SESSION_CHANGED_EVENT));
+  }
+}
 
 export function loadSession(): LoginSession | null {
   if (typeof window === "undefined") {
@@ -39,6 +46,7 @@ export function saveSession(session: LoginSession): void {
   }
 
   window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
+  notifyAuthSessionChanged();
 }
 
 export function clearSession(): void {
@@ -47,4 +55,5 @@ export function clearSession(): void {
   }
 
   window.localStorage.removeItem(AUTH_STORAGE_KEY);
+  notifyAuthSessionChanged();
 }
