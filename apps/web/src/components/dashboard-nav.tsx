@@ -82,6 +82,7 @@ export function DashboardNav() {
   const [menuQuery, setMenuQuery] = useState("");
   const [selectedSection, setSelectedSection] = useState<NavSection>("home");
   const [expandedSection, setExpandedSection] = useState<NavSection>("home");
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const {
     locale,
     toggleLocale,
@@ -153,6 +154,7 @@ export function DashboardNav() {
     }
     const syncLayoutByViewport = () => {
       const isMobileViewport = window.innerWidth <= 1080;
+      setIsMobileViewport(isMobileViewport);
       const shouldLockBody = isMobileViewport && mobileMenuOpen;
       document.body.style.overflow = shouldLockBody ? "hidden" : "";
       if (!isMobileViewport && mobileMenuOpen) {
@@ -262,6 +264,7 @@ export function DashboardNav() {
     sectionedMenuItems.find((entry) => entry.section === selectedSection) ?? sectionedMenuItems[0];
   const sectionEntriesToRender = sectionedMenuItems;
   const hasSearchQuery = menuQuery.trim().length > 0;
+  const shouldUseAccordion = isMobileViewport && !hasSearchQuery;
 
   return (
     <>
@@ -339,9 +342,14 @@ export function DashboardNav() {
                   className={`app-shell-nav__section-button ${expandedSection === entry.section ? "is-expanded" : ""}`}
                   onClick={() => {
                     setSelectedSection(entry.section);
-                    setExpandedSection(entry.section);
+                    setExpandedSection((current) => {
+                      if (!shouldUseAccordion) {
+                        return entry.section;
+                      }
+                      return current === entry.section ? current : entry.section;
+                    });
                   }}
-                  aria-expanded={hasSearchQuery || expandedSection === entry.section}
+                  aria-expanded={!shouldUseAccordion || expandedSection === entry.section}
                 >
                   <h2 className="app-shell-nav__section-title">
                     <span className="app-shell-nav__section-icon" aria-hidden>{sectionIcon(entry.section)}</span>
@@ -350,12 +358,12 @@ export function DashboardNav() {
                   <span className="app-shell-nav__section-meta">
                     <span className="app-shell-nav__section-count">{entry.items.length}</span>
                     <span className="app-shell-nav__section-chevron" aria-hidden>
-                      {hasSearchQuery || expandedSection === entry.section ? "▾" : "▸"}
+                      {!shouldUseAccordion || expandedSection === entry.section ? "▾" : "▸"}
                     </span>
                   </span>
                 </button>
                 <ul
-                  className={`app-shell-nav__menu ${hasSearchQuery || expandedSection === entry.section ? "" : "is-hidden"}`}
+                  className={`app-shell-nav__menu ${!shouldUseAccordion || expandedSection === entry.section ? "" : "is-hidden"}`}
                 >
                   {entry.items.map((item) => {
                     const active = isActivePath(pathname, item.href);
