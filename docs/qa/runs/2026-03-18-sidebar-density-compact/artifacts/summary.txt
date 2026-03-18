@@ -1,0 +1,9 @@
+run_id=2026-03-18-sidebar-density-compact
+date=2026-03-18 15:00:28 KST
+branch=main
+commit=7edf258
+lint=PASS
+typecheck=PASS
+test=PASS
+build=PASS
+smoke=PASS
