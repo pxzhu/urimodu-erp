@@ -124,7 +124,7 @@ pnpm dev
 
 ### 로컬 엔드포인트
 
-- Web: `http://localhost:3000`
+- Web(기본 진입: 로그인): `http://localhost:3000/login`
 - API: `http://localhost:4000`
 - Swagger UI: `http://localhost:4000/swagger`
 - OpenAPI JSON: `http://localhost:4000/swagger-json`

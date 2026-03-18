@@ -91,14 +91,17 @@ async function assertStableNavigation(
       .locator(".app-shell-nav__section-button")
       .filter({ hasText: resolveSectionLabel(route) })
       .first();
-    const visibleRouteLinks = sidebarMenu.locator(`a[href="${route}"]:visible`);
-    if ((await visibleRouteLinks.count()) === 0) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const visibleRouteLinks = sidebarMenu.locator(`a[href="${route}"]:visible`);
+      if ((await visibleRouteLinks.count()) > 0) {
+        return true;
+      }
       if (await sectionButton.isVisible().catch(() => false)) {
         await sectionButton.click();
+        await page.waitForTimeout(80);
       }
-      return (await visibleRouteLinks.count()) > 0;
     }
-    return true;
+    return false;
   }
 
   for (let loop = 0; loop < loops; loop += 1) {
@@ -190,8 +193,8 @@ test("sidebar navigation and document tabs stay responsive for admin/hr/employee
       window.localStorage.setItem("korean_erp_ui_locale", "ko");
       window.localStorage.setItem("korean_erp_ui_theme", "light");
     }, session);
-    await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.url(), { timeout: 20_000 }).not.toContain("/login");
+    await page.goto(`${baseUrl}/workspace`, { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(new RegExp("\\/workspace$"));
 
     await page.goto(`${baseUrl}/documents`, { waitUntil: "domcontentloaded" });
     await page.locator("section.app-shell-content h1").waitFor({ state: "visible" });
@@ -225,8 +228,8 @@ test("sidebar navigation stays responsive on mobile width with repeated open/clo
       window.localStorage.setItem("korean_erp_ui_locale", "ko");
       window.localStorage.setItem("korean_erp_ui_theme", "light");
     }, session);
-    await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.url(), { timeout: 20_000 }).not.toContain("/login");
+    await page.goto(`${baseUrl}/workspace`, { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(new RegExp("\\/workspace$"));
 
     await page.goto(`${baseUrl}/documents`, { waitUntil: "domcontentloaded" });
     await page.locator("section.app-shell-content h1").first().waitFor({ state: "visible" });
@@ -246,7 +249,11 @@ test("sidebar navigation stays responsive on mobile width with repeated open/clo
           .filter({ hasText: resolveSectionLabel(route) })
           .first();
         if (await sectionButton.isVisible().catch(() => false)) {
-          await sectionButton.click();
+          const beforeCount = await page.locator(`.app-shell-nav__menu-scroll a[href="${route}"]:visible`).count();
+          if (beforeCount === 0) {
+            await sectionButton.click();
+            await page.waitForTimeout(80);
+          }
         }
         const routeLinks = page.locator(`.app-shell-nav__menu-scroll a[href="${route}"]:visible`);
         const routeLinkVisible = (await routeLinks.count()) > 0;

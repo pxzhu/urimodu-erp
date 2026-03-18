@@ -22,10 +22,9 @@ const roles = [
 
 const pages = [
   {
-    route: "/",
-    file: "00-ai-native-landing.png",
-    shellSelector: "main.container",
-    readySelector: "main.container h1"
+    route: "/workspace",
+    file: "00-workspace-hub.png",
+    readySelector: "section.app-shell-content h1"
   },
   {
     route: "/employees",
@@ -54,7 +53,7 @@ const pages = [
   },
   {
     route: "/workspace",
-    file: "06-workspace-hub.png",
+    file: "06-workspace-overview.png",
     readySelector: "section.app-shell-content h1"
   },
   {
@@ -113,8 +112,8 @@ test("capture admin/user README screenshots", async ({ browser }) => {
       window.localStorage.setItem("korean_erp_ui_locale", "ko");
       window.localStorage.setItem("korean_erp_ui_theme", "light");
     }, session);
-    await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.url(), { timeout: 20_000 }).not.toContain("/login");
+    await page.goto(`${baseUrl}/workspace`, { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL(new RegExp("\\/workspace$"));
 
     for (const target of pages) {
       await page.goto(`${baseUrl}${target.route}`, { waitUntil: "domcontentloaded" });
