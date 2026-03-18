@@ -73,6 +73,10 @@ function sectionIcon(section: NavSection) {
   return "운";
 }
 
+function firstMenuLabelBySection(sectionedMenuItems: Array<{ section: NavSection; items: MenuItem[] }>, section: NavSection) {
+  return sectionedMenuItems.find((entry) => entry.section === section)?.items[0];
+}
+
 export function DashboardNav() {
   const router = useRouter();
   const pathname = usePathname();
@@ -313,6 +317,11 @@ export function DashboardNav() {
     return selected ? [selected, ...rest] : sectionedMenuItems;
   }, [sectionedMenuItems, selectedSection]);
   const hasSearchQuery = menuQuery.trim().length > 0;
+  const activeMenuItem = visibleMenuItems.find((item) => isActivePath(pathname, item.href));
+  const activeSectionLabel = activeMenuItem ? sectionLabel(activeMenuItem.section) : sectionLabel(selectedSection);
+  const breadcrumbLabel = activeMenuItem
+    ? `${t("홈", "Home")} > ${activeSectionLabel} > ${locale === "ko" ? activeMenuItem.ko : activeMenuItem.en}`
+    : `${t("홈", "Home")} > ${activeSectionLabel}`;
 
   function recordRecentRoute(href: string) {
     setRecentRouteHrefs((current) => {
@@ -386,6 +395,10 @@ export function DashboardNav() {
               {menuQuery ? (
                 <small>{t(`${filteredMenuItems.length}건 검색`, `${filteredMenuItems.length} results`)}</small>
               ) : null}
+            </div>
+            <div className="app-shell-nav__guide-context">
+              <small>{t("메뉴 위치", "Menu path")}</small>
+              <strong>{breadcrumbLabel}</strong>
             </div>
             <div className="app-shell-nav__quick-links">
               {quickMenuItems.map((item) => {
@@ -472,17 +485,39 @@ export function DashboardNav() {
                   }}
                   aria-expanded={hasSearchQuery || expandedSections.has(entry.section)}
                 >
-                  <h2 className="app-shell-nav__section-title">
-                    <span className="app-shell-nav__section-icon" aria-hidden>{sectionIcon(entry.section)}</span>
-                    <span>{sectionLabel(entry.section)}</span>
-                  </h2>
+                  <span className="app-shell-nav__section-copy">
+                    <h2 className="app-shell-nav__section-title">
+                      <span className="app-shell-nav__section-icon" aria-hidden>{sectionIcon(entry.section)}</span>
+                      <span>{sectionLabel(entry.section)}</span>
+                    </h2>
+                    <span className="app-shell-nav__section-hint">{sectionHint(entry.section)}</span>
+                  </span>
                   <span className="app-shell-nav__section-meta">
                     <span className="app-shell-nav__section-count">{entry.items.length}</span>
+                    <span className="app-shell-nav__section-doc-count">
+                      {t(`${entry.items.length}개 메뉴`, `${entry.items.length} items`)}
+                    </span>
                     <span className="app-shell-nav__section-chevron" aria-hidden>
                       {hasSearchQuery || expandedSections.has(entry.section) ? "▾" : "▸"}
                     </span>
                   </span>
                 </button>
+                {hasSearchQuery || expandedSections.has(entry.section) ? (
+                  <div className="app-shell-nav__section-actions">
+                    <Link
+                      href={firstMenuLabelBySection(sectionedMenuItems, entry.section)?.href ?? "/workspace"}
+                      prefetch={false}
+                      className="app-shell-nav__section-view-all"
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setSelectedSection(entry.section);
+                        setExpandedSections(new Set([entry.section]));
+                      }}
+                    >
+                      {t("카테고리 열기", "Open category")}
+                    </Link>
+                  </div>
+                ) : null}
                 <ul
                   className={`app-shell-nav__menu ${hasSearchQuery || expandedSections.has(entry.section) ? "" : "is-hidden"}`}
                 >

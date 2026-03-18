@@ -249,7 +249,7 @@ code {
 
 .app-shell-nav__section-button {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9px;
@@ -257,6 +257,12 @@ code {
   padding: 0.22rem 0.28rem;
   width: 100%;
   text-align: left;
+}
+
+.app-shell-nav__section-copy {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
 }
 
 .app-shell-nav__section-button.is-expanded {
@@ -277,6 +283,13 @@ code {
   padding: 0;
 }
 
+.app-shell-nav__section-hint {
+  color: var(--sidebar-muted);
+  font-size: 0.64rem;
+  line-height: 1.25;
+  padding-left: 1.45rem;
+}
+
 .app-shell-nav__section-icon {
   display: inline-flex;
   width: 1.12rem;
@@ -292,11 +305,13 @@ code {
 }
 
 .app-shell-nav__section-meta {
-  display: inline-flex;
-  align-items: center;
+  display: grid;
+  justify-items: end;
+  align-content: start;
   gap: 0.25rem;
   color: var(--sidebar-muted);
   font-size: 0.68rem;
+  flex-shrink: 0;
 }
 
 .app-shell-nav__section-count {
@@ -313,6 +328,33 @@ code {
 
 .app-shell-nav__section-chevron {
   font-size: 0.72rem;
+}
+
+.app-shell-nav__section-doc-count {
+  font-size: 0.62rem;
+  line-height: 1.1;
+}
+
+.app-shell-nav__section-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.05rem;
+}
+
+.app-shell-nav__section-view-all {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--sidebar-text);
+  padding: 0.13rem 0.45rem;
+  font-size: 0.64rem;
+  font-weight: 700;
+}
+
+.app-shell-nav__section-view-all:hover {
+  text-decoration: none;
+  border-color: rgba(255, 255, 255, 0.36);
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .app-shell-nav__search {
@@ -339,6 +381,28 @@ code {
   color: var(--sidebar-muted);
   font-size: 0.72rem;
   padding: 0 0.15rem;
+}
+
+.app-shell-nav__guide-context {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.36rem 0.46rem;
+  display: grid;
+  gap: 0.1rem;
+}
+
+.app-shell-nav__guide-context small {
+  color: var(--sidebar-muted);
+  font-size: 0.64rem;
+  letter-spacing: 0.02em;
+}
+
+.app-shell-nav__guide-context strong {
+  color: var(--sidebar-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.28;
 }
 
 .app-shell-nav__quick-links {
