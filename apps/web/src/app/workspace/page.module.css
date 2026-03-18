@@ -1,37 +1,37 @@
 .workspaceContent {
   display: grid;
-  gap: 1.15rem;
+  gap: 0.88rem;
 }
 
 .hero {
   border: 1px solid color-mix(in srgb, var(--line) 82%, rgba(255, 255, 255, 0.5));
-  border-radius: 22px;
+  border-radius: 16px;
   background:
     linear-gradient(140deg, rgba(76, 111, 255, 0.14), transparent 48%),
     radial-gradient(circle at 100% 0%, rgba(36, 82, 179, 0.22), transparent 42%),
     radial-gradient(circle at 0% 100%, rgba(32, 214, 199, 0.1), transparent 40%),
     var(--surface);
-  padding: 1.4rem;
+  padding: 1rem;
   display: grid;
-  gap: 1rem;
+  gap: 0.72rem;
   grid-template-columns: 1.2fr 0.9fr;
   box-shadow: var(--card-shadow-strong);
 }
 
 .heroCopy {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.42rem;
 }
 
 .heroCopy h1 {
   margin: 0;
-  font-size: clamp(1.35rem, 2.5vw, 2rem);
+  font-size: clamp(1.2rem, 2.1vw, 1.72rem);
 }
 
 .heroCopy p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.74;
+  line-height: 1.58;
   max-width: 60ch;
 }
 
@@ -51,10 +51,10 @@
 
 .ctaButton,
 .ctaButtonSecondary {
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--primary) 32%, var(--line));
-  padding: 0.45rem 0.74rem;
-  font-size: 0.85rem;
+  padding: 0.35rem 0.62rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
 }
@@ -72,78 +72,78 @@
 
 .aiPanel {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
-  border-radius: 18px;
+  border-radius: 14px;
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--surface-2) 94%, transparent), #ffffff);
-  padding: 1rem;
+  padding: 0.74rem;
   display: grid;
-  gap: 0.72rem;
+  gap: 0.52rem;
   box-shadow: var(--card-shadow);
 }
 
 .aiPanel h2 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.92rem;
 }
 
 .aiPanel ul {
   margin: 0;
   padding-left: 1.05rem;
   display: grid;
-  gap: 0.35rem;
+  gap: 0.24rem;
 }
 
 .aiPanel li {
   color: var(--muted);
-  line-height: 1.45;
-  font-size: 0.86rem;
+  line-height: 1.34;
+  font-size: 0.78rem;
 }
 
 .kpiSection {
   display: grid;
-  gap: 0.7rem;
+  gap: 0.5rem;
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .taskSection {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.5));
-  border-radius: 18px;
+  border-radius: 14px;
   background: linear-gradient(180deg, #ffffff, #f8fbff);
-  padding: 1rem;
+  padding: 0.72rem;
   display: grid;
-  gap: 0.72rem;
+  gap: 0.52rem;
 }
 
 .taskSection h2 {
   margin: 0;
-  font-size: 1.04rem;
+  font-size: 0.92rem;
 }
 
 .taskGrid {
   display: grid;
-  gap: 0.65rem;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.45rem;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
 }
 
 .taskCard {
   border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.5));
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--surface);
-  padding: 0.8rem 0.86rem;
+  padding: 0.56rem 0.62rem;
   display: grid;
-  gap: 0.22rem;
+  gap: 0.14rem;
   text-decoration: none;
   color: var(--text);
 }
 
 .taskCard strong {
-  font-size: 0.92rem;
+  font-size: 0.84rem;
 }
 
 .taskCard span {
   color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
+  font-size: 0.74rem;
+  line-height: 1.32;
 }
 
 .taskCard:hover {
@@ -154,11 +154,11 @@
 
 .kpiCard {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
-  border-radius: 18px;
+  border-radius: 13px;
   background: linear-gradient(180deg, #ffffff, #f7fbff);
-  padding: 0.8rem;
+  padding: 0.58rem;
   display: grid;
-  gap: 0.16rem;
+  gap: 0.08rem;
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.05);
   position: relative;
   overflow: hidden;
@@ -168,7 +168,7 @@
   content: "";
   position: absolute;
   inset: 0 auto auto 0;
-  height: 3px;
+  height: 2px;
   width: 100%;
   background: linear-gradient(90deg, #4c6fff, #7a5cff, #20d6c7);
 }
@@ -176,27 +176,27 @@
 .kpiCard p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.72rem;
 }
 
 .kpiCard strong {
-  font-size: 1.45rem;
+  font-size: 1.18rem;
   letter-spacing: -0.02em;
 }
 
 .kpiCard span {
   color: color-mix(in srgb, var(--muted) 75%, var(--line));
-  font-size: 0.76rem;
+  font-size: 0.68rem;
 }
 
 .moduleSection {
   border: 1px solid color-mix(in srgb, var(--line) 88%, rgba(255, 255, 255, 0.5));
-  border-radius: 22px;
+  border-radius: 16px;
   background:
     linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  padding: 1.3rem;
+  padding: 0.84rem;
   display: grid;
-  gap: 1rem;
+  gap: 0.64rem;
   box-shadow: var(--card-shadow);
 }
 
@@ -204,7 +204,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -213,40 +213,40 @@
 }
 
 .searchWrap {
-  width: min(100%, 360px);
+  width: min(100%, 300px);
 }
 
 .searchWrap input {
   width: 100%;
-  border-radius: 11px;
+  border-radius: 9px;
   border: 1px solid var(--line);
   background: var(--surface-2);
-  padding: 0.5rem 0.62rem;
+  padding: 0.38rem 0.52rem;
 }
 
 .moduleGroup {
   display: grid;
-  gap: 0.55rem;
+  gap: 0.42rem;
 }
 
 .moduleGroup h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.88rem;
 }
 
 .moduleGrid {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.52rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .moduleCard {
   border: 1px solid color-mix(in srgb, var(--line) 82%, rgba(255, 255, 255, 0.5));
-  border-radius: 18px;
+  border-radius: 13px;
   background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--surface-2) 70%, #ffffff));
-  padding: 0.95rem;
+  padding: 0.62rem;
   display: grid;
-  gap: 0.52rem;
+  gap: 0.34rem;
   box-shadow: 0 10px 18px rgba(15, 23, 42, 0.06);
   transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
   position: relative;
@@ -254,7 +254,7 @@
 }
 
 .moduleCard:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   border-color: color-mix(in srgb, var(--primary) 34%, var(--line));
   box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
 }
@@ -281,7 +281,7 @@
 }
 
 .moduleCardTop strong {
-  font-size: 0.98rem;
+  font-size: 0.86rem;
 }
 
 .moduleCardTop span {
@@ -289,26 +289,26 @@
   border: 1px solid color-mix(in srgb, var(--line) 85%, rgba(255, 255, 255, 0.4));
   background: var(--surface-2);
   color: color-mix(in srgb, var(--primary) 72%, var(--text));
-  padding: 0.2rem 0.45rem;
-  font-size: 0.72rem;
+  padding: 0.14rem 0.36rem;
+  font-size: 0.67rem;
   font-weight: 700;
 }
 
 .moduleCard p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.55;
-  font-size: 0.86rem;
+  line-height: 1.4;
+  font-size: 0.77rem;
 }
 
 .moduleLink {
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--line));
   background: color-mix(in srgb, var(--primary) 12%, #ffffff);
   color: color-mix(in srgb, var(--primary) 76%, var(--text));
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.35rem 0.58rem;
+  padding: 0.26rem 0.48rem;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -316,16 +316,16 @@
 
 .plannedTag {
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: 0.74rem;
 }
 
 .favoriteButton {
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--line);
   background: var(--surface-2);
   color: var(--text);
-  font-size: 0.8rem;
-  padding: 0.35rem 0.58rem;
+  font-size: 0.74rem;
+  padding: 0.26rem 0.48rem;
 }
 
 .favoriteChip {
@@ -334,8 +334,8 @@
   border: 1px solid color-mix(in srgb, var(--primary) 38%, var(--line));
   background: color-mix(in srgb, var(--primary) 10%, var(--surface));
   color: color-mix(in srgb, var(--primary) 74%, var(--text));
-  padding: 0.25rem 0.52rem;
-  font-size: 0.8rem;
+  padding: 0.18rem 0.4rem;
+  font-size: 0.74rem;
   font-weight: 700;
 }
 
@@ -355,8 +355,8 @@
 
 @media (max-width: 640px) {
   .hero {
-    padding: 1rem;
-    border-radius: 16px;
+    padding: 0.78rem;
+    border-radius: 13px;
   }
 
   .kpiSection {
