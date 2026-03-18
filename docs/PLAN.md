@@ -204,6 +204,42 @@ Scope: User-requested UX hardening after alpha stabilization (non-copy reference
 
 ---
 
+# UX Refresh Sprint 2 (Korean IA Speed Layer)
+
+Date: 2026-03-18  
+Scope: Follow-up UX hardening for menu discoverability and fast route entry
+
+## Goals
+
+- Reduce long-menu fatigue with a clearer 2-depth navigation rhythm
+- Preserve stable dropdown behavior while preventing "everything expanded" clutter
+- Add fast re-entry patterns for frequent/recent routes
+- Keep role-based workspace split and login-first flow intact
+
+## Planned/Executed Work
+
+1. Sidebar IA speed layer:
+   - section tabs (2-depth entry helper)
+   - recent-visited links persisted in localStorage
+   - curated quick links by role (admin/user)
+2. Dropdown behavior hardening:
+   - single-open accordion default outside search mode
+   - search mode keeps relevant sections open for scanning
+3. Workspace role UX continuation:
+   - maintain admin/user differentiated quick tasks and guidance
+4. QA:
+   - navigation regression + full workspace checks
+
+## Validation Targets
+
+- `corepack pnpm qa:navigation`
+- `corepack pnpm -r lint`
+- `corepack pnpm -r typecheck`
+- `corepack pnpm -r test`
+- `corepack pnpm -r build`
+
+---
+
 # PROMPT04 Execution Plan (Document / File / Approval Vertical Slice)
 
 Date: 2026-03-13
