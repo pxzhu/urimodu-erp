@@ -105,6 +105,53 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.taskSection {
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.5));
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  padding: 1rem;
+  display: grid;
+  gap: 0.72rem;
+}
+
+.taskSection h2 {
+  margin: 0;
+  font-size: 1.04rem;
+}
+
+.taskGrid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.taskCard {
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.5));
+  border-radius: 14px;
+  background: var(--surface);
+  padding: 0.8rem 0.86rem;
+  display: grid;
+  gap: 0.22rem;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.taskCard strong {
+  font-size: 0.92rem;
+}
+
+.taskCard span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.taskCard:hover {
+  text-decoration: none;
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--line));
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
 .kpiCard {
   border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
   border-radius: 18px;
@@ -300,6 +347,10 @@
   .kpiSection {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .taskGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 640px) {
@@ -309,6 +360,10 @@
   }
 
   .kpiSection {
+    grid-template-columns: 1fr;
+  }
+
+  .taskGrid {
     grid-template-columns: 1fr;
   }
 

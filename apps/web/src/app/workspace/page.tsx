@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DashboardNav } from "../../components/dashboard-nav";
-import { useLocaleText } from "../../components/ui-shell-provider";
+import { useLocaleText, useUiShell } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
 import styles from "./page.module.css";
@@ -47,6 +47,15 @@ interface WorkspaceModule {
   badgeKo: string;
   badgeEn: string;
   href?: string;
+}
+
+interface RoleTask {
+  id: string;
+  titleKo: string;
+  titleEn: string;
+  hintKo: string;
+  hintEn: string;
+  href: string;
 }
 
 const FAVORITE_STORAGE_KEY = "korean_erp_workspace_favorites";
@@ -150,6 +159,60 @@ const WORKSPACE_MODULES: WorkspaceModule[] = [
   }
 ];
 
+const ADMIN_TASKS: RoleTask[] = [
+  {
+    id: "task-approvals",
+    titleKo: "결재 대기 정리",
+    titleEn: "Clear approval queue",
+    hintKo: "우선순위 높은 결재부터 확인",
+    hintEn: "Review high-priority approvals first",
+    href: "/approvals"
+  },
+  {
+    id: "task-attendance",
+    titleKo: "근태 검토",
+    titleEn: "Attendance review",
+    hintKo: "검토 필요 행 중심으로 점검",
+    hintEn: "Check rows marked for review",
+    href: "/attendance/ledger"
+  },
+  {
+    id: "task-expense",
+    titleKo: "경비 승인 준비",
+    titleEn: "Prepare expense posting",
+    hintKo: "첨부 누락 청구 확인",
+    hintEn: "Check claims missing attachments",
+    href: "/expenses"
+  }
+];
+
+const USER_TASKS: RoleTask[] = [
+  {
+    id: "task-leave",
+    titleKo: "휴가 신청",
+    titleEn: "Submit leave request",
+    hintKo: "일정 확인 후 바로 상신",
+    hintEn: "Submit after schedule check",
+    href: "/leave"
+  },
+  {
+    id: "task-document",
+    titleKo: "문서 작성",
+    titleEn: "Create document",
+    hintKo: "템플릿 선택 후 작성",
+    hintEn: "Choose template and draft",
+    href: "/documents"
+  },
+  {
+    id: "task-correction",
+    titleKo: "근태 정정",
+    titleEn: "Attendance correction",
+    hintKo: "오류 기록 정정 요청",
+    hintEn: "Request correction for wrong logs",
+    href: "/attendance/corrections"
+  }
+];
+
 function normalizeText(value: string) {
   return value.trim().toLowerCase();
 }
@@ -184,6 +247,7 @@ function saveFavorites(next: string[]) {
 export default function WorkspacePage() {
   const router = useRouter();
   const t = useLocaleText();
+  const { isAdminView } = useUiShell();
   const [session, setSession] = useState<LoginSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -327,6 +391,40 @@ export default function WorkspacePage() {
     }))
     .filter((entry) => entry.modules.length > 0);
 
+  const roleTasks = isAdminView ? ADMIN_TASKS : USER_TASKS;
+  const heroTitle = isAdminView
+    ? t("관리자 업무 홈", "Admin Workspace Home")
+    : t("개인 업무 홈", "Personal Workspace Home");
+  const heroDescription = isAdminView
+    ? t(
+        "결재, 근태, 경비 현황을 빠르게 점검하고 운영 우선순위를 처리할 수 있는 관리자 중심 허브입니다.",
+        "An admin-centered hub to review approvals, attendance, and expenses and act on priorities fast."
+      )
+    : t(
+        "내 결재/근태/문서 작업을 빠르게 처리할 수 있도록 개인 업무 동선 중심으로 구성했습니다.",
+        "A personal workspace optimized for quick execution of approvals, attendance, and document tasks."
+      );
+  const roleBriefingItems = isAdminView
+    ? [
+        t("오늘 결재 대기 상위 항목 3건을 먼저 처리하세요.", "Process top 3 pending approvals first."),
+        t("근태 검토 필요 인원에게 자동 알림을 보내세요.", "Send reminders to employees needing attendance review."),
+        t("경비 청구 중 증빙 누락 건을 점검하세요.", "Check expense claims with missing evidence.")
+      ]
+    : [
+        t("오늘 처리할 내 결재 요청부터 확인하세요.", "Start with your approval tasks for today."),
+        t("휴가/정정 요청은 문서 템플릿으로 빠르게 상신하세요.", "Submit leave/correction quickly via templates."),
+        t("경비 청구 증빙을 먼저 첨부하면 반려를 줄일 수 있습니다.", "Attach receipt evidence first to reduce rejections.")
+      ];
+
+  const visibleModules = isAdminView
+    ? groupedModules
+    : groupedModules
+        .map((group) => ({
+          ...group,
+          modules: group.modules.filter((module) => module.id !== "finance-accounting")
+        }))
+        .filter((group) => group.modules.length > 0);
+
   function categoryLabel(category: WorkspaceModule["category"]) {
     if (category === "core") {
       return t("코어 업무 모듈", "Core work modules");
@@ -344,31 +442,38 @@ export default function WorkspacePage() {
         <header className={styles.hero}>
           <div className={styles.heroCopy}>
             <p className={styles.eyebrow}>{t("업무 허브 워크스페이스", "Operations Workspace")}</p>
-            <h1>{t("업무 홈", "Workspace Home")}</h1>
-            <p>
-              {t(
-                "회계·근태·결재·협업을 하나의 화면에서 연결해 운영할 수 있도록 허브형 화면을 제공합니다.",
-                "Use a hub-style workspace that connects accounting, attendance, approvals, and collaboration in one view."
-              )}
-            </p>
+            <h1>{heroTitle}</h1>
+            <p>{heroDescription}</p>
             <div className="inline-actions">
-              <Link href="/documents" className={styles.ctaButton}>
-                {t("전자결재 바로가기", "Open approvals")}
+              <Link href={roleTasks[0]?.href ?? "/workspace"} className={styles.ctaButton}>
+                {t(roleTasks[0]?.titleKo ?? "바로가기", roleTasks[0]?.titleEn ?? "Open")}
               </Link>
-              <Link href="/collaboration" className={styles.ctaButtonSecondary}>
-                {t("협업 허브 열기", "Open collaboration hub")}
+              <Link href={roleTasks[1]?.href ?? "/workspace"} className={styles.ctaButtonSecondary}>
+                {t(roleTasks[1]?.titleKo ?? "다음 작업", roleTasks[1]?.titleEn ?? "Next task")}
               </Link>
             </div>
           </div>
           <aside className={styles.aiPanel}>
-            <h2>{t("AI 운영 브리핑", "AI operations briefing")}</h2>
+            <h2>{t("오늘의 빠른 가이드", "Today's quick guide")}</h2>
             <ul>
-              <li>{t("결재 대기 문서 우선순위 상위 항목을 먼저 처리하세요.", "Handle top-priority approvals first.")}</li>
-              <li>{t("근태 검토 대상이 있는 부서에 알림을 발송하세요.", "Notify departments with attendance review items.")}</li>
-              <li>{t("이번 주 경비 청구 누락 영수증을 점검하세요.", "Check missing receipts in this week's expense claims.")}</li>
+              {roleBriefingItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
             </ul>
           </aside>
         </header>
+
+        <section className={styles.taskSection}>
+          <h2>{t("빠른 작업", "Quick Tasks")}</h2>
+          <div className={styles.taskGrid}>
+            {roleTasks.map((task) => (
+              <Link key={task.id} href={task.href} className={styles.taskCard}>
+                <strong>{t(task.titleKo, task.titleEn)}</strong>
+                <span>{t(task.hintKo, task.hintEn)}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         <section className={styles.kpiSection}>
           {stats.map((stat) => (
@@ -393,7 +498,7 @@ export default function WorkspacePage() {
             </div>
           </div>
 
-          {groupedModules.map((group) => (
+          {visibleModules.map((group) => (
             <div key={group.category} className={styles.moduleGroup}>
               <h3>{categoryLabel(group.category)}</h3>
               <div className={styles.moduleGrid}>
