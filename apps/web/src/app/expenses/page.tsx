@@ -9,6 +9,7 @@ import { useLocaleText } from "../../components/ui-shell-provider";
 import { ApiError, apiRequest, requireCompanyId } from "../../lib/api";
 import { loadSession, type LoginSession } from "../../lib/auth";
 import { translateStatus } from "../../lib/status-label";
+import styles from "./page.module.css";
 
 interface ExpenseClaimListItem {
   id: string;
@@ -159,55 +160,38 @@ export default function ExpensesPage() {
     void run();
   }, [router, t]);
 
+  const metrics = useMemo(() => {
+    const draft = claims.filter((claim) => claim.status === "DRAFT").length;
+    const inReview = claims.filter((claim) => claim.status === "IN_REVIEW" || claim.status === "PENDING").length;
+    const approved = claims.filter((claim) => claim.status === "APPROVED").length;
+    const noProject = claims.filter((claim) => !claim.project).length;
+    return { draft, inReview, approved, noProject };
+  }, [claims]);
+
   function updateItem(index: number, key: keyof ExpenseItemForm, value: string) {
-    setForm((current) => {
-      const nextItems = current.items.map((item, itemIndex) => {
-        if (itemIndex !== index) {
-          return item;
-        }
-
-        return {
-          ...item,
-          [key]: value
-        };
-      });
-
-      return {
-        ...current,
-        items: nextItems
-      };
-    });
+    setForm((current) => ({
+      ...current,
+      items: current.items.map((item, itemIndex) => (itemIndex === index ? { ...item, [key]: value } : item))
+    }));
   }
 
   function addItem() {
-    setForm((current) => ({
-      ...current,
-      items: [...current.items, { ...DEFAULT_ITEM }]
-    }));
+    setForm((current) => ({ ...current, items: [...current.items, { ...DEFAULT_ITEM }] }));
   }
 
   function removeItem(index: number) {
-    setForm((current) => ({
-      ...current,
-      items: current.items.filter((_, itemIndex) => itemIndex !== index)
-    }));
+    setForm((current) => ({ ...current, items: current.items.filter((_, itemIndex) => itemIndex !== index) }));
   }
 
   async function uploadReceiptForItem(index: number, file: File) {
-    if (!session) {
-      return;
-    }
-
+    if (!session) return;
     setUploadingItemIndex(index);
     setError(null);
 
     try {
       const uploadPayload = new FormData();
       uploadPayload.append("file", file);
-      uploadPayload.append(
-        "metadataJson",
-        JSON.stringify({ category: "expense-receipt", source: "expenses-ui" })
-      );
+      uploadPayload.append("metadataJson", JSON.stringify({ category: "expense-receipt", source: "expenses-ui" }));
 
       const uploaded = await apiRequest<FileItem>("/files/upload", {
         method: "POST",
@@ -232,9 +216,7 @@ export default function ExpensesPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!session) {
-      return;
-    }
+    if (!session) return;
 
     setSubmitting(true);
     setError(null);
@@ -263,13 +245,7 @@ export default function ExpensesPage() {
       });
 
       setSuccess(t("경비 청구를 생성했습니다.", "Expense claim created."));
-      setForm({
-        title: "",
-        currency: "KRW",
-        costCenterId: "",
-        projectId: "",
-        items: [{ ...DEFAULT_ITEM }]
-      });
+      setForm({ title: "", currency: "KRW", costCenterId: "", projectId: "", items: [{ ...DEFAULT_ITEM }] });
       await refresh(session);
     } catch (submitError) {
       if (submitError instanceof ApiError) {
@@ -286,212 +262,149 @@ export default function ExpensesPage() {
     <main className="container with-shell">
       <DashboardNav />
       <section className="app-shell-content">
-      <h1>{t("경비 청구", "Expense Claims")}</h1>
-      <p>
-        {t(
-          "경비 항목을 등록하고 영수증 이미지를 업로드/첨부할 수 있습니다.",
-          "Create expense claims and attach uploaded receipt images."
-        )}
-      </p>
+        <h1>{t("경비 청구", "Expense Claims")}</h1>
+        <p>
+          {t(
+            "경비 등록 화면을 상태 흐름과 예외 중심으로 보이도록 재구성했습니다.",
+            "The expense screen is reorganized around claim flow and exception handling."
+          )}
+        </p>
 
-      <form className="form-grid" onSubmit={(event) => void handleSubmit(event)}>
-        <label>
-          {t("제목", "Title")}
-          <input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required />
-        </label>
+        <section className={styles.metricGrid}>
+          <article className={styles.metricCard}><p>{t("작성중", "Draft")}</p><strong>{metrics.draft}</strong><span>{t("제출 전 청구", "Claims before submit")}</span></article>
+          <article className={styles.metricCard}><p>{t("승인 대기", "In review")}</p><strong>{metrics.inReview}</strong><span>{t("승인/검토 중", "Waiting for review")}</span></article>
+          <article className={styles.metricCard}><p>{t("승인 완료", "Approved")}</p><strong>{metrics.approved}</strong><span>{t("지급/후속 처리 대상", "Ready for payout or posting")}</span></article>
+          <article className={styles.metricCard}><p>{t("프로젝트 미지정", "No project")}</p><strong>{metrics.noProject}</strong><span>{t("운영 점검 필요", "Needs review")}</span></article>
+        </section>
 
-        <label>
-          {t("통화", "Currency")}
-          <input
-            value={form.currency}
-            onChange={(event) => setForm((current) => ({ ...current, currency: event.target.value.toUpperCase() }))}
-            maxLength={3}
-            required
-          />
-        </label>
+        <section className={styles.alertGrid}>
+          <article className={styles.alertCard}><strong>{t("상태 흐름", "Claim flow")}</strong><span>{t("작성중 → 제출 → 검토/승인 → 지급 흐름을 기준으로 관리하세요.", "Manage claims with a draft → submit → review → payout flow.")}</span></article>
+          <article className={styles.alertCard}><strong>{t("증빙 우선", "Evidence first")}</strong><span>{t("영수증이 먼저 첨부될수록 반려 가능성이 줄어듭니다.", "Attaching evidence first reduces the chance of rejection.")}</span></article>
+          <article className={styles.alertCard}><strong>{t("분류 정확성", "Classification")}</strong><span>{t("코스트센터/프로젝트를 연결하면 후속 정산이 쉬워집니다.", "Linking cost center and project makes downstream accounting easier.")}</span></article>
+        </section>
 
-        <label>
-          {t("코스트센터", "Cost center")}
-          <select
-            value={form.costCenterId}
-            onChange={(event) => setForm((current) => ({ ...current, costCenterId: event.target.value }))}
-          >
-            <option value="">{t("선택 안함", "(none)")}</option>
-            {costCenters.map((costCenter) => (
-              <option key={costCenter.id} value={costCenter.id}>
-                {costCenter.code} - {costCenter.name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <form className={`form-grid ${styles.formSection}`} onSubmit={(event) => void handleSubmit(event)}>
+          <label>
+            {t("제목", "Title")}
+            <input value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} required />
+          </label>
 
-        <label>
-          {t("프로젝트", "Project")}
-          <select value={form.projectId} onChange={(event) => setForm((current) => ({ ...current, projectId: event.target.value }))}>
-            <option value="">{t("선택 안함", "(none)")}</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.code} - {project.name}
-              </option>
-            ))}
-          </select>
-        </label>
+          <label>
+            {t("통화", "Currency")}
+            <input value={form.currency} onChange={(event) => setForm((current) => ({ ...current, currency: event.target.value.toUpperCase() }))} maxLength={3} required />
+          </label>
 
-        <fieldset>
-          <legend>{t("경비 항목", "Expense items")}</legend>
-          {form.items.map((item, index) => (
-            <div key={`item-${index}`} className="step-row">
-              <label>
-                {t("사용일", "Date")}
-                <input
-                  type="date"
-                  value={item.incurredOn}
-                  onChange={(event) => updateItem(index, "incurredOn", event.target.value)}
-                  required
-                />
-              </label>
+          <label>
+            {t("코스트센터", "Cost center")}
+            <select value={form.costCenterId} onChange={(event) => setForm((current) => ({ ...current, costCenterId: event.target.value }))}>
+              <option value="">{t("선택 안함", "(none)")}</option>
+              {costCenters.map((costCenter) => <option key={costCenter.id} value={costCenter.id}>{costCenter.code} - {costCenter.name}</option>)}
+            </select>
+          </label>
 
-              <label>
-                {t("카테고리", "Category")}
-                <input
-                  value={item.category}
-                  onChange={(event) => updateItem(index, "category", event.target.value)}
-                  required
-                />
-              </label>
+          <label>
+            {t("프로젝트", "Project")}
+            <select value={form.projectId} onChange={(event) => setForm((current) => ({ ...current, projectId: event.target.value }))}>
+              <option value="">{t("선택 안함", "(none)")}</option>
+              {projects.map((project) => <option key={project.id} value={project.id}>{project.code} - {project.name}</option>)}
+            </select>
+          </label>
 
-              <label>
-                {t("거래처", "Vendor")}
-                <select value={item.vendorId} onChange={(event) => updateItem(index, "vendorId", event.target.value)}>
-                  <option value="">{t("선택 안함", "(none)")}</option>
-                  {vendors.map((vendor) => (
-                    <option key={vendor.id} value={vendor.id}>
-                      {vendor.code} - {vendor.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label>
-                {t("금액", "Amount")}
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={item.amount}
-                  onChange={(event) => updateItem(index, "amount", event.target.value)}
-                  required
-                />
-              </label>
-
-              <label>
-                VAT
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={item.vatAmount}
-                  onChange={(event) => updateItem(index, "vatAmount", event.target.value)}
-                />
-              </label>
-
-              <label>
-                {t("상세 설명", "Description")}
-                <input
-                  value={item.description}
-                  onChange={(event) => updateItem(index, "description", event.target.value)}
-                />
-              </label>
-
-              <label>
-                {t("영수증 이미지 업로드", "Upload receipt image")}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => {
+          <fieldset>
+            <legend>{t("경비 항목", "Expense items")}</legend>
+            {form.items.map((item, index) => (
+              <div key={`item-${index}`} className="step-row">
+                <label>
+                  {t("사용일", "Date")}
+                  <input type="date" value={item.incurredOn} onChange={(event) => updateItem(index, "incurredOn", event.target.value)} required />
+                </label>
+                <label>
+                  {t("카테고리", "Category")}
+                  <input value={item.category} onChange={(event) => updateItem(index, "category", event.target.value)} required />
+                </label>
+                <label>
+                  {t("거래처", "Vendor")}
+                  <select value={item.vendorId} onChange={(event) => updateItem(index, "vendorId", event.target.value)}>
+                    <option value="">{t("선택 안함", "(none)")}</option>
+                    {vendors.map((vendor) => <option key={vendor.id} value={vendor.id}>{vendor.code} - {vendor.name}</option>)}
+                  </select>
+                </label>
+                <label>
+                  {t("금액", "Amount")}
+                  <input type="number" min="0" step="0.01" value={item.amount} onChange={(event) => updateItem(index, "amount", event.target.value)} required />
+                </label>
+                <label>
+                  VAT
+                  <input type="number" min="0" step="0.01" value={item.vatAmount} onChange={(event) => updateItem(index, "vatAmount", event.target.value)} />
+                </label>
+                <label>
+                  {t("상세 설명", "Description")}
+                  <input value={item.description} onChange={(event) => updateItem(index, "description", event.target.value)} />
+                </label>
+                <label>
+                  {t("영수증 이미지 업로드", "Upload receipt image")}
+                  <input type="file" accept="image/*" onChange={(event) => {
                     const file = event.target.files?.[0];
-                    if (file) {
-                      void uploadReceiptForItem(index, file);
-                    }
+                    if (file) void uploadReceiptForItem(index, file);
                     event.currentTarget.value = "";
-                  }}
-                />
-              </label>
-
-              <label>
-                {t("영수증 선택", "Choose receipt")}
-                <select value={item.receiptFileId} onChange={(event) => updateItem(index, "receiptFileId", event.target.value)}>
-                  <option value="">{t("선택 안함", "(none)")}</option>
-                  {files.map((file) => (
-                    <option key={file.id} value={file.id}>
-                      {file.originalName}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <div className="inline-actions">
-                <button type="button" onClick={() => removeItem(index)} disabled={form.items.length === 1}>
-                  {t("항목 삭제", "Remove item")}
-                </button>
-                {uploadingItemIndex === index ? <span>{t("영수증 업로드 중...", "Uploading receipt...")}</span> : null}
+                  }} />
+                </label>
+                <label>
+                  {t("영수증 선택", "Choose receipt")}
+                  <select value={item.receiptFileId} onChange={(event) => updateItem(index, "receiptFileId", event.target.value)}>
+                    <option value="">{t("선택 안함", "(none)")}</option>
+                    {files.map((file) => <option key={file.id} value={file.id}>{file.originalName}</option>)}
+                  </select>
+                </label>
+                <div className="inline-actions">
+                  <button type="button" onClick={() => removeItem(index)} disabled={form.items.length === 1}>{t("항목 삭제", "Remove item")}</button>
+                  {uploadingItemIndex === index ? <span>{t("영수증 업로드 중...", "Uploading receipt...")}</span> : null}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+            <button type="button" onClick={addItem}>{t("항목 추가", "Add item")}</button>
+          </fieldset>
 
-          <button type="button" onClick={addItem}>
-            {t("항목 추가", "Add item")}
-          </button>
-        </fieldset>
+          <button type="submit" disabled={submitting}>{submitting ? t("생성 중...", "Creating...") : t("경비 청구 생성", "Create expense claim")}</button>
+        </form>
 
-        <button type="submit" disabled={submitting}>
-          {submitting ? t("생성 중...", "Creating...") : t("경비 청구 생성", "Create expense claim")}
-        </button>
-      </form>
+        {error ? <p className="error-text">{error}</p> : null}
+        {success ? <p className="success-text">{success}</p> : null}
 
-      {error ? <p className="error-text">{error}</p> : null}
-      {success ? <p className="success-text">{success}</p> : null}
-
-      <h2>{t("청구 목록", "Claim list")}</h2>
-      <table className="data-table">
-        <thead>
-          <tr>
-            <th>{t("제목", "Title")}</th>
-            <th>{t("작성자", "Employee")}</th>
-            <th>{t("상태", "Status")}</th>
-            <th>{t("금액", "Amount")}</th>
-            <th>{t("코스트센터", "Cost center")}</th>
-            <th>{t("프로젝트", "Project")}</th>
-            <th>{t("항목 수", "Items")}</th>
-            <th>{t("생성일", "Created")}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {claims.map((claim) => (
-            <tr key={claim.id}>
-              <td>
-                <Link href={`/expenses/${claim.id}`}>{claim.title}</Link>
-              </td>
-              <td>
-                {claim.employee.employeeNumber} {claim.employee.nameKr}
-              </td>
-              <td>{translateStatus(claim.status, t)}</td>
-              <td>
-                {claim.totalAmount} {claim.currency}
-              </td>
-              <td>{claim.costCenter ? `${claim.costCenter.code} ${claim.costCenter.name}` : "-"}</td>
-              <td>{claim.project ? `${claim.project.code} ${claim.project.name}` : "-"}</td>
-              <td>{claim._count.items}</td>
-              <td>{new Date(claim.createdAt).toLocaleString()}</td>
-            </tr>
-          ))}
-          {claims.length === 0 ? (
-            <tr>
-              <td colSpan={8}>{t("경비 청구가 없습니다.", "No expense claims yet.")}</td>
-            </tr>
-          ) : null}
-        </tbody>
-      </table>
+        <section className={styles.listSection}>
+          <h2>{t("청구 목록", "Claim list")}</h2>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>{t("제목", "Title")}</th>
+                <th>{t("작성자", "Employee")}</th>
+                <th>{t("상태", "Status")}</th>
+                <th>{t("금액", "Amount")}</th>
+                <th>{t("코스트센터", "Cost center")}</th>
+                <th>{t("프로젝트", "Project")}</th>
+                <th>{t("항목 수", "Items")}</th>
+                <th>{t("생성일", "Created")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {claims.map((claim) => (
+                <tr key={claim.id}>
+                  <td><Link href={`/expenses/${claim.id}`}>{claim.title}</Link></td>
+                  <td>{claim.employee.employeeNumber} {claim.employee.nameKr}</td>
+                  <td>{translateStatus(claim.status, t)}</td>
+                  <td>{claim.totalAmount} {claim.currency}</td>
+                  <td>{claim.costCenter ? `${claim.costCenter.code} ${claim.costCenter.name}` : "-"}</td>
+                  <td>{claim.project ? `${claim.project.code} ${claim.project.name}` : "-"}</td>
+                  <td>{claim._count.items}</td>
+                  <td>{new Date(claim.createdAt).toLocaleString()}</td>
+                </tr>
+              ))}
+              {claims.length === 0 ? (
+                <tr><td colSpan={8}>{t("경비 청구가 없습니다.", "No expense claims yet.")}</td></tr>
+              ) : null}
+            </tbody>
+          </table>
+        </section>
       </section>
     </main>
   );
