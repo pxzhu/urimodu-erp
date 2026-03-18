@@ -21,6 +21,9 @@
   --card-shadow-strong: 0 14px 32px rgba(15, 23, 42, 0.12);
   --danger: #b4232d;
   --success: #0d7f55;
+  --btn-height: 1.95rem;
+  --btn-padding-y: 0.36rem;
+  --btn-padding-x: 0.74rem;
 }
 
 :root[data-theme="dark"] {
@@ -537,15 +540,15 @@ code {
   align-items: center;
   justify-content: flex-start;
   gap: 0.2rem;
-  padding: 0.4rem 0.48rem;
+  padding: 0.3rem 0.42rem;
   border-radius: 10px;
   color: var(--sidebar-text);
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.08);
-  font-size: 0.81rem;
+  font-size: 0.78rem;
   font-weight: 700;
   line-height: 1.35;
-  min-height: 1.8rem;
+  min-height: 1.56rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
   position: relative;
   overflow: hidden;
@@ -600,15 +603,16 @@ button {
 
 .nav-icon-button,
 .nav-chip {
-  padding: 0.34rem 0.54rem;
-  font-size: 0.78rem;
+  min-height: 1.82rem;
+  padding: 0.24rem 0.48rem;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
 .nav-mobile-toggle {
   display: none;
-  min-width: 2.2rem;
-  min-height: 2.2rem;
+  min-width: 1.9rem;
+  min-height: 1.9rem;
   font-size: 1rem;
   border-radius: 12px;
   flex-shrink: 0;
@@ -812,7 +816,9 @@ legend {
 }
 
 button {
-  padding: 0.55rem 0.9rem;
+  min-height: var(--btn-height);
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  line-height: 1.2;
 }
 
 button:disabled {
@@ -1046,8 +1052,8 @@ button:disabled {
   }
 
   .app-shell-nav__link {
-    min-height: 2.1rem;
-    font-size: 0.9rem;
+    min-height: 1.74rem;
+    font-size: 0.84rem;
   }
 
   .app-shell-nav__quick-links {
