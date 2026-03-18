@@ -1,0 +1,134 @@
+.metricGrid {
+  display: grid;
+  gap: 0.56rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0.9rem;
+}
+
+.metricCard {
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255, 255, 255, 0.45));
+  background: linear-gradient(180deg, #ffffff, #f7fbff);
+  padding: 0.68rem;
+  display: grid;
+  gap: 0.08rem;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.metricCard p,
+.metricCard span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.73rem;
+}
+
+.metricCard strong {
+  font-size: 1.18rem;
+}
+
+.queueSection {
+  border: 1px solid color-mix(in srgb, var(--line) 86%, rgba(255, 255, 255, 0.45));
+  border-radius: 16px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  padding: 0.82rem;
+  display: grid;
+  gap: 0.7rem;
+  margin-bottom: 0.9rem;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.queueSectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.queueSectionHeader h2 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.queueSectionHeader span {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.queueGrid {
+  display: grid;
+  gap: 0.56rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.queueCard {
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, rgba(255, 255, 255, 0.45));
+  background: linear-gradient(180deg, #ffffff, color-mix(in srgb, var(--surface-2) 65%, #ffffff));
+  padding: 0.72rem;
+  display: grid;
+  gap: 0.34rem;
+  box-shadow: 0 10px 18px rgba(15, 23, 42, 0.05);
+}
+
+.queueCard--danger {
+  border-color: color-mix(in srgb, var(--danger) 42%, var(--line));
+}
+
+.queueCard--warning {
+  border-color: color-mix(in srgb, #f59e0b 42%, var(--line));
+}
+
+.queueCard--neutral {
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--line));
+}
+
+.queueCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.queueCardHeader strong {
+  font-size: 0.86rem;
+}
+
+.queueCardHeader span {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, rgba(255, 255, 255, 0.4));
+  background: var(--surface-2);
+  color: color-mix(in srgb, var(--primary) 72%, var(--text));
+  padding: 0.12rem 0.36rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.queueCard p,
+.queueMeta span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  line-height: 1.42;
+}
+
+.queueMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1080px) {
+  .metricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .metricGrid {
+    grid-template-columns: 1fr;
+  }
+}

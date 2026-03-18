@@ -28,6 +28,13 @@ interface SimpleExpenseClaim {
   status: string;
 }
 
+interface WorkspaceSignals {
+  employees: number;
+  pendingApprovals: number;
+  attendanceReview: number;
+  openExpenses: number;
+}
+
 interface WorkspaceStat {
   id: string;
   labelKo: string;
@@ -253,6 +260,12 @@ export default function WorkspacePage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [signals, setSignals] = useState<WorkspaceSignals>({
+    employees: 0,
+    pendingApprovals: 0,
+    attendanceReview: 0,
+    openExpenses: 0
+  });
   const [stats, setStats] = useState<WorkspaceStat[]>([
     {
       id: "employees",
@@ -324,24 +337,32 @@ export default function WorkspacePage() {
           })
         ]);
 
+        const nextSignals = {
+          employees: employees.length,
+          pendingApprovals: approvalInbox.length,
+          attendanceReview: attendanceLedger.filter((row) => row.needsReview).length,
+          openExpenses: expenseClaims.filter((claim) => claim.status !== "APPROVED").length
+        };
+
+        setSignals(nextSignals);
         setStats((current) =>
           current.map((item) => {
             if (item.id === "employees") {
-              return { ...item, value: employees.length };
+              return { ...item, value: nextSignals.employees };
             }
             if (item.id === "approvals") {
-              return { ...item, value: approvalInbox.length };
+              return { ...item, value: nextSignals.pendingApprovals };
             }
             if (item.id === "attendance-alerts") {
               return {
                 ...item,
-                value: attendanceLedger.filter((row) => row.needsReview).length
+                value: nextSignals.attendanceReview
               };
             }
             if (item.id === "expense-open") {
               return {
                 ...item,
-                value: expenseClaims.filter((claim) => claim.status !== "APPROVED").length
+                value: nextSignals.openExpenses
               };
             }
             return item;
@@ -392,6 +413,126 @@ export default function WorkspacePage() {
     .filter((entry) => entry.modules.length > 0);
 
   const roleTasks = isAdminView ? ADMIN_TASKS : USER_TASKS;
+  const operationalAlerts = useMemo(
+    () =>
+      isAdminView
+        ? [
+            {
+              id: "approval-delay",
+              tone: signals.pendingApprovals > 5 ? "danger" : "primary",
+              title: t("결재 대기 정리 필요", "Approval queue needs attention"),
+              description: t(
+                `현재 결재 대기 ${signals.pendingApprovals}건이 있습니다. 우선순위 높은 건부터 처리하세요.`,
+                `${signals.pendingApprovals} approvals are pending. Start with the highest priority items.`
+              ),
+              href: "/approvals"
+            },
+            {
+              id: "attendance-review",
+              tone: signals.attendanceReview > 0 ? "warning" : "success",
+              title: t("근태 검토 필요", "Attendance review required"),
+              description: t(
+                `검토가 필요한 근태 원장 ${signals.attendanceReview}건을 확인하세요.`,
+                `Review ${signals.attendanceReview} attendance ledger rows that need attention.`
+              ),
+              href: "/attendance/ledger"
+            },
+            {
+              id: "expense-open",
+              tone: signals.openExpenses > 3 ? "warning" : "primary",
+              title: t("진행 중인 경비 청구", "Open expense claims"),
+              description: t(
+                `승인 전 경비 청구 ${signals.openExpenses}건이 남아 있습니다.`,
+                `${signals.openExpenses} expense claims are still in progress before approval.`
+              ),
+              href: "/expenses"
+            }
+          ]
+        : [
+            {
+              id: "personal-approval",
+              tone: signals.pendingApprovals > 0 ? "primary" : "success",
+              title: t("내 결재/문서 확인", "Check my approvals and documents"),
+              description: t(
+                `현재 처리 대기 중인 개인 결재 항목 ${signals.pendingApprovals}건을 확인하세요.`,
+                `Check your ${signals.pendingApprovals} pending personal approval items.`
+              ),
+              href: "/approvals"
+            },
+            {
+              id: "personal-attendance",
+              tone: signals.attendanceReview > 0 ? "warning" : "success",
+              title: t("근태 정정 필요 여부 확인", "Check attendance corrections"),
+              description: t(
+                `검토 또는 정정이 필요한 근태 항목 ${signals.attendanceReview}건이 있습니다.`,
+                `${signals.attendanceReview} attendance items may need review or correction.`
+              ),
+              href: "/attendance/corrections"
+            },
+            {
+              id: "personal-expense",
+              tone: signals.openExpenses > 0 ? "warning" : "primary",
+              title: t("경비 청구 진행 상태", "Expense claim progress"),
+              description: t(
+                `제출 또는 승인 대기 중인 경비 청구 ${signals.openExpenses}건을 확인하세요.`,
+                `Check ${signals.openExpenses} expense claims awaiting submission or approval.`
+              ),
+              href: "/expenses"
+            }
+          ],
+    [isAdminView, signals, t]
+  );
+  const workflowQueues = useMemo(
+    () =>
+      isAdminView
+        ? [
+            {
+              id: "queue-urgent",
+              label: t("우선 처리 큐", "Priority queue"),
+              value: signals.pendingApprovals,
+              helper: t("결재함에서 우선순위 결재를 먼저 확인", "Review high-priority approvals first"),
+              href: "/approvals"
+            },
+            {
+              id: "queue-attendance",
+              label: t("근태 예외 큐", "Attendance exception queue"),
+              value: signals.attendanceReview,
+              helper: t("검토 필요 항목을 중심으로 점검", "Focus on rows marked for review"),
+              href: "/attendance/ledger"
+            },
+            {
+              id: "queue-expenses",
+              label: t("경비 처리 큐", "Expense processing queue"),
+              value: signals.openExpenses,
+              helper: t("증빙/승인 대기 건 점검", "Check evidence and approval wait states"),
+              href: "/expenses"
+            }
+          ]
+        : [
+            {
+              id: "queue-docs",
+              label: t("내 문서/결재", "My documents / approvals"),
+              value: signals.pendingApprovals,
+              helper: t("보완 요청 또는 승인 대기 확인", "Check revisions or pending approvals"),
+              href: "/approvals"
+            },
+            {
+              id: "queue-leave",
+              label: t("근태/휴가 액션", "Attendance / leave actions"),
+              value: signals.attendanceReview,
+              helper: t("정정 또는 휴가 요청 진행", "Continue corrections or leave requests"),
+              href: "/leave"
+            },
+            {
+              id: "queue-expense-user",
+              label: t("내 경비 청구", "My expense claims"),
+              value: signals.openExpenses,
+              helper: t("제출 전/승인 대기 건 확인", "Review drafts and waiting claims"),
+              href: "/expenses"
+            }
+          ],
+    [isAdminView, signals, t]
+  );
   const heroTitle = isAdminView
     ? t("관리자 업무 홈", "Admin Workspace Home")
     : t("개인 업무 홈", "Personal Workspace Home");
@@ -463,6 +604,15 @@ export default function WorkspacePage() {
           </aside>
         </header>
 
+        <section className={styles.alertSection}>
+          {operationalAlerts.map((alert) => (
+            <Link key={alert.id} href={alert.href} className={`${styles.alertCard} ${styles[`alertCard--${alert.tone}`]}`}>
+              <strong>{alert.title}</strong>
+              <span>{alert.description}</span>
+            </Link>
+          ))}
+        </section>
+
         <section className={styles.taskSection}>
           <h2>{t("빠른 작업", "Quick Tasks")}</h2>
           <div className={styles.taskGrid}>
@@ -483,6 +633,21 @@ export default function WorkspacePage() {
               <span>{t(stat.helperKo, stat.helperEn)}</span>
             </article>
           ))}
+        </section>
+
+        <section className={styles.queueSection}>
+          <div className={styles.moduleSectionHeader}>
+            <h2>{t("오늘 처리할 큐", "Today's action queues")}</h2>
+          </div>
+          <div className={styles.queueGrid}>
+            {workflowQueues.map((queue) => (
+              <Link key={queue.id} href={queue.href} className={styles.queueCard}>
+                <p>{queue.label}</p>
+                <strong>{loading ? "-" : queue.value.toLocaleString()}</strong>
+                <span>{queue.helper}</span>
+              </Link>
+            ))}
+          </div>
         </section>
 
         <section className={styles.moduleSection}>
