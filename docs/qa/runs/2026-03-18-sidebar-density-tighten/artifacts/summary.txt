@@ -1,0 +1,9 @@
+run_id=2026-03-18-sidebar-density-tighten
+date=2026-03-18 15:31:29 KST
+branch=codex/fix-sidebar-density-compact
+commit=641fe9a
+lint=PASS
+typecheck=PASS
+test=PASS
+build=PASS
+smoke=PASS
