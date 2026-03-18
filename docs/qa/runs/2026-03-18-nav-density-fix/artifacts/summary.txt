@@ -1,0 +1,9 @@
+run_id=2026-03-18-nav-density-fix
+date=2026-03-18 14:26:35 KST
+branch=codex/fix-nav-accordion-and-button-density
+commit=b85847f
+lint=PASS
+typecheck=PASS
+test=PASS
+build=PASS
+smoke=PASS

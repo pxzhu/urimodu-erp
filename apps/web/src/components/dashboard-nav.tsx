@@ -18,8 +18,6 @@ interface MenuItem {
 
 type NavSection = MenuItem["section"];
 
-const RECENT_MENU_STORAGE_KEY = "korean_erp_recent_menu_routes";
-
 const menuItems: MenuItem[] = [
   { href: "/workspace", ko: "업무 홈", en: "Workspace", section: "home" },
   { href: "/companies", ko: "회사", en: "Companies", section: "org", adminOnly: true },
@@ -84,7 +82,6 @@ export function DashboardNav() {
   const [menuQuery, setMenuQuery] = useState("");
   const [selectedSection, setSelectedSection] = useState<NavSection>("home");
   const [expandedSections, setExpandedSections] = useState<Set<NavSection>>(() => new Set());
-  const [recentRouteHrefs, setRecentRouteHrefs] = useState<string[]>([]);
   const {
     locale,
     toggleLocale,
@@ -121,21 +118,6 @@ export function DashboardNav() {
         .filter((entry) => entry.items.length > 0),
     [filteredMenuItems]
   );
-  const quickMenuItems = useMemo(() => {
-    const preferredOrder = isAdminView
-      ? ["/workspace", "/approvals", "/documents", "/attendance/ledger", "/expenses", "/employees"]
-      : ["/workspace", "/approvals", "/documents", "/leave", "/attendance/ledger", "/expenses"];
-    const ordered = preferredOrder
-      .map((href) => visibleMenuItems.find((item) => item.href === href))
-      .filter((item): item is MenuItem => Boolean(item));
-    return ordered.slice(0, 6);
-  }, [isAdminView, visibleMenuItems]);
-  const recentMenuItems = useMemo(() => {
-    const mapped = recentRouteHrefs
-      .map((href) => visibleMenuItems.find((item) => item.href === href))
-      .filter((item): item is MenuItem => Boolean(item));
-    return mapped.slice(0, 5);
-  }, [recentRouteHrefs, visibleMenuItems]);
 
   useEffect(() => {
     const activeSection = sectionedMenuItems.find((entry) =>
@@ -146,14 +128,7 @@ export function DashboardNav() {
       if (activeSection !== selectedSection) {
         setSelectedSection(activeSection);
       }
-      setExpandedSections((current) => {
-        if (current.has(activeSection)) {
-          return current;
-        }
-        const next = new Set(current);
-        next.add(activeSection);
-        return next;
-      });
+      setExpandedSections(() => new Set([activeSection]));
     }
 
     const selectedExists = sectionedMenuItems.some((entry) => entry.section === selectedSection);
@@ -165,31 +140,19 @@ export function DashboardNav() {
   useEffect(() => {
     const availableSections = new Set(sectionedMenuItems.map((entry) => entry.section));
     setExpandedSections((current) => {
-      const next = new Set<NavSection>();
-      current.forEach((section) => {
-        if (availableSections.has(section)) {
-          next.add(section);
-        }
-      });
-      return next;
-    });
-  }, [sectionedMenuItems]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-    try {
-      const parsed = JSON.parse(window.localStorage.getItem(RECENT_MENU_STORAGE_KEY) ?? "[]") as unknown;
-      if (!Array.isArray(parsed)) {
-        setRecentRouteHrefs([]);
-        return;
+      const currentExpanded = [...current][0];
+      if (currentExpanded && availableSections.has(currentExpanded)) {
+        return new Set([currentExpanded]);
       }
-      setRecentRouteHrefs(parsed.filter((entry): entry is string => typeof entry === "string").slice(0, 5));
-    } catch {
-      setRecentRouteHrefs([]);
-    }
-  }, []);
+      if (selectedSection && availableSections.has(selectedSection)) {
+        return new Set([selectedSection]);
+      }
+      if (sectionedMenuItems[0]?.section) {
+        return new Set([sectionedMenuItems[0].section]);
+      }
+      return new Set<NavSection>();
+    });
+  }, [sectionedMenuItems, selectedSection]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -325,30 +288,16 @@ export function DashboardNav() {
     ? `${t("홈", "Home")} > ${activeSectionLabel} > ${locale === "ko" ? activeMenuItem.ko : activeMenuItem.en}`
     : `${t("홈", "Home")} > ${activeSectionLabel}`;
 
-  function recordRecentRoute(href: string) {
-    setRecentRouteHrefs((current) => {
-      const next = [href, ...current.filter((route) => route !== href)].slice(0, 5);
-      if (typeof window !== "undefined") {
-        window.localStorage.setItem(RECENT_MENU_STORAGE_KEY, JSON.stringify(next));
-      }
-      return next;
-    });
-  }
-
   function toggleSection(section: NavSection) {
     setSelectedSection(section);
     setExpandedSections((current) => {
-      const next = new Set(current);
       if (hasSearchQuery) {
-        next.add(section);
-        return next;
+        return new Set([section]);
       }
-      if (next.has(section)) {
-        next.delete(section);
-      } else {
-        next.add(section);
+      if (current.has(section)) {
+        return new Set<NavSection>();
       }
-      return next;
+      return new Set([section]);
     });
   }
 
@@ -419,49 +368,6 @@ export function DashboardNav() {
               <small>{t("메뉴 위치", "Menu path")}</small>
               <strong>{breadcrumbLabel}</strong>
             </div>
-            <div className="app-shell-nav__quick-links">
-              {quickMenuItems.map((item) => {
-                const active = isActivePath(pathname, item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    prefetch={false}
-                    className={`app-shell-nav__quick-link ${active ? "is-active" : ""}`}
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      recordRecentRoute(item.href);
-                    }}
-                  >
-                    {locale === "ko" ? item.ko : item.en}
-                  </Link>
-                );
-              })}
-            </div>
-            {recentMenuItems.length > 0 ? (
-              <div className="app-shell-nav__recent-links">
-                <small>{t("최근 방문", "Recent")}</small>
-                <div className="app-shell-nav__recent-list">
-                  {recentMenuItems.map((item) => {
-                    const active = isActivePath(pathname, item.href);
-                    return (
-                      <Link
-                        key={`recent-${item.href}`}
-                        href={item.href}
-                        prefetch={false}
-                        className={`app-shell-nav__recent-link ${active ? "is-active" : ""}`}
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          recordRecentRoute(item.href);
-                        }}
-                      >
-                        {locale === "ko" ? item.ko : item.en}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : null}
             {selectedEntry ? (
               <div className="app-shell-nav__panel-meta">
                 <strong>{sectionLabel(selectedEntry.section)}</strong>
@@ -507,13 +413,12 @@ export function DashboardNav() {
                         <Link
                           href={item.href}
                           prefetch={false}
-                        className={`app-shell-nav__link ${active ? "is-active" : ""}`}
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          setSelectedSection(entry.section);
-                          setExpandedSections((current) => new Set(current).add(entry.section));
-                          recordRecentRoute(item.href);
-                        }}
+                          className={`app-shell-nav__link ${active ? "is-active" : ""}`}
+                          onClick={() => {
+                            setMobileMenuOpen(false);
+                            setSelectedSection(entry.section);
+                            setExpandedSections(() => new Set([entry.section]));
+                          }}
                         >
                           <span className="app-shell-nav__link-text">{label}</span>
                         </Link>
