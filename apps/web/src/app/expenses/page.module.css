@@ -1,0 +1,63 @@
+.metricGrid,
+.alertGrid {
+  display: grid;
+  gap: 0.56rem;
+  margin-bottom: 0.9rem;
+}
+
+.metricGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.alertGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metricCard,
+.alertCard,
+.formSection,
+.listSection {
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--line) 84%, rgba(255,255,255,0.45));
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  padding: 0.72rem;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+.metricCard,
+.alertCard {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.metricCard p,
+.metricCard span,
+.alertCard span {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.metricCard strong,
+.alertCard strong {
+  font-size: 0.9rem;
+}
+
+.formSection,
+.listSection {
+  margin-bottom: 0.9rem;
+}
+
+@media (max-width: 1080px) {
+  .metricGrid,
+  .alertGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .metricGrid,
+  .alertGrid {
+    grid-template-columns: 1fr;
+  }
+}
