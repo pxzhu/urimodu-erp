@@ -254,9 +254,11 @@ code {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.05);
-  padding: 0.18rem 0.24rem;
+  padding: 0.28rem 0.3rem;
   width: 100%;
   text-align: left;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
 }
 
 .app-shell-nav__section-copy {
@@ -285,7 +287,7 @@ code {
 
 .app-shell-nav__section-hint {
   color: var(--sidebar-muted);
-  font-size: 0.6rem;
+  font-size: 0.66rem;
   line-height: 1.2;
   padding-left: 1.28rem;
 }
@@ -605,6 +607,11 @@ button {
 
 .nav-mobile-toggle {
   display: none;
+  min-width: 2.2rem;
+  min-height: 2.2rem;
+  font-size: 1rem;
+  border-radius: 12px;
+  flex-shrink: 0;
 }
 
 .nav-desktop-toggle {
@@ -1016,31 +1023,31 @@ button:disabled {
   .app-shell-nav__menu-scroll {
     display: none;
     position: static;
-    max-height: 0;
-    border: 0 solid transparent;
+    max-height: min(70vh, 560px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 14px;
     background: linear-gradient(180deg, #122b57 0%, #0d2349 100%);
-    box-shadow: none;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(0);
-    padding: 0;
-    pointer-events: auto;
-    transition: opacity 160ms ease, max-height 180ms ease, padding 180ms ease, border-color 180ms ease;
+    box-shadow: 0 24px 44px rgba(8, 18, 37, 0.48);
+    padding: 0.75rem;
+    margin-top: 0.2rem;
+    overflow-y: auto;
   }
 
   .app-shell-nav.is-mobile-open .app-shell-nav__menu-scroll {
     display: grid;
-    max-height: min(70vh, 560px);
-    border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 24px 44px rgba(8, 18, 37, 0.48);
-    opacity: 1;
-    visibility: visible;
-    padding: 0.75rem;
-    pointer-events: auto;
-    margin-top: 0.2rem;
-    overflow-y: auto;
+  }
+
+  .app-shell-nav__section-button {
+    padding: 0.4rem 0.5rem;
+  }
+
+  .app-shell-nav__section-hint {
+    font-size: 0.74rem;
+  }
+
+  .app-shell-nav__link {
+    min-height: 2.1rem;
+    font-size: 0.9rem;
   }
 
   .app-shell-nav__quick-links {
