@@ -100,9 +100,20 @@ export function UiShellProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(sidebarCollapsed));
-    const isCompactViewport = typeof window !== "undefined" && window.innerWidth <= 1080;
-    document.documentElement.style.setProperty("--sidebar-width", isCompactViewport ? "100%" : "300px");
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    function syncSidebarWidthByViewport() {
+      const nextWidth = window.innerWidth <= 1080 ? "100%" : "300px";
+      document.documentElement.style.setProperty("--sidebar-width", nextWidth);
+    }
+
+    syncSidebarWidthByViewport();
+    window.addEventListener("resize", syncSidebarWidthByViewport);
+    return () => {
+      window.removeEventListener("resize", syncSidebarWidthByViewport);
+    };
+  }, []);
 
   useEffect(() => {
     function onStorage(event: StorageEvent) {
