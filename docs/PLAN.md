@@ -791,3 +791,34 @@ Ship a focused hardening release for post-alpha stabilization without expanding 
 - Documents/approvals action modals completed.
 - Navigation regression QA passed (desktop/mobile).
 - Role-based screenshots captured and linked in page checklist.
+
+---
+
+# 2026-03-18 Guide-Style Navigation Refresh
+
+## Goal
+
+- Apply a Korean-friendly guide-center IA pattern to sidebar navigation without using any third-party product wording.
+- Improve discoverability with explicit menu path context and category-level hints.
+
+## Execution
+
+1. Add `메뉴 위치` breadcrumb context in sidebar using current route.
+2. Refine section headers into guide-like category blocks:
+   - category title
+   - short category hint
+   - item count and menu count label
+3. Add per-category quick action (`카테고리 열기`) for faster entry.
+4. Keep compact spacing and existing light-mode baseline intact.
+5. Validate with:
+   - `pnpm qa:navigation`
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+
+## Result Snapshot
+
+- Sidebar now exposes route breadcrumb + category hints for faster orientation.
+- 2-depth category scanning pattern is clearer and denser.
+- No competitor brand strings were introduced in UI copy.
