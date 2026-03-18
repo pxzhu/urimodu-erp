@@ -1,0 +1,9 @@
+run_id=2026-03-18-functional-actions-v2
+date=2026-03-18 13:56:02 KST
+branch=codex/fix-functional-qa-and-actions
+commit=12f1ffb
+lint=PASS
+typecheck=PASS
+test=PASS
+build=PASS
+smoke=PASS

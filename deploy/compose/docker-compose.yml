@@ -120,6 +120,12 @@ services:
       WORKER_PORT: ${WORKER_PORT:-4100}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-erp}
       REDIS_URL: redis://redis:6379
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minio}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minio123}
+      MINIO_BUCKET: ${MINIO_BUCKET:-erp-files}
+      MINIO_USE_SSL: "false"
       ATTENDANCE_NORMALIZE_BATCH_SIZE: ${ATTENDANCE_NORMALIZE_BATCH_SIZE:-500}
       WORKER_JOB_STALE_MS: ${WORKER_JOB_STALE_MS:-600000}
     ports:
@@ -129,6 +135,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_started
+      minio-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4100/health || exit 1"]
       interval: 15s
