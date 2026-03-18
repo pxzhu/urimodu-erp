@@ -238,8 +238,6 @@ Scope: Follow-up UX hardening for menu discoverability and fast route entry
 - `corepack pnpm -r test`
 - `corepack pnpm -r build`
 
----
-
 # PROMPT04 Execution Plan (Document / File / Approval Vertical Slice)
 
 Date: 2026-03-13
@@ -822,3 +820,36 @@ Ship a focused hardening release for post-alpha stabilization without expanding 
 - Sidebar now exposes route breadcrumb + category hints for faster orientation.
 - 2-depth category scanning pattern is clearer and denser.
 - No competitor brand strings were introduced in UI copy.
+
+---
+
+# 2026-03-18 Guide-Driven UX/Feature Expansion (No Vendor Naming)
+
+## Goal
+
+- Address reported sidebar dropdown reliability issues first.
+- Expand practical collaboration/service features using public help-center IA patterns as inspiration only.
+- Keep all in-product wording vendor-neutral and Korean-first.
+
+## Execution
+
+1. Sidebar reliability hardening:
+   - mobile route transitions close the menu to avoid stuck/blocked states
+   - mobile menu visibility handling simplified to deterministic `display none/open`
+   - section accordion supports explicit open/close toggling per category
+2. Collaboration feature expansion:
+   - new operational guide flow cards for step-by-step entry
+   - new tabs: 일정, 연락처, 거래처, 세금 문서
+   - starter create/list interactions for each new tab
+3. QA and validation:
+   - `pnpm qa:navigation`
+   - `pnpm -r lint`
+   - `pnpm -r typecheck`
+   - `pnpm -r test`
+   - `pnpm -r build`
+
+## Result Snapshot
+
+- Sidebar dropdown interaction is more stable in mobile and desktop contexts.
+- Collaboration hub now covers broader core office flows aligned with guide-style information architecture.
+- No third-party competitor names were added to the product UI.

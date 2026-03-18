@@ -83,7 +83,7 @@ export function DashboardNav() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
   const [selectedSection, setSelectedSection] = useState<NavSection>("home");
-  const [expandedSections, setExpandedSections] = useState<Set<NavSection>>(() => new Set(["home"]));
+  const [expandedSections, setExpandedSections] = useState<Set<NavSection>>(() => new Set());
   const [recentRouteHrefs, setRecentRouteHrefs] = useState<string[]>([]);
   const {
     locale,
@@ -142,14 +142,18 @@ export function DashboardNav() {
       entry.items.some((item) => isActivePath(pathname, item.href))
     )?.section;
 
-    if (activeSection && activeSection !== selectedSection) {
-      setSelectedSection(activeSection);
+    if (activeSection) {
+      if (activeSection !== selectedSection) {
+        setSelectedSection(activeSection);
+      }
       setExpandedSections((current) => {
-        const next = new Set<NavSection>();
+        if (current.has(activeSection)) {
+          return current;
+        }
+        const next = new Set(current);
         next.add(activeSection);
         return next;
       });
-      return;
     }
 
     const selectedExists = sectionedMenuItems.some((entry) => entry.section === selectedSection);
@@ -167,9 +171,6 @@ export function DashboardNav() {
           next.add(section);
         }
       });
-      if (next.size === 0 && sectionedMenuItems[0]?.section) {
-        next.add(sectionedMenuItems[0].section);
-      }
       return next;
     });
   }, [sectionedMenuItems]);
@@ -191,7 +192,12 @@ export function DashboardNav() {
   }, []);
 
   useEffect(() => {
-    setMobileMenuOpen(false);
+    if (typeof window === "undefined") {
+      return;
+    }
+    if (window.innerWidth <= 1080) {
+      setMobileMenuOpen(false);
+    }
   }, [pathname]);
 
   useEffect(() => {
@@ -329,6 +335,23 @@ export function DashboardNav() {
     });
   }
 
+  function toggleSection(section: NavSection) {
+    setSelectedSection(section);
+    setExpandedSections((current) => {
+      const next = new Set(current);
+      if (hasSearchQuery) {
+        next.add(section);
+        return next;
+      }
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
+  }
+
   return (
     <>
       <nav
@@ -439,21 +462,6 @@ export function DashboardNav() {
                 </div>
               </div>
             ) : null}
-            <div className="app-shell-nav__section-tabs">
-              {sectionEntriesToRender.map((entry) => (
-                <button
-                  key={`tab-${entry.section}`}
-                  type="button"
-                  className={`app-shell-nav__section-tab ${selectedSection === entry.section ? "is-active" : ""}`}
-                  onClick={() => {
-                    setSelectedSection(entry.section);
-                    setExpandedSections(new Set([entry.section]));
-                  }}
-                >
-                  {sectionLabel(entry.section)}
-                </button>
-              ))}
-            </div>
             {selectedEntry ? (
               <div className="app-shell-nav__panel-meta">
                 <strong>{sectionLabel(selectedEntry.section)}</strong>
@@ -465,20 +473,9 @@ export function DashboardNav() {
                 <button
                   type="button"
                   className={`app-shell-nav__section-button ${expandedSections.has(entry.section) ? "is-expanded" : ""}`}
-                  onClick={() => {
-                    setSelectedSection(entry.section);
-                    if (hasSearchQuery) {
-                      setExpandedSections((current) => {
-                        const next = new Set(current);
-                        next.add(entry.section);
-                        return next;
-                      });
-                      return;
-                    }
-                    // Keep one category always expanded for predictable dropdown behavior.
-                    setExpandedSections(new Set<NavSection>([entry.section]));
-                  }}
+                  onClick={() => toggleSection(entry.section)}
                   aria-expanded={hasSearchQuery || expandedSections.has(entry.section)}
+                  aria-controls={`menu-section-${entry.section}`}
                 >
                   <span className="app-shell-nav__section-copy">
                     <h2 className="app-shell-nav__section-title">
@@ -498,6 +495,7 @@ export function DashboardNav() {
                   </span>
                 </button>
                 <ul
+                  id={`menu-section-${entry.section}`}
                   className={`app-shell-nav__menu ${hasSearchQuery || expandedSections.has(entry.section) ? "" : "is-hidden"}`}
                 >
                   {entry.items.map((item) => {
@@ -513,7 +511,7 @@ export function DashboardNav() {
                         onClick={() => {
                           setMobileMenuOpen(false);
                           setSelectedSection(entry.section);
-                          setExpandedSections(new Set([entry.section]));
+                          setExpandedSections((current) => new Set(current).add(entry.section));
                           recordRecentRoute(item.href);
                         }}
                         >
