@@ -382,13 +382,13 @@ export function DashboardNav() {
                   onClick={() => toggleSection(entry.section)}
                   aria-expanded={hasSearchQuery || expandedSections.has(entry.section)}
                   aria-controls={`menu-section-${entry.section}`}
+                  title={sectionHint(entry.section)}
                 >
                   <span className="app-shell-nav__section-copy">
                     <h2 className="app-shell-nav__section-title">
                       <span className="app-shell-nav__section-icon" aria-hidden>{sectionIcon(entry.section)}</span>
                       <span>{sectionLabel(entry.section)}</span>
                     </h2>
-                    <span className="app-shell-nav__section-hint">{sectionHint(entry.section)}</span>
                   </span>
                   <span className="app-shell-nav__section-meta">
                     <span className="app-shell-nav__section-count">{entry.items.length}</span>
