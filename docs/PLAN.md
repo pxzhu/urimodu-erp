@@ -163,6 +163,47 @@ Date: 2026-03-13
 
 ---
 
+# UX Refresh Sprint (Korean-First IA / Login-First)
+
+Date: 2026-03-18  
+Scope: User-requested UX hardening after alpha stabilization (non-copy reference refresh)
+
+## Goals
+
+- Restore reliable left navigation dropdown behavior (collapse/expand on desktop/mobile)
+- Keep first entry as login-first flow (`/` -> `/login`)
+- Improve Korean-first practical UX for fast task entry
+- Differentiate workspace experience for admin vs user roles
+- Keep stack/architecture unchanged (Next.js + existing modular monolith backend)
+
+## Planned/Executed Work
+
+1. Sidebar interaction hardening:
+   - section expand/collapse state as a set (multi-open capable)
+   - repeated click stability and search-open behavior
+   - quick-link strip for frequent routes
+2. Login-first entry:
+   - root redirect to `/login`
+   - practical two-panel login UI (ID save + locale/theme controls)
+3. Role-based workspace UX:
+   - admin/user differentiated hero copy and quick tasks
+   - role-specific briefing guidance
+   - user mode hides finance-accounting module card
+4. QA/automation sync:
+   - Playwright navigation and screenshot scripts aligned to login-first routing
+5. Docs sync:
+   - README endpoint note updated for default login entry
+
+## Validation Targets
+
+- `corepack pnpm qa:navigation`
+- `corepack pnpm -r lint`
+- `corepack pnpm -r typecheck`
+- `corepack pnpm -r test`
+- `corepack pnpm -r build`
+
+---
+
 # PROMPT04 Execution Plan (Document / File / Approval Vertical Slice)
 
 Date: 2026-03-13

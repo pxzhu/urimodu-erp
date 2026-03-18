@@ -23,7 +23,7 @@ const roles = [
 const pages = [
   {
     route: "/workspace",
-    file: "00-workspace-hub.png",
+    file: "00-ai-native-landing.png",
     readySelector: "section.app-shell-content h1"
   },
   {
@@ -53,7 +53,7 @@ const pages = [
   },
   {
     route: "/workspace",
-    file: "06-workspace-overview.png",
+    file: "06-workspace-hub.png",
     readySelector: "section.app-shell-content h1"
   },
   {
