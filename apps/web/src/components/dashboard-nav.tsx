@@ -81,8 +81,7 @@ export function DashboardNav() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [menuQuery, setMenuQuery] = useState("");
   const [selectedSection, setSelectedSection] = useState<NavSection>("home");
-  const [expandedSection, setExpandedSection] = useState<NavSection>("home");
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Set<NavSection>>(() => new Set(["home"]));
   const {
     locale,
     toggleLocale,
@@ -127,7 +126,11 @@ export function DashboardNav() {
 
     if (activeSection && activeSection !== selectedSection) {
       setSelectedSection(activeSection);
-      setExpandedSection(activeSection);
+      setExpandedSections((current) => {
+        const next = new Set(current);
+        next.add(activeSection);
+        return next;
+      });
       return;
     }
 
@@ -138,11 +141,20 @@ export function DashboardNav() {
   }, [pathname, sectionedMenuItems, selectedSection]);
 
   useEffect(() => {
-    const hasExpandedSection = sectionedMenuItems.some((entry) => entry.section === expandedSection);
-    if (!hasExpandedSection && sectionedMenuItems[0]?.section) {
-      setExpandedSection(sectionedMenuItems[0].section);
-    }
-  }, [expandedSection, sectionedMenuItems]);
+    const availableSections = new Set(sectionedMenuItems.map((entry) => entry.section));
+    setExpandedSections((current) => {
+      const next = new Set<NavSection>();
+      current.forEach((section) => {
+        if (availableSections.has(section)) {
+          next.add(section);
+        }
+      });
+      if (next.size === 0 && sectionedMenuItems[0]?.section) {
+        next.add(sectionedMenuItems[0].section);
+      }
+      return next;
+    });
+  }, [sectionedMenuItems]);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -154,7 +166,6 @@ export function DashboardNav() {
     }
     const syncLayoutByViewport = () => {
       const isMobileViewport = window.innerWidth <= 1080;
-      setIsMobileViewport(isMobileViewport);
       const shouldLockBody = isMobileViewport && mobileMenuOpen;
       document.body.style.overflow = shouldLockBody ? "hidden" : "";
       if (!isMobileViewport && mobileMenuOpen) {
@@ -264,7 +275,7 @@ export function DashboardNav() {
     sectionedMenuItems.find((entry) => entry.section === selectedSection) ?? sectionedMenuItems[0];
   const sectionEntriesToRender = sectionedMenuItems;
   const hasSearchQuery = menuQuery.trim().length > 0;
-  const shouldUseAccordion = isMobileViewport && !hasSearchQuery;
+  const quickMenuItems = visibleMenuItems.slice(0, 6);
 
   return (
     <>
@@ -329,6 +340,24 @@ export function DashboardNav() {
                 <small>{t(`${filteredMenuItems.length}건 검색`, `${filteredMenuItems.length} results`)}</small>
               ) : null}
             </div>
+            <div className="app-shell-nav__quick-links">
+              {quickMenuItems.map((item) => {
+                const active = isActivePath(pathname, item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    prefetch={false}
+                    className={`app-shell-nav__quick-link ${active ? "is-active" : ""}`}
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    {locale === "ko" ? item.ko : item.en}
+                  </Link>
+                );
+              })}
+            </div>
             {selectedEntry ? (
               <div className="app-shell-nav__panel-meta">
                 <strong>{sectionLabel(selectedEntry.section)}</strong>
@@ -339,17 +368,25 @@ export function DashboardNav() {
               <section className="app-shell-nav__section" key={entry.section}>
                 <button
                   type="button"
-                  className={`app-shell-nav__section-button ${expandedSection === entry.section ? "is-expanded" : ""}`}
+                  className={`app-shell-nav__section-button ${expandedSections.has(entry.section) ? "is-expanded" : ""}`}
                   onClick={() => {
                     setSelectedSection(entry.section);
-                    setExpandedSection((current) => {
-                      if (!shouldUseAccordion) {
-                        return entry.section;
+                    setExpandedSections((current) => {
+                      if (hasSearchQuery) {
+                        const next = new Set(current);
+                        next.add(entry.section);
+                        return next;
                       }
-                      return current === entry.section ? current : entry.section;
+                      const next = new Set(current);
+                      if (next.has(entry.section)) {
+                        next.delete(entry.section);
+                      } else {
+                        next.add(entry.section);
+                      }
+                      return next;
                     });
                   }}
-                  aria-expanded={!shouldUseAccordion || expandedSection === entry.section}
+                  aria-expanded={hasSearchQuery || expandedSections.has(entry.section)}
                 >
                   <h2 className="app-shell-nav__section-title">
                     <span className="app-shell-nav__section-icon" aria-hidden>{sectionIcon(entry.section)}</span>
@@ -358,12 +395,12 @@ export function DashboardNav() {
                   <span className="app-shell-nav__section-meta">
                     <span className="app-shell-nav__section-count">{entry.items.length}</span>
                     <span className="app-shell-nav__section-chevron" aria-hidden>
-                      {!shouldUseAccordion || expandedSection === entry.section ? "▾" : "▸"}
+                      {hasSearchQuery || expandedSections.has(entry.section) ? "▾" : "▸"}
                     </span>
                   </span>
                 </button>
                 <ul
-                  className={`app-shell-nav__menu ${!shouldUseAccordion || expandedSection === entry.section ? "" : "is-hidden"}`}
+                  className={`app-shell-nav__menu ${hasSearchQuery || expandedSections.has(entry.section) ? "" : "is-hidden"}`}
                 >
                   {entry.items.map((item) => {
                     const active = isActivePath(pathname, item.href);
@@ -378,7 +415,11 @@ export function DashboardNav() {
                         onClick={() => {
                           setMobileMenuOpen(false);
                           setSelectedSection(entry.section);
-                          setExpandedSection(entry.section);
+                          setExpandedSections((current) => {
+                            const next = new Set(current);
+                            next.add(entry.section);
+                            return next;
+                          });
                         }}
                         >
                           <span className="app-shell-nav__link-text">{label}</span>
