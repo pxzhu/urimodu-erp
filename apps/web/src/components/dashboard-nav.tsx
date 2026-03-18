@@ -73,10 +73,6 @@ function sectionIcon(section: NavSection) {
   return "운";
 }
 
-function firstMenuLabelBySection(sectionedMenuItems: Array<{ section: NavSection; items: MenuItem[] }>, section: NavSection) {
-  return sectionedMenuItems.find((entry) => entry.section === section)?.items[0];
-}
-
 export function DashboardNav() {
   const router = useRouter();
   const pathname = usePathname();
@@ -471,17 +467,16 @@ export function DashboardNav() {
                   className={`app-shell-nav__section-button ${expandedSections.has(entry.section) ? "is-expanded" : ""}`}
                   onClick={() => {
                     setSelectedSection(entry.section);
-                    setExpandedSections((current) => {
-                      if (hasSearchQuery) {
+                    if (hasSearchQuery) {
+                      setExpandedSections((current) => {
                         const next = new Set(current);
                         next.add(entry.section);
                         return next;
-                      }
-                      if (current.has(entry.section)) {
-                        return new Set<NavSection>();
-                      }
-                      return new Set<NavSection>([entry.section]);
-                    });
+                      });
+                      return;
+                    }
+                    // Keep one category always expanded for predictable dropdown behavior.
+                    setExpandedSections(new Set<NavSection>([entry.section]));
                   }}
                   aria-expanded={hasSearchQuery || expandedSections.has(entry.section)}
                 >
@@ -502,22 +497,6 @@ export function DashboardNav() {
                     </span>
                   </span>
                 </button>
-                {hasSearchQuery || expandedSections.has(entry.section) ? (
-                  <div className="app-shell-nav__section-actions">
-                    <Link
-                      href={firstMenuLabelBySection(sectionedMenuItems, entry.section)?.href ?? "/workspace"}
-                      prefetch={false}
-                      className="app-shell-nav__section-view-all"
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        setSelectedSection(entry.section);
-                        setExpandedSections(new Set([entry.section]));
-                      }}
-                    >
-                      {t("카테고리 열기", "Open category")}
-                    </Link>
-                  </div>
-                ) : null}
                 <ul
                   className={`app-shell-nav__menu ${hasSearchQuery || expandedSections.has(entry.section) ? "" : "is-hidden"}`}
                 >
